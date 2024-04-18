@@ -49,7 +49,9 @@ class PinverifyController extends GetxController {
     }
 
     if (box.read("pin") == pin) {
-      Get.offNamed(Routes.HOME);
+      box.write("verify", true).then((value) {
+        Get.offNamed(Routes.HOME);
+      });
     } else {
       Utils.showDialog("Incorrect pin!");
     }

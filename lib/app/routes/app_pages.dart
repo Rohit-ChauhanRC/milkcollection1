@@ -21,6 +21,7 @@ class AppPages {
   AppPages._();
 
   static const INITIAL = Routes.LOGIN;
+  static const INITIAL1 = Routes.PINVERIFY;
 
   static final routes = [
     GetPage(

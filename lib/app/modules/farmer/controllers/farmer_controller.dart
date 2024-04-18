@@ -1,7 +1,27 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:milkcollection/app/data/local_database/farmer_db.dart';
+import 'package:milkcollection/app/modules/farmerlist/controllers/farmerlist_controller.dart';
+import 'package:milkcollection/app/utils/utils.dart';
 
 class FarmerController extends GetxController {
   //
+  GlobalKey<FormState> farmerFormKey = GlobalKey();
+
+  final FarmerlistController farmerlistController = FarmerlistController();
+
+  final RxList<ConnectivityResult> _connectionStatus =
+      [ConnectivityResult.none].obs;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+
+  final box = GetStorage();
 
   final RxBool _type = true.obs;
   bool get type => _type.value;
@@ -55,16 +75,25 @@ class FarmerController extends GetxController {
   int get radio => _radio.value;
   set radio(int i) => _radio.value = i;
 
+  final RxBool _circularProgress = true.obs;
+  bool get circularProgress => _circularProgress.value;
+  set circularProgress(bool v) => _circularProgress.value = v;
+
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     type = Get.arguments[0];
-    print("ggg${Get.arguments[0]}");
+    print("arguments: ${Get.arguments}");
     if (Get.arguments[0] == true) {
       title = "Farmer Detail";
     } else {
       title = "Add Farmer";
     }
+
+    _connectivitySubscription = _connectivity.onConnectivityChanged
+        .listen((List<ConnectivityResult> result) async {
+      _connectionStatus.value = result;
+    });
   }
 
   @override
@@ -75,5 +104,73 @@ class FarmerController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> addFarmer() async {
+    await farmerlistController.farmerDB
+        .create(
+      farmerId: int.tryParse("${Get.arguments[1] + 1}")!,
+      calculationsID: int.tryParse("${Get.arguments[1] + 1}")!,
+      farmerName: farmerName,
+      bankName: bankName,
+      branchName: branchName,
+      aadharCardNo: aadharCard,
+      accountName: accountNumber,
+      address: address,
+      centerID: int.tryParse("${box.read("centerId")}")!,
+      exportParameter1: "0",
+      exportParameter2: "0",
+      exportParameter3: "0",
+      iFSCCode: ifscCode,
+      mCPGroup: "Maklife",
+      mobileNumber: mobileNumber,
+      modeOfPay: radio,
+      noOfBuffalos: int.tryParse(numberOfBuffalo),
+      noOfCows: int.tryParse(numberOfCows),
+      rFID: "null",
+    )
+        .then((value) async {
+      await farmerlistController.getFarmerList().then((value) {});
+    });
+
+    try {
+      var res = await http.post(
+          Uri.parse("http://Payment.maklife.in:9019/api/FarmerRegistration"),
+          body: {
+            "CalculationsID": "${Get.arguments[1] + 1}",
+            "FarmerName": farmerName,
+            "BankName": bankName,
+            "BranchName": branchName,
+            "AccountName": accountNumber,
+            "IFSCCode": ifscCode,
+            "AadharCardNo": aadharCard,
+            "MobileNumber": mobileNumber,
+            "NoOfCows": numberOfCows,
+            "NoOfBuffalos": numberOfBuffalo,
+            "ModeOfPay": radio.toString(),
+            "RF_ID": "null",
+            "Address": address,
+            "ExportParameter1": "0",
+            "ExportParameter2": "0",
+            "ExportParameter3": "0",
+            "CenterID": box.read("centerId").toString(),
+            "MCPGroup": "Maklife"
+          });
+      print(jsonDecode(res.body));
+
+      if (res.statusCode == 200 && jsonDecode(res.body) == "Added succes..") {
+        //
+        // print(jsonDecode(res.body));
+      } else {
+        //
+        Utils.showDialog(json.decode(res.body));
+      }
+      circularProgress = true;
+    } catch (e) {
+      // apiLopp(i);
+      print(e);
+      circularProgress = true;
+    }
+    Get.back();
   }
 }

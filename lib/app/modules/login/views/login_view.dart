@@ -73,10 +73,7 @@ class LoginView extends GetView<LoginController> {
                                 initialValue: controller.username,
                                 label: "Please enter Username...",
                                 onChanged: (val) => controller.username = val,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  signed: true,
-                                ),
+                                keyboardType: TextInputType.text,
                                 maxLength: 10,
                                 validator: (val) => val!.length < 3
                                     ? "Field is required!"
@@ -107,10 +104,7 @@ class LoginView extends GetView<LoginController> {
                                 initialValue: controller.password,
                                 label: "Please enter Password...",
                                 onChanged: (val) => controller.password = val,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  signed: true,
-                                ),
+                                keyboardType: TextInputType.text,
                                 maxLength: 10,
                                 validator: (val) => val!.length < 3
                                     ? "Field is required!"

@@ -19,7 +19,9 @@ void main() async {
         builder: (_, child) {
           return GetMaterialApp(
             title: "MaklifeEcom",
-            initialRoute: AppPages.INITIAL,
+            initialRoute: box.read("verify") != null
+                ? AppPages.INITIAL1
+                : AppPages.INITIAL,
             getPages: AppPages.routes,
             theme: AppTheme.theme,
             debugShowCheckedModeBanner: false,
