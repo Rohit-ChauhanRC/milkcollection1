@@ -11,15 +11,15 @@ class FarmerDB {
   Future<void> createTable(Database database) async {
     await database.execute("""
   CREATE TABLE IF NOT EXISTS $tableName (
-    "FarmerId" INTEGER NOT NULL,
+    "FarmerID" INTEGER NOT NULL,
     "Key_id" INTEGER ,
     "FarmerName" TEXT NOT NULL,
     "BankName" TEXT NOT NULL,
     "BranchName" TEXT NOT NULL,
     "AccountName" TEXT,
     "IFSCCode" TEXT,
-    "AadharCardNo" BLOB,
-    "MobileNumber" Text,
+    "AadharCardNo" TEXT,
+    "MobileNumber" TEXT,
     "NoOfCows" INTEGER,
     "NoOfBuffalos" INTEGER,
     "ModeOfPay" INTEGER,
@@ -31,7 +31,7 @@ class FarmerDB {
     "MCPGroup" TEXT,
     "CenterID" INTEGER,
     "FUploaded" INTEGER,
-    PRIMARY KEY("id" AUTOINCREMENT)
+    PRIMARY KEY("Key_id" AUTOINCREMENT)
   );
 """);
   }
@@ -40,7 +40,6 @@ class FarmerDB {
 
   Future<int> create({
     required int farmerId,
-    required int calculationsID,
     required String farmerName,
     required String bankName,
     required String branchName,
@@ -58,15 +57,15 @@ class FarmerDB {
     String? exportParameter3,
     String? mCPGroup,
     int? centerID,
+    int? FUploaded,
   }) async {
     final database = await DataBaseService().database;
     return await database.rawInsert(
       '''
-        INSERT INTO $tableName (FarmerId,CalculationsID,FarmerName,BankName,BranchName,AccountName,IFSCCode,AadharCardNo,MobileNumber,NoOfCows,NoOfBuffalos,ModeOfPay,RF_ID,Address,ExportParameter1,ExportParameter2,ExportParameter3,MCPGroup,CenterID) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO $tableName (FarmerID,FarmerName,BankName,BranchName,AccountName,IFSCCode,AadharCardNo,MobileNumber,NoOfCows,NoOfBuffalos,ModeOfPay,RF_ID,Address,ExportParameter1,ExportParameter2,ExportParameter3,MCPGroup,CenterID,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ''',
       [
         farmerId,
-        calculationsID,
         farmerName,
         bankName,
         branchName,
@@ -84,6 +83,7 @@ class FarmerDB {
         exportParameter3,
         mCPGroup,
         centerID,
+        FUploaded,
       ],
     );
   }
@@ -109,9 +109,19 @@ class FarmerDB {
   Future<FarmerListModel> fetchById(int id) async {
     final database = await DataBaseService().database;
     final farmer = await database.rawQuery('''
-        SELECT * from $tableName WHERE CalculationsID = ? 
+        SELECT * from $tableName WHERE FarmerID = ? 
       
       ''', [id]);
+    return FarmerListModel.fromMap(
+        farmer.isNotEmpty ? farmer.first : <String, dynamic>{});
+  }
+
+  Future<FarmerListModel> fetchByFUoloaded(bool FUploaded) async {
+    final database = await DataBaseService().database;
+    final farmer = await database.rawQuery('''
+        SELECT * from $tableName WHERE FUploaded = ? 
+      
+      ''', [FUploaded]);
     return FarmerListModel.fromMap(
         farmer.isNotEmpty ? farmer.first : <String, dynamic>{});
   }
@@ -136,6 +146,7 @@ class FarmerDB {
     String? exportParameter3,
     String? mCPGroup,
     int? centerID,
+    int? FUploaded,
   }) async {
     final database = await DataBaseService().database;
     return await database.update(
@@ -158,8 +169,9 @@ class FarmerDB {
         if (exportParameter3 != null) 'ExportParameter3': exportParameter3,
         if (mCPGroup != null) 'MCPGroup': mCPGroup,
         if (centerID != null) 'CenterID': centerID,
+        if (FUploaded != null) 'FUploaded': FUploaded,
       },
-      where: 'calculationsID = ?',
+      where: 'Key_id = ?',
       conflictAlgorithm: ConflictAlgorithm.rollback,
       whereArgs: [calculationsID],
     );
@@ -169,8 +181,14 @@ class FarmerDB {
     final database = await DataBaseService().database;
 
     await database.rawDelete('''
-  DELETE FROM $tableName WHERE calculationsID = ?
+  DELETE FROM $tableName WHERE Key_id = ?
 ''', [id]);
+  }
+
+  Future<void> deleteTable() async {
+    final database = await DataBaseService().database;
+
+    await database.delete(tableName);
   }
 
   void onUpgrade(Database db, int oldVersion, int newVersion) {

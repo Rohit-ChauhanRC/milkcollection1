@@ -30,6 +30,7 @@ class FarmerListModel {
   String exportParameter2;
   String exportParameter3;
   int centerId;
+  int? FUploaded;
   String mcpGroup;
 
   FarmerListModel({
@@ -52,32 +53,34 @@ class FarmerListModel {
     required this.exportParameter3,
     required this.centerId,
     required this.mcpGroup,
+    this.FUploaded,
   });
 
   factory FarmerListModel.fromMap(Map<String, dynamic> json) => FarmerListModel(
-        farmerId: json["FarmerId"],
-        calculationsId: json["CalculationsID"],
-        farmerName: json["FarmerName"],
-        bankName: json["BankName"],
-        branchName: json["BranchName"],
-        accountName: json["AccountName"],
-        ifscCode: json["IFSCCode"],
-        aadharCardNo: json["AadharCardNo"],
-        mobileNumber: json["MobileNumber"],
-        noOfCows: json["NoOfCows"],
-        noOfBuffalos: json["NoOfBuffalos"],
-        modeOfPay: json["ModeOfPay"],
-        rfId: json["RF_ID"],
-        address: json["Address"],
+        farmerId: json["FarmerID"] ?? 0,
+        calculationsId: json["CalculationsID"] ?? 0,
+        farmerName: json["FarmerName"] ?? "",
+        bankName: json["BankName"] ?? "",
+        branchName: json["BranchName"] ?? "",
+        accountName: json["AccountName"] ?? "",
+        ifscCode: json["IFSCCode"] ?? "",
+        aadharCardNo: json["AadharCardNo"] ?? "",
+        mobileNumber: json["MobileNumber"] ?? "",
+        noOfCows: json["NoOfCows"] ?? 0,
+        noOfBuffalos: json["NoOfBuffalos"] ?? 0,
+        modeOfPay: json["ModeOfPay"] ?? 0,
+        rfId: json["RF_ID"] ?? "",
+        address: json["Address"] ?? "",
         exportParameter1: json["ExportParameter1"],
         exportParameter2: json["ExportParameter2"],
         exportParameter3: json["ExportParameter3"],
-        centerId: json["CenterID"],
-        mcpGroup: json["MCPGroup"]!,
+        centerId: json["CenterID"] ?? 0,
+        mcpGroup: json["MCPGroup"] ?? "",
+        FUploaded: json["FUploaded"] ?? 1,
       );
 
   Map<String, dynamic> toMap() => {
-        "FarmerId": farmerId,
+        "FarmerID": farmerId,
         "CalculationsID": calculationsId,
         "FarmerName": farmerName,
         "BankName": bankName,
@@ -96,6 +99,7 @@ class FarmerListModel {
         "ExportParameter3": exportParameter3,
         "CenterID": centerId,
         "MCPGroup": mcpGroup,
+        "FUploaded": FUploaded,
       };
 }
 

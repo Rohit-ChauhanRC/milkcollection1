@@ -5,12 +5,14 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
+import 'package:milkcollection/app/modules/pinverify/controllers/pinverify_controller.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 
 class FarmerlistController extends GetxController {
   //
 
   final box = GetStorage();
+  final PinverifyController pinverifyController = Get.find();
 
   final FarmerDB farmerDB = FarmerDB();
 
@@ -18,24 +20,22 @@ class FarmerlistController extends GetxController {
   String get search => _search.value;
   set search(String mob) => _search.value = mob;
 
-  final RxList<FarmerListModel> _farmerData = RxList<FarmerListModel>();
-  List<FarmerListModel> get farmerData => _farmerData;
-  set farmerData(List<FarmerListModel> lst) => _farmerData.assignAll(lst);
-
   final RxBool _circularProgress = true.obs;
   bool get circularProgress => _circularProgress.value;
   set circularProgress(bool v) => _circularProgress.value = v;
 
+  final RxBool _searchActive = false.obs;
+  bool get searchActive => _searchActive.value;
+  set searchActive(bool v) => _searchActive.value = v;
+
+  final RxList<FarmerListModel> _searchfarmerData = RxList<FarmerListModel>();
+  List<FarmerListModel> get searchfarmerData => _searchfarmerData;
+  set searchfarmerData(List<FarmerListModel> lst) =>
+      _searchfarmerData.assignAll(lst);
+
   @override
   void onInit() async {
     super.onInit();
-
-    // final db = await farmerDB.fetchAll();
-    // if (db.isEmpty) {
-    //   await getFarmerList();
-    // } else {
-    farmerData.assignAll(await farmerDB.fetchAll());
-    // }
   }
 
   @override
@@ -48,49 +48,22 @@ class FarmerlistController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getFarmerList() async {
-    try {
-      var res = await http.get(
-        Uri.parse(
-            "http://Payment.maklife.in:9019/api/GetFarmerList?CollectionCenterId=${box.read("centerId")}"),
-      );
+  Future<void> getSearchFarmerData() async {
+    // searchfarmerData.assignAll(await farmerDB.fetchByName(search.trim()));
+    pinverifyController.farmerData;
 
-      if (res.statusCode == 200) {
-        farmerData.assignAll(farmerListModelFromMap(res.body));
-        if (farmerData.isNotEmpty) {
-          for (var e in farmerData) {
-            farmerDB.create(
-              farmerId: e.farmerId,
-              calculationsID: e.calculationsId,
-              farmerName: e.farmerName,
-              bankName: e.bankName,
-              branchName: e.branchName,
-              aadharCardNo: e.aadharCardNo,
-              accountName: e.accountName,
-              address: e.address,
-              centerID: e.centerId,
-              exportParameter1: e.exportParameter1,
-              exportParameter2: e.exportParameter2,
-              exportParameter3: e.exportParameter3,
-              iFSCCode: e.ifscCode,
-              mCPGroup: e.mcpGroup,
-              mobileNumber: e.mobileNumber,
-              modeOfPay: e.modeOfPay,
-              noOfBuffalos: e.noOfBuffalos,
-              noOfCows: e.noOfCows,
-              rFID: e.rfId,
-            );
-          }
-        }
-        print(farmerData);
-      } else {
-        //
-        Utils.showDialog(json.decode(res.body));
+    for (var i = 0; i < pinverifyController.farmerData.length; i++) {
+      if (pinverifyController.farmerData[i].farmerName
+          .toString()
+          .toLowerCase()
+          .contains(search.trim().toLowerCase())) {
+        searchfarmerData.add(pinverifyController.farmerData[i]);
+
+        update();
+        print(pinverifyController.farmerData[i].farmerName);
       }
-      circularProgress = true;
-    } catch (e) {
-      // apiLopp(i);
-      circularProgress = true;
     }
+
+    print(searchfarmerData);
   }
 }

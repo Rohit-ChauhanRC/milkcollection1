@@ -34,7 +34,12 @@ class FarmerlistView extends GetView<FarmerlistController> {
                   child: TextFormWidget(
                     prefix: InkWell(
                       onTap: () {
-                        print("object");
+                        if (controller.search.trim().isNotEmpty) {
+                          controller.searchActive = true;
+                          controller.getSearchFarmerData();
+                        } else {
+                          controller.searchActive = false;
+                        }
                       },
                       child: const Icon(
                         Icons.search,
@@ -46,8 +51,6 @@ class FarmerlistView extends GetView<FarmerlistController> {
                     onChanged: (val) => controller.search = val,
                     keyboardType: TextInputType.text,
                     maxLength: 10,
-                    validator: (val) =>
-                        val!.length < 3 ? "Field is required!" : null,
                   ),
                 )),
 
@@ -57,7 +60,9 @@ class FarmerlistView extends GetView<FarmerlistController> {
                   height: Get.height * 0.7,
                   // color: Colors.amber,
                   child: ListView.builder(
-                      itemCount: controller.farmerData.length,
+                      itemCount: controller.searchActive
+                          ? controller.searchfarmerData.length
+                          : controller.pinverifyController.farmerData.length,
                       itemBuilder: (ctx, i) {
                         return Container(
                           decoration: BoxDecoration(
@@ -69,15 +74,26 @@ class FarmerlistView extends GetView<FarmerlistController> {
                             onTap: () {
                               Get.toNamed(Routes.FARMER, arguments: [
                                 true,
-                                controller.farmerData[i].farmerId
+                                controller.searchActive
+                                    ? controller.searchfarmerData[i].farmerId
+                                    : controller.pinverifyController
+                                        .farmerData[i].farmerId
                               ]);
                             },
                             title: Text(
-                              controller.farmerData[i].farmerName,
+                              controller.searchActive
+                                  ? controller.searchfarmerData[i].farmerName
+                                  : controller.pinverifyController.farmerData[i]
+                                      .farmerName,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             subtitle: Text(
-                              controller.farmerData[i].farmerId.toString(),
+                              controller.searchActive
+                                  ? controller.searchfarmerData[i].farmerId
+                                      .toString()
+                                  : controller.pinverifyController.farmerData[i]
+                                      .farmerId
+                                      .toString(),
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             trailing: InkWell(
@@ -99,7 +115,11 @@ class FarmerlistView extends GetView<FarmerlistController> {
           // Get.toNamed(Routes.FARMER);
           Get.toNamed(Routes.FARMER, arguments: [
             false,
-            controller.farmerData[controller.farmerData.length - 1].farmerId
+            controller
+                .pinverifyController
+                .farmerData[
+                    controller.pinverifyController.farmerData.length - 1]
+                .farmerId
           ]);
         },
         title: "Add Farmer",

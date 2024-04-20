@@ -145,7 +145,7 @@ class FarmerView extends GetView<FarmerController> {
                             width: Get.width * 0.2,
                             child: Radio(
                               activeColor: AppColors.yellow,
-                              value: 1,
+                              value: 0,
                               groupValue: controller.radio,
                               onChanged: (int? i) {
                                 print(i);
@@ -156,7 +156,7 @@ class FarmerView extends GetView<FarmerController> {
                       InkWell(
                         child: const Text("Cash"),
                         onTap: () {
-                          controller.radio = 1;
+                          controller.radio = 0;
                         },
                       ),
                     ],
@@ -168,7 +168,7 @@ class FarmerView extends GetView<FarmerController> {
                             width: Get.width * 0.2,
                             child: Radio(
                               activeColor: AppColors.yellow,
-                              value: 2,
+                              value: 1,
                               groupValue: controller.radio,
                               onChanged: (int? i) {
                                 print(i);
@@ -179,7 +179,7 @@ class FarmerView extends GetView<FarmerController> {
                       InkWell(
                         child: const Text("Bank"),
                         onTap: () {
-                          controller.radio = 2;
+                          controller.radio = 1;
                         },
                       ),
                     ],
