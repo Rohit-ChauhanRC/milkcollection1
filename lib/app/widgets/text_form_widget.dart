@@ -16,6 +16,7 @@ class TextFormWidget extends StatelessWidget {
     this.maxLength,
     this.inputFormatters,
     this.prefix,
+    this.obscureText = false,
   });
 
   final void Function(String)? onChanged;
@@ -29,6 +30,7 @@ class TextFormWidget extends StatelessWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final Widget? prefix;
+  final bool obscureText;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class TextFormWidget extends StatelessWidget {
         inputFormatters: inputFormatters,
         textAlign: TextAlign.left,
         keyboardType: keyboardType ?? TextInputType.text,
+        obscureText: obscureText,
         decoration: InputDecoration(
           suffixIcon: prefix,
           // contentPadding: EdgeInsets.only(bottom: 10, left: 10)

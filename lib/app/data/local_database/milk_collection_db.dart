@@ -1,37 +1,38 @@
 import 'package:flutter/services.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
+import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'local_database.dart';
 
-class FarmerDB {
+class MilkCollectionDB {
   //
-  final tableName = 'farmer';
+  final tableName = 'milkcollection';
 
   Future<void> createTable(Database database) async {
     await database.execute("""
   CREATE TABLE IF NOT EXISTS $tableName (
-    "FarmerID" INTEGER NOT NULL,
-    "Key_id" INTEGER ,
-    "FarmerName" TEXT NOT NULL,
-    "BankName" TEXT NOT NULL,
-    "BranchName" TEXT NOT NULL,
-    "AccountName" TEXT,
-    "IFSCCode" TEXT,
-    "AadharCardNo" TEXT,
-    "MobileNumber" TEXT,
-    "NoOfCows" INTEGER,
-    "NoOfBuffalos" INTEGER,
-    "ModeOfPay" INTEGER,
-    "RF_ID" TEXT,
-    "Address" TEXT,
-    "ExportParameter1" TEXT,
-    "ExportParameter2" TEXT,
-    "ExportParameter3" TEXT,
-    "MCPGroup" TEXT,
-    "CenterID" INTEGER,
-    "FUploaded" INTEGER,
-    PRIMARY KEY("Key_id" AUTOINCREMENT)
+    "id" INTEGER ,
+    "Collection_Date" TEXT,
+    "Inserted_Time" TEXT,
+    "FarmerId" INTEGER,
+    "Farmer_Name" TEXT,
+    "Collection_Mode" TEXT,
+    "Scale_Mode" TEXT,
+    "Analyze_Mode" TEXT,
+    "Milk_Status" TEXT,
+    "Milk_Type" TEXT,
+    "Rate_Chart_Name" TEXT,
+    "Qty" REAL,
+    "FAT" REAL,
+    "SNF" REAL,
+    "Added_Water" REAL,
+    "Rate_Per_Liter" REAL,
+    "Total_Amt" REAL,
+    "CollectionCenterId" INTEGER,
+    "CollectionCenterName" TEXT,
+    "Shift" TEXT,
+    PRIMARY KEY("id" AUTOINCREMENT)
   );
 """);
   }
@@ -39,51 +40,51 @@ class FarmerDB {
   //
 
   Future<int> create({
-    required int farmerId,
-    required String farmerName,
-    required String bankName,
-    required String branchName,
-    String? accountName,
-    String? iFSCCode,
-    String? aadharCardNo,
-    String? mobileNumber,
-    int? noOfCows,
-    int? noOfBuffalos,
-    int? modeOfPay,
-    String? rFID,
-    String? address,
-    String? exportParameter1,
-    String? exportParameter2,
-    String? exportParameter3,
-    String? mCPGroup,
-    int? centerID,
-    int? FUploaded,
+    int? FarmerId,
+    String? Farmer_Name,
+    String? Collection_Date,
+    String? Inserted_Time,
+    String? Collection_Mode,
+    String? Scale_Mode,
+    String? Analyze_Mode,
+    String? Milk_Status,
+    String? Milk_Type,
+    String? Rate_Chart_Name,
+    String? CollectionCenterName,
+    String? CollectionCenterId,
+    String? Shift,
+    double? Qty,
+    double? FAT,
+    double? SNF,
+    double? Added_Water,
+    double? Rate_Per_Liter,
+    double? Total_Amt,
   }) async {
     final database = await DataBaseService().database;
     return await database.rawInsert(
       '''
-        INSERT INTO $tableName (FarmerID,FarmerName,BankName,BranchName,AccountName,IFSCCode,AadharCardNo,MobileNumber,NoOfCows,NoOfBuffalos,ModeOfPay,RF_ID,Address,ExportParameter1,ExportParameter2,ExportParameter3,MCPGroup,CenterID,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO $tableName (Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ''',
       [
-        farmerId,
-        farmerName,
-        bankName,
-        branchName,
-        accountName,
-        iFSCCode,
-        aadharCardNo,
-        mobileNumber,
-        noOfCows,
-        noOfBuffalos,
-        modeOfPay,
-        rFID,
-        address,
-        exportParameter1,
-        exportParameter2,
-        exportParameter3,
-        mCPGroup,
-        centerID,
-        FUploaded,
+        Collection_Date,
+        Inserted_Time,
+        FarmerId,
+        Farmer_Name,
+        Collection_Mode,
+        Scale_Mode,
+        Analyze_Mode,
+        Milk_Status,
+        Milk_Type,
+        Rate_Chart_Name,
+        Qty,
+        FAT,
+        SNF,
+        Added_Water,
+        Rate_Per_Liter,
+        Total_Amt,
+        CollectionCenterId,
+        CollectionCenterName,
+        Shift
       ],
     );
   }
@@ -97,32 +98,32 @@ class FarmerDB {
     return farmers.map((e) => FarmerListModel.fromMap(e)).toList();
   }
 
-  Future<List<FarmerListModel>> fetchByName(String name) async {
+  Future<List<MilkCollectionModel>> fetchByName(String name) async {
     final database = await DataBaseService().database;
     final farmers = await database.rawQuery('''
         SELECT * from $tableName WHERE FarmerName = ?
       ''', [name]);
 
-    return farmers.map((e) => FarmerListModel.fromMap(e)).toList();
+    return farmers.map((e) => MilkCollectionModel.fromMap(e)).toList();
   }
 
-  Future<FarmerListModel> fetchById(String id) async {
+  Future<MilkCollectionModel> fetchById(int id) async {
     final database = await DataBaseService().database;
     final farmer = await database.rawQuery('''
         SELECT * from $tableName WHERE FarmerID = ? 
       
       ''', [id]);
-    return FarmerListModel.fromMap(
+    return MilkCollectionModel.fromMap(
         farmer.isNotEmpty ? farmer.first : <String, dynamic>{});
   }
 
-  Future<FarmerListModel> fetchByFUoloaded(bool FUploaded) async {
+  Future<MilkCollectionModel> fetchByFUoloaded(bool FUploaded) async {
     final database = await DataBaseService().database;
     final farmer = await database.rawQuery('''
         SELECT * from $tableName WHERE FUploaded = ? 
       
       ''', [FUploaded]);
-    return FarmerListModel.fromMap(
+    return MilkCollectionModel.fromMap(
         farmer.isNotEmpty ? farmer.first : <String, dynamic>{});
   }
 

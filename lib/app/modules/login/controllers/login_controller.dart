@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/models/login_model.dart';
 
 import '../../../routes/app_pages.dart';
@@ -70,7 +71,7 @@ class LoginController extends GetxController {
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9019/api/ValidateUser?Username=$username&Password=$password"),
+            "$baseUrlConst/$loginConst?Username=$username&Password=$password"),
       );
       final a = jsonDecode(res.body);
 
@@ -78,8 +79,8 @@ class LoginController extends GetxController {
         loginModel.assignAll(loginModelFromMap(res.body));
 
         if (loginModel.isNotEmpty) {
-          box.write("pin", loginModel[0].pin);
-          box.write("centerId", loginModel[0].centerId);
+          box.write(pinConst, loginModel[0].pin);
+          box.write(centerIdConst, loginModel[0].centerId);
           Get.toNamed(
             Routes.PINVERIFY,
           );

@@ -12,47 +12,47 @@ String farmerListModelToMap(List<FarmerListModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
 
 class FarmerListModel {
-  int farmerId;
-  int calculationsId;
-  String farmerName;
-  String bankName;
-  String branchName;
-  String accountName;
-  String ifscCode;
-  String aadharCardNo;
-  String mobileNumber;
-  int noOfCows;
-  int noOfBuffalos;
-  int modeOfPay;
-  String rfId;
-  String address;
-  String exportParameter1;
-  String exportParameter2;
-  String exportParameter3;
-  int centerId;
+  int? farmerId;
+  int? calculationsId;
+  String? farmerName;
+  String? bankName;
+  String? branchName;
+  String? accountName;
+  String? ifscCode;
+  String? aadharCardNo;
+  String? mobileNumber;
+  int? noOfCows;
+  int? noOfBuffalos;
+  int? modeOfPay;
+  String? rfId;
+  String? address;
+  String? exportParameter1;
+  String? exportParameter2;
+  String? exportParameter3;
+  int? centerId;
   int? FUploaded;
-  String mcpGroup;
+  String? mcpGroup;
 
   FarmerListModel({
-    required this.farmerId,
-    required this.calculationsId,
-    required this.farmerName,
-    required this.bankName,
-    required this.branchName,
-    required this.accountName,
-    required this.ifscCode,
-    required this.aadharCardNo,
-    required this.mobileNumber,
-    required this.noOfCows,
-    required this.noOfBuffalos,
-    required this.modeOfPay,
-    required this.rfId,
-    required this.address,
-    required this.exportParameter1,
-    required this.exportParameter2,
-    required this.exportParameter3,
-    required this.centerId,
-    required this.mcpGroup,
+    this.farmerId,
+    this.calculationsId,
+    this.farmerName,
+    this.bankName,
+    this.branchName,
+    this.accountName,
+    this.ifscCode,
+    this.aadharCardNo,
+    this.mobileNumber,
+    this.noOfCows,
+    this.noOfBuffalos,
+    this.modeOfPay,
+    this.rfId,
+    this.address,
+    this.exportParameter1,
+    this.exportParameter2,
+    this.exportParameter3,
+    this.centerId,
+    this.mcpGroup,
     this.FUploaded,
   });
 

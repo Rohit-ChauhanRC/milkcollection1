@@ -2,6 +2,8 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import 'farmer_db.dart';
+import 'milk_collection_db.dart';
+import 'ratechart_db.dart';
 
 class DataBaseService {
   Database? _database;
@@ -36,7 +38,8 @@ class DataBaseService {
 
   Future<void> create(Database database, int verion) async {
     await FarmerDB().createTable(database);
-    // await VendorDB().createTable(database);
+    await RateChartDB().createTable(database);
+    await MilkCollectionDB().createTable(database);
     // await ReceivingDB().createTable(database);
     // await SellDB().createTable(database);
     // await ProfileDB().createTable(database);

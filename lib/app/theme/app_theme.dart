@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import 'app_colors.dart';
 import 'app_dimens.dart';
@@ -27,7 +28,7 @@ class AppTheme {
           ),
           bodySmall: const TextStyle(
             color: AppColors.white,
-            fontSize: AppDimens.font16,
+            fontSize: AppDimens.font14,
             fontWeight: FontWeight.bold,
           ),
           displayLarge: const TextStyle(
@@ -54,7 +55,7 @@ class AppTheme {
         colorScheme: const ColorScheme.light(
           background: AppColors.white,
         ),
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.appBar,
           titleTextStyle: TextStyle(
             color: AppColors.white,
@@ -63,7 +64,7 @@ class AppTheme {
             fontSize: AppDimens.font18,
           ),
           iconTheme: IconThemeData(color: AppColors.white),
-          actionsIconTheme: const IconThemeData(
+          actionsIconTheme: IconThemeData(
             color: AppColors.purple_200,
           ),
         ),
@@ -71,6 +72,7 @@ class AppTheme {
           style: ElevatedButton.styleFrom(
             side: const BorderSide(color: AppColors.yellow),
             minimumSize: Size(150.w, 35.h),
+            maximumSize: const Size.fromWidth(double.infinity),
             shadowColor: AppColors.button,
             backgroundColor: AppColors.darkBrown,
             textStyle: const TextStyle(

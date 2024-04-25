@@ -82,9 +82,9 @@ class FarmerlistView extends GetView<FarmerlistController> {
                             },
                             title: Text(
                               controller.searchActive
-                                  ? controller.searchfarmerData[i].farmerName
+                                  ? controller.searchfarmerData[i].farmerName!
                                   : controller.pinverifyController.farmerData[i]
-                                      .farmerName,
+                                      .farmerName!,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             subtitle: Text(

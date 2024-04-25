@@ -39,7 +39,7 @@ class HomeView extends GetView<HomeController> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Obx(() => SizedBox(
-                              width: Get.width * 0.2,
+                              width: Get.width * 0.18,
                               child: Radio(
                                 activeColor: AppColors.yellow,
                                 value: 1,
@@ -62,7 +62,7 @@ class HomeView extends GetView<HomeController> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Obx(() => SizedBox(
-                              width: Get.width * 0.2,
+                              width: Get.width * 0.18,
                               child: Radio(
                                 activeColor: AppColors.yellow,
                                 value: 2,
@@ -85,7 +85,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               Container(
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.all(15),
                 alignment: Alignment.center,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -105,7 +105,7 @@ class HomeView extends GetView<HomeController> {
                 thickness: 2,
               ),
               Container(
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.all(15),
                 alignment: Alignment.center,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -261,11 +261,16 @@ class HomeView extends GetView<HomeController> {
           child: Row(
             children: [
               InkWell(
-                onTap: () {
-                  Get.toNamed(Routes.COLLECTMILK);
+                onTap: () async {
+                  await controller.getRaateChart("C").then((value) async {
+                    await controller.getRaateChart("B").then((value) async {
+                      controller.pd.close();
+                      Get.toNamed(Routes.COLLECTMILK);
+                    });
+                  });
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -303,7 +308,7 @@ class HomeView extends GetView<HomeController> {
                   Get.toNamed(Routes.FARMERLIST);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -338,7 +343,7 @@ class HomeView extends GetView<HomeController> {
                   // Get.toNamed(Routes.);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -376,7 +381,7 @@ class HomeView extends GetView<HomeController> {
                   Get.toNamed(Routes.SHIFTDETAILS);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -418,7 +423,7 @@ class HomeView extends GetView<HomeController> {
                   // Get.toNamed(Routes.P);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -453,7 +458,7 @@ class HomeView extends GetView<HomeController> {
                   // Get.toNamed(Routes.COLLECTMILK);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.20,
+                  width: Get.width * 0.19,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,

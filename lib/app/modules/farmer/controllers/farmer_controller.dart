@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
 import 'package:milkcollection/app/modules/farmerlist/controllers/farmerlist_controller.dart';
 import 'package:milkcollection/app/utils/utils.dart';
@@ -108,39 +109,39 @@ class FarmerController extends GetxController {
 
   Future<void> addFarmer() async {
     try {
-      var res = await http.post(
-          Uri.parse("http://Payment.maklife.in:9019/api/FarmerRegistration"),
-          body: {
-            "CalculationsID": "${Get.arguments[1] + 1}",
-            "FarmerName": farmerName,
-            "BankName": bankName,
-            "BranchName": branchName,
-            "AccountName": accountNumber,
-            "IFSCCode": ifscCode,
-            "AadharCardNo": aadharCard,
-            "MobileNumber": mobileNumber,
-            "NoOfCows": numberOfCows,
-            "NoOfBuffalos": numberOfBuffalo,
-            "ModeOfPay": radio.toString(),
-            "RF_ID": "null",
-            "Address": address,
-            "ExportParameter1": "0",
-            "ExportParameter2": "0",
-            "ExportParameter3": "0",
-            "CenterID": box.read("centerId").toString(),
-            "MCPGroup": "Maklife"
-          });
+      var res =
+          await http.post(Uri.parse("$baseUrlConst/$addFarmerConst"), body: {
+        "CalculationsID": "${Get.arguments[1] + 1}",
+        "FarmerName": farmerName,
+        "BankName": bankName,
+        "BranchName": branchName,
+        "AccountName": accountNumber,
+        "IFSCCode": ifscCode,
+        "AadharCardNo": aadharCard,
+        "MobileNumber": mobileNumber,
+        "NoOfCows": numberOfCows,
+        "NoOfBuffalos": numberOfBuffalo,
+        "ModeOfPay": radio.toString(),
+        "RF_ID": "null",
+        "Address": address,
+        "ExportParameter1": "0",
+        "ExportParameter2": "0",
+        "ExportParameter3": "0",
+        "CenterID": box.read("centerId").toString(),
+        "MCPGroup": "Maklife"
+      });
       print(jsonDecode(res.body));
 
       if (res.statusCode == 200 && jsonDecode(res.body) == "Added succes..") {
         //
-        await farmerlistController.pinverifyController
-            .getFamerDataDB()
-            .then((value) async {
-          await farmerlistController.farmerDB.deleteTable().then((value) async {
-            await farmerlistController.pinverifyController.getFarmerList();
-          });
-        });
+        // await farmerlistController.pinverifyController
+        //     .getFamerDataDB()
+        //     .then((value) async {
+        //   await farmerlistController.farmerDB.deleteTable().then((value) async {
+        //     await farmerlistController.pinverifyController.getFarmerList();
+        //   });
+        // });
+        await farmerlistController.pinverifyController.getFarmerList();
 
         // print(jsonDecode(res.body));
       } else {
@@ -166,6 +167,9 @@ class FarmerController extends GetxController {
           rFID: "null",
           FUploaded: 0,
         );
+        // await farmerlistController.pinverifyController.getFarmerList();
+        farmerlistController.pinverifyController.farmerData.assignAll(
+            await farmerlistController.pinverifyController.farmerDB.fetchAll());
 
         Utils.showDialog(json.decode(res.body));
       }

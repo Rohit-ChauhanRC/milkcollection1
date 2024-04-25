@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
@@ -59,12 +60,12 @@ class PinverifyController extends GetxController {
       return null;
     }
 
-    if (box.read("pin") == pin) {
+    if (box.read(pinConst) == pin) {
       await getFamerDataDB().then((v) async {
         await getFarmerList();
       });
 
-      box.write("verify", true).then((value) => Get.toNamed(Routes.HOME));
+      box.write(verifyConst, true).then((value) => Get.toNamed(Routes.HOME));
     } else {
       Utils.showDialog("Incorrect pin!");
     }
@@ -77,28 +78,26 @@ class PinverifyController extends GetxController {
         if (e.FUploaded == 0) {
           print(e.farmerId);
           try {
-            var res = await http.post(
-                Uri.parse(
-                    "http://Payment.maklife.in:9019/api/FarmerRegistration"),
-                body: {
-                  "FarmerName": e.farmerName,
-                  "BankName": e.bankName,
-                  "BranchName": e.branchName,
-                  "AccountName": e.accountName,
-                  "IFSCCode": e.ifscCode,
-                  "AadharCardNo": e.aadharCardNo,
-                  "MobileNumber": e.mobileNumber,
-                  "NoOfCows": e.noOfCows.toString(),
-                  "NoOfBuffalos": e.noOfBuffalos.toString(),
-                  "ModeOfPay": e.modeOfPay.toString(),
-                  "RF_ID": "null",
-                  "Address": e.address,
-                  "ExportParameter1": "0",
-                  "ExportParameter2": "0",
-                  "ExportParameter3": "0",
-                  "CenterID": box.read("centerId"),
-                  "MCPGroup": "Maklife"
-                });
+            var res = await http
+                .post(Uri.parse("$baseUrlConst/$addFarmerConst"), body: {
+              "FarmerName": e.farmerName,
+              "BankName": e.bankName,
+              "BranchName": e.branchName,
+              "AccountName": e.accountName,
+              "IFSCCode": e.ifscCode,
+              "AadharCardNo": e.aadharCardNo,
+              "MobileNumber": e.mobileNumber,
+              "NoOfCows": e.noOfCows.toString(),
+              "NoOfBuffalos": e.noOfBuffalos.toString(),
+              "ModeOfPay": e.modeOfPay.toString(),
+              "RF_ID": "null",
+              "Address": e.address,
+              "ExportParameter1": "0",
+              "ExportParameter2": "0",
+              "ExportParameter3": "0",
+              "CenterID": box.read(centerIdConst),
+              "MCPGroup": "Maklife"
+            });
             print(jsonDecode(res.body));
 
             if (res.statusCode == 200) {
@@ -120,20 +119,19 @@ class PinverifyController extends GetxController {
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9019/api/GetFarmerList?CollectionCenterId=${box.read("centerId")}"),
+            "$baseUrlConst/$getFarmerConst?CollectionCenterId=${box.read(centerIdConst)}"),
       );
 
       if (res.statusCode == 200) {
         farmerData.assignAll(farmerListModelFromMap(res.body));
-        print(farmerData.first.farmerId);
 
         if (farmerData.isNotEmpty) {
           for (var e in farmerData) {
             farmerDB.create(
-              farmerId: e.farmerId,
-              farmerName: e.farmerName,
-              bankName: e.bankName,
-              branchName: e.branchName,
+              farmerId: e.farmerId!,
+              farmerName: e.farmerName!,
+              bankName: e.bankName!,
+              branchName: e.branchName!,
               aadharCardNo: e.aadharCardNo,
               accountName: e.accountName,
               address: e.address,

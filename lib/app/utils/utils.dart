@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:milkcollection/app/widgets/text_form_widget.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_dimens.dart';
@@ -73,6 +74,67 @@ class Utils {
               ),
             ),
           ),
+        ),
+      );
+  static void showDialogManualPin({
+    Function()? onTap,
+    String? initialValue,
+  }) =>
+      Get.defaultDialog(
+        barrierDismissible: false,
+        backgroundColor: AppColors.white,
+        title: "Validate Pin",
+        titleStyle: Theme.of(Get.context!).textTheme.displayMedium,
+        // title: success ? Strings.success : title,
+        content: TextFormWidget(
+          prefix: const Icon(
+            Icons.pin,
+            size: 30,
+          ),
+          initialValue: initialValue,
+          label: "Please enter Pin...",
+          onChanged: (val) {
+            initialValue = val;
+            print(initialValue);
+          },
+          keyboardType: const TextInputType.numberWithOptions(
+            signed: true,
+          ),
+          maxLength: 10,
+        ),
+        // cancel: ,
+        confirm: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () {
+                  Get.back();
+                },
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: AppColors.darkBrown,
+                    fontSize: AppDimens.font16,
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: onTap,
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: AppColors.darkBrown,
+                    fontSize: AppDimens.font16,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
 
