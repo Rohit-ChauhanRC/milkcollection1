@@ -89,13 +89,13 @@ class MilkCollectionDB {
     );
   }
 
-  Future<List<FarmerListModel>> fetchAll() async {
+  Future<List<MilkCollectionModel>> fetchAll() async {
     final database = await DataBaseService().database;
     final farmers = await database.rawQuery('''
         SELECT * from $tableName 
       ''');
 
-    return farmers.map((e) => FarmerListModel.fromMap(e)).toList();
+    return farmers.map((e) => MilkCollectionModel.fromMap(e)).toList();
   }
 
   Future<List<MilkCollectionModel>> fetchByName(String name) async {

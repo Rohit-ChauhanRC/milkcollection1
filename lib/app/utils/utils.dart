@@ -145,7 +145,7 @@ class Utils {
         closeIconColor: AppColors.red,
         content: Text(
           message,
-          style: Theme.of(Get.context!).textTheme.bodySmall,
+          style: Theme.of(Get.context!).textTheme.displayMedium,
         )));
   }
 

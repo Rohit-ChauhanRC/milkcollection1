@@ -44,6 +44,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
               if (i == "Recover Data") {
                 await controller.getRestoreData();
               } else if (i == "Manual Collection") {
+                controller.pin = "";
                 controller.showDialogManualPin(
                   initialValue: controller.pin,
                   onTap: () async {
@@ -51,6 +52,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   },
                 );
                 // await controller.getVerifyPin();
+              } else {
+                await controller.exportExcel();
               }
             },
           ),

@@ -42,8 +42,8 @@ class AppTheme {
             fontWeight: FontWeight.bold,
           ),
           displaySmall: const TextStyle(
-            color: AppColors.white,
-            fontSize: AppDimens.font16,
+            color: AppColors.black,
+            fontSize: AppDimens.font12,
             fontWeight: FontWeight.bold,
           ),
           labelSmall: const TextStyle(

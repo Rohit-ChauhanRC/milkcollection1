@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/widgets/radio_list_tile_widget.dart';
@@ -15,7 +16,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Maklife CenterId 9"),
+        title: Text("Maklife CenterId ${controller.box.read(centerIdConst)} "),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
