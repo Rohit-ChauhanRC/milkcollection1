@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
+import 'package:milkcollection/app/modules/home/controllers/home_controller.dart';
 import 'dart:convert';
 import 'package:path/path.dart';
 
@@ -21,8 +22,8 @@ import 'package:milkcollection/app/utils/utils.dart';
 import 'package:milkcollection/app/widgets/text_form_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:open_filex/open_filex.dart';
+
+import 'package:share_plus/share_plus.dart';
 
 class CollectmilkController extends GetxController {
   //
@@ -31,10 +32,16 @@ class CollectmilkController extends GetxController {
 
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
 
+  // final HomeController homeController = Get.find();
+
   final PinverifyController pinverifyController = Get.find();
 
+  late ServerSocket weightServerSocket;
+  late ServerSocket printerServerSocket;
   late ServerSocket serverSocket;
   late Socket socket;
+  late Socket weightsocket;
+  late Socket printersocket;
 
   final RxInt _radio = 0.obs;
   int get radio => _radio.value;
@@ -73,10 +80,32 @@ class CollectmilkController extends GetxController {
   List<MilkCollectionModel> get exportData => _exportData;
   set exportData(List<MilkCollectionModel> lst) => _exportData.assignAll(lst);
 
+  final RxString _fat = "".obs;
+  String get fat => _fat.value;
+  set fat(String i) => _fat.value = i;
+
+  final RxString _snf = "".obs;
+  String get snf => _snf.value;
+  set snf(String i) => _snf.value = i;
+
+  final RxString _density = "".obs;
+  String get density => _density.value;
+  set density(String i) => _density.value = i;
+
+  final RxString _water = "".obs;
+  String get water => _water.value;
+  set water(String i) => _water.value = i;
+
+  final RxString _quantity = "".obs;
+  String get quantity => _quantity.value;
+  set quantity(String i) => _quantity.value = i;
+
   @override
   void onInit() async {
     super.onInit();
     await Permission.storage.request();
+    fat = Get.arguments[0];
+    await getSocket();
   }
 
   @override
@@ -89,12 +118,13 @@ class CollectmilkController extends GetxController {
     super.onClose();
   }
 
-  // void print(String text) {
-  //  socket.getRawOption(option);
-  // ReadBuffer(ByteData.sublistView(TransferableTypedData.fromList(list)[0].,));
-  // }
-
-  // http://Payment.maklife.in:9019/api/RestoreCollectionData?CollectionCenterId=5&FromDate=24-JAN-2024&ToDate=24-APR-2024
+  Future<void> getSocket() async {
+    // homeController.analyzer.listen((event) {
+    //   final message = String.fromCharCodes(event);
+    //   fat = message;
+    //   print("message: $message");
+    // });
+  }
 
   dateFormat(DateTime date) {
     return DateFormat("dd-MMM-yyyy").format(date);
@@ -163,15 +193,6 @@ class CollectmilkController extends GetxController {
     farmerData =
         await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
   }
-
-  // Future<void> connecttionSocket() async {
-  //   final ip = InternetAddress.anyIPv4;
-  //   final server = await ServerSocket.bind(ip, 8889);
-  //   print("Server is running on: ${ip.address}:8889");
-  //   server.listen((event) {
-  //     handleConnection(event);
-  //   });
-  // }
 
   Future<void> getVerifyPin() async {
     try {
@@ -393,242 +414,155 @@ class CollectmilkController extends GetxController {
 
       Sheet sheet = excel["CollectionData"];
 
-      sheet.cell(CellIndex.indexByString(
-        "A1",
-      ))
-        ..value = const TextCellValue("Collection Date")
-        ..cellStyle = CellStyle(
-          fontSize: 16,
-          bold: true,
-          backgroundColorHex: ExcelColor.yellow,
-          fontColorHex: ExcelColor.black,
-        );
-      sheet
-          .cell(CellIndex.indexByString(
-            "B1",
-          ))
-          .value = const TextCellValue("Inserted Time");
-      sheet
-          .cell(CellIndex.indexByString(
-            "C1",
-          ))
-          .value = const TextCellValue("Farmer Id");
-      sheet
-          .cell(CellIndex.indexByString(
-            "D1",
-          ))
-          .value = const TextCellValue("Farmer Name");
-      sheet
-          .cell(CellIndex.indexByString(
-            "E1",
-          ))
-          .value = const TextCellValue("Collection Mode");
-      sheet
-          .cell(CellIndex.indexByString(
-            "F1",
-          ))
-          .value = const TextCellValue("Scale Mode");
-      sheet
-          .cell(CellIndex.indexByString(
-            "G1",
-          ))
-          .value = const TextCellValue("Analyze Mode");
-      sheet
-          .cell(CellIndex.indexByString(
-            "H1",
-          ))
-          .value = const TextCellValue("Milk Status");
-      sheet
-          .cell(CellIndex.indexByString(
-            "I1",
-          ))
-          .value = const TextCellValue("Rate Chart");
-      sheet
-          .cell(CellIndex.indexByString(
-            "J1",
-          ))
-          .value = const TextCellValue("Qty");
-      sheet
-          .cell(CellIndex.indexByString(
-            "K1",
-          ))
-          .value = const TextCellValue("FAT");
-      sheet
-          .cell(CellIndex.indexByString(
-            "L1",
-          ))
-          .value = const TextCellValue("SNF");
-      sheet
-          .cell(CellIndex.indexByString(
-            "M1",
-          ))
-          .value = const TextCellValue("Added Water");
-      sheet
-          .cell(CellIndex.indexByString(
-            "N1",
-          ))
-          .value = const TextCellValue("Rate Per Liter");
-      sheet
-          .cell(CellIndex.indexByString(
-            "O1",
-          ))
-          .value = const TextCellValue("Total Amount");
-      sheet
-          .cell(CellIndex.indexByString(
-            "P1",
-          ))
-          .value = const TextCellValue("Collection Center Id");
-      sheet
-          .cell(CellIndex.indexByString(
-            "Q1",
-          ))
-          .value = const TextCellValue("Collection Center Name");
-      sheet
-          .cell(CellIndex.indexByString(
-            "R1",
-          ))
-          .value = const TextCellValue("Shift");
+      final indexList = [
+        {"key": "A1", "value": "Collection Date"},
+        {"key": "B1", "value": "Inserted Time"},
+        {"key": "C1", "value": "Farmer Id"},
+        {"key": "D1", "value": "Farmer Name"},
+        {"key": "E1", "value": "Collection Mode"},
+        {"key": "F1", "value": "Scale Mode"},
+        {"key": "G1", "value": "Analyze Mode"},
+        {"key": "H1", "value": "Milk Status"},
+        {"key": "I1", "value": "Rate Chart"},
+        {"key": "J1", "value": "Qty"},
+        {"key": "K1", "value": "FAT"},
+        {"key": "L1", "value": "SNF"},
+        {"key": "M1", "value": "Added Water"},
+        {"key": "N1", "value": "Rate Per Liter"},
+        {"key": "O1", "value": "Total Amount"},
+        {"key": "P1", "value": "Collection Center Id"},
+        {"key": "Q1", "value": "Collection Center Name"},
+        {"key": "R1", "value": "Shift"},
+      ];
 
-      List.generate(exportData.length, (index) {
-        sheet
-            .cell(CellIndex.indexByString(
-              "A${(index + 2).toString()}",
-            ))
-            .value = TextCellValue(exportData.elementAt(index).collectionDate!);
-        sheet
-            .cell(CellIndex.indexByString(
-              "B${(index + 2).toString()}",
-            ))
-            .value = TextCellValue(exportData.elementAt(index).insertedTime!);
-        sheet
-                .cell(CellIndex.indexByString(
-                  "C${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).farmerId.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "D${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).farmerName.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "E${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(
-                exportData.elementAt(index).collectionMode.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "F${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).scaleMode.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "G${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).analyzeMode.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "H${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).milkStatus.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "I${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).rateChartName.toString());
-        sheet
-            .cell(CellIndex.indexByString(
-              "J${(index + 2).toString()}",
-            ))
-            .value = TextCellValue(exportData.elementAt(index).qty.toString());
-        sheet
-            .cell(CellIndex.indexByString(
-              "K${(index + 2).toString()}",
-            ))
-            .value = TextCellValue(exportData.elementAt(index).fat.toString());
-        sheet
-            .cell(CellIndex.indexByString(
-              "L${(index + 2).toString()}",
-            ))
-            .value = TextCellValue(exportData.elementAt(index).snf.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "M${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).addedWater.toString());
+      for (var i = 0; i < indexList.length; i++) {
+        sheet.cell(CellIndex.indexByString(
+          indexList[i]["key"].toString(),
+        ))
+          ..value = TextCellValue(
+            indexList[i]["value"].toString(),
+          )
+          ..cellStyle = CellStyle(
+            fontSize: 14,
+            bold: true,
+            backgroundColorHex: ExcelColor.yellow,
+            fontColorHex: ExcelColor.black,
+          );
+      }
 
-        sheet
-                .cell(CellIndex.indexByString(
-                  "N${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).ratePerLiter.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "O${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).totalAmt.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "P${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(
-                exportData.elementAt(index).collectionCenterId.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "Q${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(
-                exportData.elementAt(index).collectionCenterName.toString());
-        sheet
-                .cell(CellIndex.indexByString(
-                  "R${(index + 2).toString()}",
-                ))
-                .value =
-            TextCellValue(exportData.elementAt(index).shift.toString());
-      });
+      sheetCell({
+        required int index,
+        required String value,
+        required String column,
+      }) {
+        return sheet
+            .cell(CellIndex.indexByString(
+              "$column${(index + 2).toString()}",
+            ))
+            .value = TextCellValue(value);
+      }
+
+      for (var index = 0; index < exportData.length; index++) {
+        sheetCell(
+            index: index,
+            column: "A",
+            value: exportData.elementAt(index).collectionDate!);
+        sheetCell(
+            index: index,
+            column: "B",
+            value: exportData.elementAt(index).insertedTime!);
+        sheetCell(
+            index: index,
+            column: "C",
+            value: exportData.elementAt(index).farmerId.toString());
+        sheetCell(
+            index: index,
+            column: "D",
+            value: exportData.elementAt(index).farmerName.toString());
+        sheetCell(
+            index: index,
+            column: "E",
+            value: exportData.elementAt(index).collectionMode.toString());
+        sheetCell(
+            index: index,
+            column: "F",
+            value: exportData.elementAt(index).scaleMode.toString());
+        sheetCell(
+            index: index,
+            column: "G",
+            value: exportData.elementAt(index).analyzeMode.toString());
+        sheetCell(
+            index: index,
+            column: "H",
+            value: exportData.elementAt(index).milkStatus.toString());
+        sheetCell(
+            index: index,
+            column: "I",
+            value: exportData.elementAt(index).rateChartName.toString());
+        sheetCell(
+            index: index,
+            column: "J",
+            value: exportData.elementAt(index).qty.toString());
+        sheetCell(
+            index: index,
+            column: "K",
+            value: exportData.elementAt(index).fat.toString());
+        sheetCell(
+            index: index,
+            column: "L",
+            value: exportData.elementAt(index).snf.toString());
+        sheetCell(
+            index: index,
+            column: "M",
+            value: exportData.elementAt(index).addedWater.toString());
+        sheetCell(
+            index: index,
+            column: "N",
+            value: exportData.elementAt(index).ratePerLiter.toString());
+        sheetCell(
+            index: index,
+            column: "O",
+            value: exportData.elementAt(index).totalAmt.toString());
+        sheetCell(
+            index: index,
+            column: "P",
+            value: exportData.elementAt(index).collectionCenterId.toString());
+        sheetCell(
+            index: index,
+            column: "Q",
+            value: exportData.elementAt(index).collectionCenterName.toString());
+        sheetCell(
+            index: index,
+            column: "R",
+            value: exportData.elementAt(index).shift.toString());
+      }
+
       var fileBytes = excel.save();
 
       var directory = await getApplicationDocumentsDirectory();
 
-      File(join('${directory.path}/output_file_name2.xlsx'))
+      File(join('${directory.path}/CollectionData.xlsx'))
         ..createSync(recursive: true)
         ..writeAsBytesSync(fileBytes!);
 
-      OpenFilex.open('${directory.path}/output_file_name2.xlsx');
+      // OpenFilex.open('${directory.path}/output_file_name2.xlsx');
+      await Share.shareXFiles([XFile('${directory.path}/CollectionData.xlsx')],
+          text: 'CollectionData.xlsx');
 
       // }
     }
   }
 
-  getSheet(
-      {required Sheet sheet,
-      required String cellIndex,
-      required String value}) {
-    // Sheet sheet = excel["CollectionData"];
+  // Future<void> connecttionSocket() async {
+  //   final ip = InternetAddress.anyIPv4;
+  //   final server = await ServerSocket.bind(ip, 8889);
+  //   print("Server is running on: ${ip.address}:8889");
+  //   server.listen((event) {
+  //     handleConnection(event);
+  //   });
+  // }
 
-    sheet
-        .cell(CellIndex.indexByString(
-          "A1",
-        ))
-        .value = TextCellValue(value.toString());
-  }
-}
-
-
-
-// List<Socket> clients = [];
+  // List<Socket> clients = [];
 
 // void handleConnection(Socket client) {
 //   client.listen(
@@ -652,3 +586,4 @@ class CollectmilkController extends GetxController {
 //     },
 //   );
 // }
+}

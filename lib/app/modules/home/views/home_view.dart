@@ -266,7 +266,8 @@ class HomeView extends GetView<HomeController> {
                   await controller.getRaateChart("C").then((value) async {
                     await controller.getRaateChart("B").then((value) async {
                       controller.pd.close();
-                      Get.toNamed(Routes.COLLECTMILK);
+                      Get.toNamed(Routes.COLLECTMILK,
+                          arguments: [controller.fat]);
                     });
                   });
                 },

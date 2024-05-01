@@ -15,43 +15,47 @@ class AppTheme {
     return ThemeData(
         fontFamily: "Nunito",
         textTheme: textTheme.copyWith(
-          bodyLarge: const TextStyle(
-            color: AppColors.white,
-            fontSize: AppDimens.font50,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 5,
-          ),
-          bodyMedium: const TextStyle(
-            color: AppColors.white,
-            fontSize: AppDimens.font20,
-            fontWeight: FontWeight.bold,
-          ),
-          bodySmall: const TextStyle(
-            color: AppColors.white,
-            fontSize: AppDimens.font14,
-            fontWeight: FontWeight.bold,
-          ),
-          displayLarge: const TextStyle(
-            color: AppColors.black,
-            fontSize: AppDimens.font20,
-            fontWeight: FontWeight.bold,
-          ),
-          displayMedium: const TextStyle(
-            color: AppColors.black,
-            fontSize: AppDimens.font18,
-            fontWeight: FontWeight.bold,
-          ),
-          displaySmall: const TextStyle(
-            color: AppColors.black,
-            fontSize: AppDimens.font12,
-            fontWeight: FontWeight.bold,
-          ),
-          labelSmall: const TextStyle(
-            color: AppColors.white,
-            fontSize: AppDimens.font16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+            bodyLarge: const TextStyle(
+              color: AppColors.white,
+              fontSize: AppDimens.font50,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 5,
+            ),
+            bodyMedium: const TextStyle(
+              color: AppColors.white,
+              fontSize: AppDimens.font20,
+              fontWeight: FontWeight.bold,
+            ),
+            bodySmall: const TextStyle(
+              color: AppColors.white,
+              fontSize: AppDimens.font14,
+              fontWeight: FontWeight.bold,
+            ),
+            displayLarge: const TextStyle(
+              color: AppColors.black,
+              fontSize: AppDimens.font20,
+              fontWeight: FontWeight.bold,
+            ),
+            displayMedium: const TextStyle(
+              color: AppColors.black,
+              fontSize: AppDimens.font18,
+              fontWeight: FontWeight.bold,
+            ),
+            displaySmall: const TextStyle(
+              color: AppColors.black,
+              fontSize: AppDimens.font12,
+              fontWeight: FontWeight.bold,
+            ),
+            labelSmall: const TextStyle(
+              color: AppColors.white,
+              fontSize: AppDimens.font16,
+              fontWeight: FontWeight.bold,
+            ),
+            labelMedium: const TextStyle(
+              color: AppColors.black,
+              fontSize: AppDimens.font14,
+              fontWeight: FontWeight.bold,
+            )),
         colorScheme: const ColorScheme.light(
           background: AppColors.white,
         ),
