@@ -263,13 +263,12 @@ class HomeView extends GetView<HomeController> {
             children: [
               InkWell(
                 onTap: () async {
-                  await controller.getRaateChart("C").then((value) async {
-                    await controller.getRaateChart("B").then((value) async {
-                      controller.pd.close();
-                      Get.toNamed(Routes.COLLECTMILK,
-                          arguments: [controller.fat]);
-                    });
-                  });
+                  // await controller.getRaateChart("C").then((value) async {
+                  //   await controller.getRaateChart("B").then((value) async {
+                  //     controller.pd.close();
+                  Get.toNamed(Routes.COLLECTMILK, arguments: [controller.fat]);
+                  // });
+                  // });
                 },
                 child: SizedBox(
                   width: Get.width * 0.19,

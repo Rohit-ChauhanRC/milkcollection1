@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/modules/collectmilk/controllers/collectmilk_controller.dart';
 import 'dart:convert';
@@ -75,6 +76,12 @@ class HomeController extends GetxController {
       radio = 2;
     }
 
+    await getRaateChart("C").then((value) async {
+      await getRaateChart("B").then((value) async {
+        pd.close();
+      });
+    });
+
     await checkIp();
   }
 
@@ -88,7 +95,9 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getRaateChart(String milkType) async {
+  Future<void> getRaateChart(
+    String milkType,
+  ) async {
     try {
       var res = await http.get(
         Uri.parse(
@@ -100,9 +109,13 @@ class HomeController extends GetxController {
 
         rateChartData.assignAll(ratechartModelFromMap(res.body));
         if (rateChartData.isNotEmpty) {
-          for (var e in rateChartData) {
-            if (box.read("ratecounter") == null) {
-              pd.show(max: rateChartData.length, msg: 'Downloading...');
+          pd.show(
+              max: rateChartData.length,
+              msgFontSize: 12,
+              valueFontSize: 12,
+              msg: 'Downloading Rate Chart ${rateChartData.length}...');
+          if (box.read(ratecounterConst) == null) {
+            for (var e in rateChartData) {
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
@@ -112,10 +125,21 @@ class HomeController extends GetxController {
                 price: e.price.toString(),
                 snf: e.snf,
               );
-              box.write("ratecounter", e.counters);
-            } else if (box.read("ratecounter") != null &&
-                box.read("ratecounter") < e.counters) {
-              pd.show(max: rateChartData.length, msg: 'Downloading...');
+            }
+            if (milkType == "B") {
+              box.write("ratecounter", rateChartData.first.counters);
+              pd.close();
+            }
+          }
+          if (box.read(ratecounterConst) != null &&
+              (int.tryParse(box.read(ratecounterConst))! <
+                  int.tryParse(rateChartData.first.counters)!)) {
+            for (var e in rateChartData) {
+              pd.show(
+                  msgFontSize: 12,
+                  valueFontSize: 12,
+                  max: rateChartData.length,
+                  msg: 'Downloading Rate Chart ${rateChartData.length}...');
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
@@ -125,10 +149,14 @@ class HomeController extends GetxController {
                 price: e.price.toString(),
                 snf: e.snf,
               );
-              box.write("ratecounter", e.counters);
-            } else {}
+            }
+            if (milkType == "B") {
+              box.write("ratecounter", rateChartData.first.counters);
+              pd.close();
+            }
           }
         }
+        pd.close();
         rateChartData.assignAll([]);
       } else {}
     } catch (e) {}
@@ -171,26 +199,38 @@ class HomeController extends GetxController {
   Future<void> weighingConnection(
     String ip,
   ) async {
-    final server = await ServerSocket.bind(ip, 8881);
+    try {
+      final server = await ServerSocket.bind(ip, 8881);
 
-    server.listen((event) {
-      weighingSocketConnection(event);
-    });
+      server.listen((event) {
+        weighingSocketConnection(event);
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> anaylzerConnection(String ip) async {
-    final server = await ServerSocket.bind(ip, 8889);
-    server.listen((event) {
-      analyzerSocketConnection(event);
-    });
+    try {
+      final server = await ServerSocket.bind(ip, 8889);
+      server.listen((event) {
+        analyzerSocketConnection(event);
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> printerConnection(String ip) async {
     final ip = InternetAddress.anyIPv4;
-    final server = await ServerSocket.bind(ip, 8883);
-    server.listen((event) {
-      printerSocketConnection(event);
-    });
+    try {
+      final server = await ServerSocket.bind(ip, 8883);
+      server.listen((event) {
+        printerSocketConnection(event);
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   void analyzerSocketConnection(Socket client) {

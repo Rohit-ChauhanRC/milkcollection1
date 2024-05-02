@@ -9,3 +9,6 @@ const String addFarmerConst = "FarmerRegistration";
 const String getFarmerConst = "GetFarmerList";
 const String restoreDataConst = "RestoreCollectionData";
 const String pinForManualConst = "GetPinForManualTesting";
+const String ratecounterConst = "ratecounter";
+const String manualConst = "Manual";
+const String autoConst = "Auto";

@@ -8,7 +8,9 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
+import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
+import 'package:milkcollection/app/data/models/ratechart_model.dart';
 import 'package:milkcollection/app/modules/home/controllers/home_controller.dart';
 import 'dart:convert';
 import 'package:path/path.dart';
@@ -31,6 +33,8 @@ class CollectmilkController extends GetxController {
   final box = GetStorage();
 
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
+
+  final RateChartDB rateChartDB = RateChartDB();
 
   // final HomeController homeController = Get.find();
 
@@ -100,12 +104,36 @@ class CollectmilkController extends GetxController {
   String get quantity => _quantity.value;
   set quantity(String i) => _quantity.value = i;
 
+  final RxList<RatechartModel> _rateChartData = RxList<RatechartModel>();
+  List<RatechartModel> get rateChartData => _rateChartData;
+  set rateChartData(List<RatechartModel> lst) => _rateChartData.assignAll(lst);
+
+  final RxString _price = "".obs;
+  String get price => _price.value;
+  set price(String i) => _price.value = i;
+
+  final RxString _totalAmount = "".obs;
+  String get totalAmount => _totalAmount.value;
+  set totalAmount(String i) => _totalAmount.value = i;
+
+  final RxInt _shiftTime = 1.obs;
+  int get shiftTime => _shiftTime.value;
+  set shiftTime(int i) => _shiftTime.value = i;
+
   @override
   void onInit() async {
     super.onInit();
+
+    if (DateTime.now().hour < 12) {
+      shiftTime = 1;
+    } else {
+      shiftTime = 2;
+    }
     await Permission.storage.request();
-    fat = Get.arguments[0];
-    await getSocket();
+
+    WidgetsBinding.instance.initInstances();
+
+    await getRateChart();
   }
 
   @override
@@ -118,12 +146,45 @@ class CollectmilkController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getSocket() async {
-    // homeController.analyzer.listen((event) {
-    //   final message = String.fromCharCodes(event);
-    //   fat = message;
-    //   print("message: $message");
-    // });
+  Future<void> getRateChart() async {
+    rateChartData.assignAll(await rateChartDB.fetchAll());
+    // print("await rateChartDB.fetchAll(): ${await rateChartDB.fetchAll()}");
+  }
+
+  String getPriceData() {
+    // print("rateChartData: $rateChartData");
+    totalAmount = "";
+    for (var i = 0; i < rateChartData.length; i++) {
+      if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
+          double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
+        price = (rateChartData[i].price).toString();
+        Future.delayed(const Duration(seconds: 1), () {
+          // totalAmount =
+          //     ((rateChartData[i].price) * int.tryParse(quantity)!).toString();
+        });
+      }
+    }
+
+    return price;
+  }
+
+  String getTotalAmount() {
+    totalAmount = "";
+
+    // print("rateChartData: $rateChartData");
+
+    for (var i = 0; i < rateChartData.length; i++) {
+      if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
+          double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
+        // print(rateChartData[i]);
+        totalAmount = ((rateChartData[i].price * double.tryParse(quantity)!)
+                .toPrecision(2))
+            .toString();
+      }
+      update();
+    }
+
+    return totalAmount;
   }
 
   dateFormat(DateTime date) {
@@ -553,37 +614,27 @@ class CollectmilkController extends GetxController {
     }
   }
 
-  // Future<void> connecttionSocket() async {
-  //   final ip = InternetAddress.anyIPv4;
-  //   final server = await ServerSocket.bind(ip, 8889);
-  //   print("Server is running on: ${ip.address}:8889");
-  //   server.listen((event) {
-  //     handleConnection(event);
-  //   });
-  // }
-
-  // List<Socket> clients = [];
-
-// void handleConnection(Socket client) {
-//   client.listen(
-//     (Uint8List data) {
-//       final message = String.fromCharCodes(data);
-
-//       for (var c in clients) {
-//         c.write("Server: $message joined the party!");
-//       }
-
-//       clients.add(client);
-//       client.write("server you are logged in $message");
-//     },
-//     onError: (error) {
-//       print(error);
-//       client.close();
-//     },
-//     onDone: () {
-//       print("Server: Client left");
-//       client.close();
-//     },
-//   );
-// }
+  Future<void> accept() async {
+    await milkCollectionDB.create(
+      FarmerId: int.tryParse(farmerId),
+      Added_Water: double.tryParse(water),
+      Analyze_Mode: check ? manualConst : autoConst,
+      CollectionCenterId: box.read(centerIdConst),
+      CollectionCenterName: "Head office test",
+      Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+      Collection_Mode: check ? manualConst : autoConst,
+      FAT: double.tryParse(fat),
+      Farmer_Name: farmerData.farmerName,
+      Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
+      Milk_Status: "Accepted",
+      Milk_Type: radio == 0 ? "CM" : "BM",
+      Qty: double.tryParse(quantity),
+      Rate_Chart_Name: "1235ABC",
+      Rate_Per_Liter: double.tryParse(price),
+      SNF: double.tryParse(snf),
+      Scale_Mode: check ? manualConst : autoConst,
+      Shift: shiftTime == 1 ? "AM" : "PM",
+      Total_Amt: double.tryParse(totalAmount),
+    );
+  }
 }

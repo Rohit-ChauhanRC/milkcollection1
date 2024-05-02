@@ -15,6 +15,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
   const CollectmilkView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    controller.getRateChart();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Maklife'),
@@ -195,21 +196,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
               SizedBox(
                 height: 20.h,
               ),
-              // GetBuilder<HomeController>(builder: (
-              //   HomeController homeController,
-              // ) {
-              //   return datafieldcontainer(
-              //     onChanged1: (p0) {},
-              //     onChanged2: (p0) {},
-              //     onChanged3: (p0) {},
-              //     title1: "FAT",
-              //     title2: "SNF",
-              //     title3: "WATER",
-              //     initialValue1: homeController.fat,
-              //     initialValue2: homeController.snf,
-              //     initialValue3: homeController.water,
-              //   );
-              // }),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -238,7 +225,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               padding: const EdgeInsets.all(10),
                               child: Text(
-                                "${double.tryParse(controller.fat)!.toPrecision(1)}",
+                                "${controller.fat.isNotEmpty ? double.tryParse(controller.fat)!.toPrecision(1) : ""}",
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -285,7 +272,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               padding: const EdgeInsets.all(10),
                               child: Text(
-                                "${double.tryParse(controller.snf)!.toPrecision(1)}",
+                                "${controller.snf.isNotEmpty ? double.tryParse(controller.snf)!.toPrecision(1) : ""}",
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -334,7 +321,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               padding: const EdgeInsets.all(10),
                               child: Text(
-                                controller.water,
+                                controller.water ?? "",
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -364,17 +351,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
               SizedBox(
                 height: 20.h,
               ),
-              // Obx(() => datafieldcontainer(
-              //       onChanged1: (p0) {},
-              //       onChanged2: (p0) {},
-              //       onChanged3: (p0) {},
-              //       title1: "QUANTITY",
-              //       title2: "PRICE",
-              //       title3: "AMOUNT",
-              //       initialValue1: controller.fat,
-              //       initialValue2: controller.snf,
-              //       initialValue3: controller.water,
-              //     )),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -403,7 +380,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               padding: const EdgeInsets.all(10),
                               child: Text(
-                                controller.quantity,
+                                controller.fat.isNotEmpty
+                                    ? controller.quantity
+                                    : "",
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -423,66 +402,83 @@ class CollectmilkView extends GetView<CollectmilkController> {
                             )),
                     ],
                   ),
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "PRICE",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => SizedBox(
-                            // width: 100.w,
-                            width: Get.width * .3,
-
-                            // height: 65.h,
-                            child: TextFormWidget(
-                              readOnly: controller.check,
-                              initialValue: controller.snf,
-                              label: "Please enter FarmerId...",
-                              // onChanged: onChanged2,
-                              onChanged: (e) => controller.fat = controller.fat,
-
-                              keyboardType: TextInputType.text,
-                              maxLength: 10,
-                            ),
-                          )),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "AMOUNT",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => SizedBox(
-                            // width: 100.w,
-                            width: Get.width * .3,
-
-                            // height: 65.h,
-                            child: TextFormWidget(
-                              readOnly: controller.check,
-                              initialValue: controller.water,
-                              label: "Please enter FarmerId...",
-                              // onChanged: onChanged3,
-                              onChanged: (e) => controller.fat = controller.fat,
-
-                              keyboardType: TextInputType.text,
-                              maxLength: 10,
-                            ),
-                          )),
-                    ],
-                  ),
+                  Obx(() => Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "PRICE",
+                                  style: Theme.of(Get.context!)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10.h,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  controller.fat.isNotEmpty
+                                      ? controller.getPriceData()
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "AMOUNT",
+                                  style: Theme.of(Get.context!)
+                                      .textTheme
+                                      .bodySmall,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10.h,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  controller.fat.isNotEmpty
+                                      ? controller.getTotalAmount()
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      )),
                 ],
               ),
 
@@ -496,7 +492,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await controller.getRestoreData();
+                    await controller.accept();
                   },
                   child: Text("ACCEPT"),
                   style: ElevatedButton.styleFrom(
