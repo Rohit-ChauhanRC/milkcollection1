@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:io' as io;
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -36,7 +37,7 @@ class CollectmilkController extends GetxController {
 
   final RateChartDB rateChartDB = RateChartDB();
 
-  // final HomeController homeController = Get.find();
+  final HomeController homeController = Get.find<HomeController>();
 
   final PinverifyController pinverifyController = Get.find();
 
@@ -120,9 +121,17 @@ class CollectmilkController extends GetxController {
   int get shiftTime => _shiftTime.value;
   set shiftTime(int i) => _shiftTime.value = i;
 
+  // late Rx<Socket> printer;
+
+  final RxBool _printD = false.obs;
+  bool get printD => _printD.value;
+  set printD(bool v) => _printD.value = v;
+
   @override
   void onInit() async {
     super.onInit();
+
+    // await checkIp();
 
     if (DateTime.now().hour < 12) {
       shiftTime = 1;
@@ -131,14 +140,15 @@ class CollectmilkController extends GetxController {
     }
     await Permission.storage.request();
 
-    WidgetsBinding.instance.initInstances();
-
+    // WidgetsBinding.instance.initInstances();
+    await getCollectionThirtyDaysData();
     await getRateChart();
   }
 
   @override
-  void onReady() {
+  void onReady() async {
     super.onReady();
+    await getRateChart();
   }
 
   @override
@@ -148,40 +158,60 @@ class CollectmilkController extends GetxController {
 
   Future<void> getRateChart() async {
     rateChartData.assignAll(await rateChartDB.fetchAll());
-    // print("await rateChartDB.fetchAll(): ${await rateChartDB.fetchAll()}");
+
+    print("await rateChartDB.fetchAll(): ${await rateChartDB.fetchAll()}");
   }
 
-  String getPriceData() {
-    // print("rateChartData: $rateChartData");
-    totalAmount = "";
+  String getPriceData(bool v) {
     for (var i = 0; i < rateChartData.length; i++) {
-      if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
-          double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
-        price = (rateChartData[i].price).toString();
-        Future.delayed(const Duration(seconds: 1), () {
-          // totalAmount =
-          //     ((rateChartData[i].price) * int.tryParse(quantity)!).toString();
-        });
+      if (v) {
+        if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
+          price = (rateChartData[i].price).toString();
+          print(price);
+        }
+      } else {
+        // homeController.
+        if (double.tryParse(homeController.fat) ==
+                double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(homeController.snf) ==
+                double.tryParse(rateChartData[i].snf)) {
+          price = (rateChartData[i].price).toString();
+          print(price);
+        }
       }
     }
 
     return price;
   }
 
-  String getTotalAmount() {
+  String getTotalAmount(bool v) {
     totalAmount = "";
 
     // print("rateChartData: $rateChartData");
 
     for (var i = 0; i < rateChartData.length; i++) {
-      if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
-          double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
-        // print(rateChartData[i]);
-        totalAmount = ((rateChartData[i].price * double.tryParse(quantity)!)
-                .toPrecision(2))
-            .toString();
+      if (v) {
+        if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
+          totalAmount = ((rateChartData[i].price * double.tryParse(quantity)!)
+                  .toPrecision(2))
+              .toString();
+          print(totalAmount);
+        }
+        update();
+      } else {
+        if (double.tryParse(homeController.fat) ==
+                double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(homeController.snf) ==
+                double.tryParse(rateChartData[i].snf)) {
+          totalAmount = ((rateChartData[i].price *
+                      double.tryParse(homeController.quantity)!)
+                  .toPrecision(2))
+              .toString();
+          print(totalAmount);
+        }
       }
-      update();
     }
 
     return totalAmount;
@@ -239,6 +269,58 @@ class CollectmilkController extends GetxController {
     }
   }
 
+  Future<void> getCollectionThirtyDaysData() async {
+    try {
+      var res = await http.get(
+          Uri.parse(
+            "$baseUrlConst/$restoreDataConst?CollectionCenterId=${box.read("centerId")}&FromDate=${dateFormat(DateTime.now().subtract(const Duration(days: 30)))}&ToDate=${dateFormat(DateTime.now())}",
+          ),
+          headers: {"Content-Type": "application/json"});
+
+      if (res.statusCode == 200) {
+        restoreData.assignAll([]);
+        // print("res: ${res}");
+        // print("res: ${jsonDecode(res.body.toString())}");
+        restoreData.assignAll(milkCollectionModelFromMap(res.body));
+        if (restoreData.isNotEmpty) {
+          print(restoreData.length.toString());
+          await milkCollectionDB.deleteTable().then((value) async {
+            for (var e in restoreData) {
+              await milkCollectionDB.create(
+                Added_Water: e.addedWater,
+                Analyze_Mode: e.analyzeMode,
+                CollectionCenterId: e.collectionCenterId.toString(),
+                CollectionCenterName: e.collectionCenterName,
+                Collection_Date: e.collectionDate,
+                Collection_Mode: e.collectionMode,
+                FAT: e.fat,
+                FarmerId: e.farmerId,
+                Farmer_Name: e.farmerName,
+                Inserted_Time: e.insertedTime,
+                Milk_Status: e.milkStatus,
+                Milk_Type: e.milkType,
+                Qty: e.qty,
+                Rate_Chart_Name: e.rateChartName,
+                Rate_Per_Liter: e.ratePerLiter,
+                SNF: e.snf,
+                Scale_Mode: e.scaleMode,
+                Shift: e.shift,
+                Total_Amt: e.totalAmt,
+              );
+            }
+          });
+
+          box.write(calculationsId, restoreData.last.calculationsId);
+        }
+        // restoreData.assignAll([]);
+      } else {
+        print(jsonDecode(res.body));
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   getFarmerId() async {
     var farmerfinalId = box.read(centerIdConst);
     if (farmerId.length == 1) {
@@ -253,6 +335,23 @@ class CollectmilkController extends GetxController {
     }
     farmerData =
         await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
+  }
+
+  getFarmerIdFinal() {
+    var farmerfinalId = box.read(centerIdConst);
+    if (farmerId.length == 1) {
+      farmerfinalId = "${farmerfinalId}000$farmerId";
+    } else if (farmerId.length == 2) {
+      farmerfinalId = "${farmerfinalId}00$farmerId";
+    } else if (farmerId.length == 3) {
+      farmerfinalId = "${farmerfinalId}0$farmerId";
+    } else if (farmerId.length == 4) {
+      farmerfinalId = farmerfinalId.toString() + farmerId;
+      // }
+    }
+    return farmerfinalId;
+    // farmerData =
+    //     await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
   }
 
   Future<void> getVerifyPin() async {
@@ -375,7 +474,7 @@ class CollectmilkController extends GetxController {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Obx(() => SizedBox(
-                        // width: Get.width * 0.18,
+                        width: Get.width * 0.16,
                         child: Radio(
                           activeColor: AppColors.yellow,
                           value: "AM",
@@ -383,6 +482,7 @@ class CollectmilkController extends GetxController {
                           onChanged: (String? i) {
                             print(i);
                             shift = i!;
+                            shiftTime = 1;
                           },
                         ),
                       )),
@@ -401,7 +501,7 @@ class CollectmilkController extends GetxController {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Obx(() => SizedBox(
-                        width: Get.width * 0.18,
+                        width: Get.width * 0.16,
                         child: Radio(
                           activeColor: AppColors.yellow,
                           value: "PM",
@@ -409,6 +509,7 @@ class CollectmilkController extends GetxController {
                           onChanged: (String? i) {
                             print(i);
                             shift = i!;
+                            shiftTime = 2;
                           },
                         ),
                       )),
@@ -614,15 +715,164 @@ class CollectmilkController extends GetxController {
     }
   }
 
+  Future<void> checkIp() async {
+    var ip;
+    for (var interface in await NetworkInterface.list()) {
+      // print(interface);
+      for (var addr in interface.addresses) {
+        if (addr.type == InternetAddressType.IPv4 &&
+            addr.address.startsWith('192') &&
+            Platform.isAndroid &&
+            (interface.name.startsWith("swlan") ||
+                interface.name.startsWith("ap"))) {
+          ip = addr.address.split(".").getRange(0, 3).join(".");
+          for (var i = 0; i < 255; i++) {
+            printerConnection("$ip.$i");
+          }
+        } else if (addr.type == InternetAddressType.IPv4 &&
+            addr.address.startsWith('172') &&
+            Platform.isIOS) {
+          addr.address.split(".").getRange(0, 3).join(".");
+          for (var i = 0; i < 255; i++) {
+            printerConnection("$ip.$i");
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> printerConnection(String ip) async {
+    final ip = InternetAddress.anyIPv4;
+    try {
+      final server = await ServerSocket.bind(ip, 8883);
+      server.listen((event) {
+        printerSocketConnection(event);
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void printerSocketConnection(Socket client) {
+    client.listen(
+      (Uint8List data) {
+        final message = String.fromCharCodes(data);
+
+        print("[print]");
+        // if (printD) {
+        client.write(prinntData());
+        // }
+        // printer.value = client;
+      },
+      onError: (error) {
+        print("error: $error");
+        client.destroy();
+      },
+      onDone: () {
+        client.destroy();
+      },
+    );
+  }
+
+  String prinntData() {
+    String string_tobesend = "***Maklife Producer Company Ltd***" +
+        "\n\n" +
+        "Date  :  " +
+        "ManDate" +
+        "\n" +
+        "Time  :  " +
+        "Shift" +
+        "\n" +
+        "FarmerName    :     " +
+        "farmername.getText().toString()" +
+        "\n" +
+        "Farmer Id     :     " +
+        "farmer_id.getText().toString()" +
+        "\n" +
+        "Fat           :     " +
+        "fat.getText().toString()" +
+        "\n" +
+        "Snf           :     " +
+        "snf.getText().toString()" +
+        "\n" +
+        "Milk Type     :     " +
+        "type" +
+        "\n" +
+        "Weight        :     " +
+        "weight.getText().toString() " +
+        "\n" +
+        "Price         :     " +
+        "unit_price.getText().toString()" +
+        "\n" +
+        "Amount        :     " +
+        "amount.getText().toString()" +
+        "\n" +
+        "          " +
+        "\n" +
+        "            " +
+        "          \n" +
+        "          \n" +
+        "       \n" +
+        "               \n" +
+        "           \n";
+
+    return string_tobesend;
+  }
+
+  Future<void> sendCollection() async {
+    try {
+      var res = await http.post(
+          Uri.parse(
+            "$baseUrlConst/$dailyCollection",
+          ),
+          body: {
+            "Collection_Date":
+                DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
+            "Inserted_Time":
+                DateFormat("hh:mm:ss").format(DateTime.now()).toString(),
+            "Calculations_ID": box.read(calculationsId) + 1,
+            "FarmerId": getFarmerIdFinal(),
+            "Farmer_Name": farmerData.farmerName,
+            "Collection_Mode": !check ? manualConst : autoConst,
+            "Scale_Mode": !check ? manualConst : autoConst,
+            "Analyze_Mode": !check ? manualConst : autoConst,
+            "Milk_Status": "Accepted",
+            "Milk_Type": radio == 0 ? "CM" : "BM",
+            "Rate_Chart_Name": "1235ABC",
+            "Qty": !check ? quantity : homeController.quantity,
+            "FAT": !check ? fat : homeController.fat,
+            "SNF": !check ? snf : homeController.snf,
+            "Added_Water": !check ? water : homeController.water,
+            "Rate_Per_Liter": !check ? getPriceData(false) : getPriceData(true),
+            "Total_Amt": totalAmount,
+            "CollectionCenterId": box.read(centerIdConst).toString(),
+            "CollectionCenterName": box.read(centerName),
+            "Shift": shiftTime == 1 ? "Am" : "Pm"
+          });
+      print(res.body);
+      if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
+        print(jsonDecode(res.body));
+        await getCollectionThirtyDaysData();
+      } else {
+        await accept();
+      }
+    } catch (e) {
+      await accept();
+
+      print(e.toString());
+    }
+  }
+
   Future<void> accept() async {
-    await milkCollectionDB.create(
+    await milkCollectionDB
+        .create(
       FarmerId: int.tryParse(farmerId),
       Added_Water: double.tryParse(water),
-      Analyze_Mode: check ? manualConst : autoConst,
+      Analyze_Mode: !check ? manualConst : autoConst,
       CollectionCenterId: box.read(centerIdConst),
-      CollectionCenterName: "Head office test",
+      CollectionCenterName: box.read(centerName),
       Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-      Collection_Mode: check ? manualConst : autoConst,
+      Collection_Mode: !check ? manualConst : autoConst,
       FAT: double.tryParse(fat),
       Farmer_Name: farmerData.farmerName,
       Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
@@ -632,9 +882,30 @@ class CollectmilkController extends GetxController {
       Rate_Chart_Name: "1235ABC",
       Rate_Per_Liter: double.tryParse(price),
       SNF: double.tryParse(snf),
-      Scale_Mode: check ? manualConst : autoConst,
+      Scale_Mode: !check ? manualConst : autoConst,
       Shift: shiftTime == 1 ? "AM" : "PM",
-      Total_Amt: double.tryParse(totalAmount),
-    );
+      Total_Amt: !check
+          ? double.tryParse(getTotalAmount(false))
+          : double.tryParse(getTotalAmount(false)),
+    )
+        .then((value) async {
+      emptyData();
+      Utils.showSnackbar("Accepted!");
+
+      // await checkIp();
+    });
+  }
+
+  void emptyData() {
+    printD = true;
+    fat = "";
+    snf = "";
+    water = "";
+    quantity = "";
+    price = "";
+    totalAmount = "";
+    farmerData = FarmerListModel();
+    farmerId = "";
+    radio = 0;
   }
 }

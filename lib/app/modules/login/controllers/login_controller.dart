@@ -55,15 +55,8 @@ class LoginController extends GetxController {
     if (!loginFormKey.currentState!.validate()) {
       return null;
     }
-    // if (mobileNumber == "9876543210" &&
-    //     (inputUser == "Outlet" || inputUser == "Franchise")) {
-    //   // await createProfile();
 
-    //   // mobileNumber.substring(start)
-    //   Get.toNamed(Routes.HOME, arguments: [inputUser, mobileNumber]);
-    // } else {
     await loginCred();
-    // }
   }
 
   loginCred() async {
@@ -81,6 +74,7 @@ class LoginController extends GetxController {
         if (loginModel.isNotEmpty) {
           box.write(pinConst, loginModel[0].pin);
           box.write(centerIdConst, loginModel[0].centerId);
+          box.write(centerName, loginModel[0].centerName);
           Get.toNamed(
             Routes.PINVERIFY,
           );

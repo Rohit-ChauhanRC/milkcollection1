@@ -29,9 +29,9 @@ class RatechartModel {
   });
 
   factory RatechartModel.fromMap(Map<String, dynamic> json) => RatechartModel(
-        fat: json["Fat"],
-        snf: json["Snf"],
-        price: double.tryParse(json["Price"])!,
+        fat: json["Fat"].toString(),
+        snf: json["Snf"].toString(),
+        price: json["Price"] as double,
         milkType: json["MilkType"],
         insertedDate: DateTime.parse(json["InsertedDate"]),
         counters: json["Counters"],

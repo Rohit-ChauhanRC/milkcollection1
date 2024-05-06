@@ -12,7 +12,7 @@ class RateChartDB {
   CREATE TABLE IF NOT EXISTS $tableName (
     "id" INTEGER ,
     "Fat" TEXT,
-    "Price" TEXT,
+    "Price" FLOAT,
     "MilkType" TEXT ,
     "Snf" TEXT ,
     "InsertedDate" TEXT,

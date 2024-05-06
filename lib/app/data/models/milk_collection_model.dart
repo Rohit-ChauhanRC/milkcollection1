@@ -32,6 +32,7 @@ class MilkCollectionModel {
   int? collectionCenterId;
   String? collectionCenterName;
   String? shift;
+  int? FUploaded;
 
   MilkCollectionModel({
     this.collectionDate,
@@ -54,6 +55,7 @@ class MilkCollectionModel {
     this.collectionCenterId,
     this.collectionCenterName,
     this.shift,
+    this.FUploaded,
   });
 
   factory MilkCollectionModel.fromMap(Map<String, dynamic> json) =>
@@ -78,6 +80,7 @@ class MilkCollectionModel {
         collectionCenterId: json["CollectionCenterId"],
         collectionCenterName: json["CollectionCenterName"],
         shift: json["Shift"],
+        FUploaded: json["FUploaded"] ?? 1,
       );
 
   Map<String, dynamic> toMap() => {
@@ -101,5 +104,6 @@ class MilkCollectionModel {
         "CollectionCenterId": collectionCenterId,
         "CollectionCenterName": collectionCenterName,
         "Shift": shift,
+        "FUploaded": FUploaded,
       };
 }

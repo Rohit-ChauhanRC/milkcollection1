@@ -18,8 +18,8 @@ class HomeController extends GetxController {
 
   final RateChartDB rateChartDB = RateChartDB();
 
-  final CollectmilkController collectmilkController =
-      Get.put(CollectmilkController());
+  // final CollectmilkController collectmilkController =
+  //     Get.put(CollectmilkController());
 
   ProgressDialog pd = ProgressDialog(context: Get.context);
 
@@ -35,13 +35,13 @@ class HomeController extends GetxController {
   // Socket get analyzer => _analyzer.value;
   // set analyzer(Socket ss) => _analyzer.value = ss;
 
-  late Rx<Socket> _printer;
-  Socket get printer => _printer.value;
-  set printer(Socket ss) => _printer.value = ss;
+  // late Rx<Socket> _printer;
+  // Socket get printer => _printer.value;
+  // set printer(Socket ss) => _printer.value = ss;
 
-  late Rx<Socket> _weighing;
-  Socket get weighing => _weighing.value;
-  set weighing(Socket ss) => _weighing.value = ss;
+  // late Rx<Socket> _weighing;
+  // Socket get weighing => _weighing.value;
+  // set weighing(Socket ss) => _weighing.value = ss;
 
   final RxString _ip = "".obs;
   String get ip => _ip.value;
@@ -76,8 +76,8 @@ class HomeController extends GetxController {
       radio = 2;
     }
 
-    await getRaateChart("C").then((value) async {
-      await getRaateChart("B").then((value) async {
+    await getRateChart("C").then((value) async {
+      await getRateChart("B").then((value) async {
         pd.close();
       });
     });
@@ -95,7 +95,7 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getRaateChart(
+  Future<void> getRateChart(
     String milkType,
   ) async {
     try {
@@ -241,17 +241,25 @@ class HomeController extends GetxController {
 
         print(message);
 
-        collectmilkController.fat =
+        // collectmilkController.fat =
+        //     "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
+        fat =
             "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
         print(fat);
-        collectmilkController.snf =
+        // collectmilkController.snf =
+        //     "${message.split(" ")[1].split("@")[3]}.${message.split(" ")[1].split("@")[4]}";
+        snf =
             "${message.split(" ")[1].split("@")[3]}.${message.split(" ")[1].split("@")[4]}";
         print(snf);
-        collectmilkController.density =
+        density =
             "${message.split(" ")[1].split("@")[5]}.${message.split(" ")[1].split("@")[6]}";
+        // collectmilkController.density =
+        //     "${message.split(" ")[1].split("@")[5]}.${message.split(" ")[1].split("@")[6]}";
         print(density);
-        collectmilkController.water =
+        water =
             "${message.split(" ")[1].split("@")[7]}.${message.split(" ")[1].split("@")[8]}";
+        // collectmilkController.water =
+        //     "${message.split(" ")[1].split("@")[7]}.${message.split(" ")[1].split("@")[8]}";
         print(water);
         update();
       },
@@ -271,8 +279,8 @@ class HomeController extends GetxController {
         final message = String.fromCharCodes(data);
 
         print(message);
-
-        printer = client;
+        client.write("object");
+        // printer = client;
       },
       onError: (error) {
         print("error: $error");
@@ -289,7 +297,8 @@ class HomeController extends GetxController {
       (Uint8List data) {
         final message = String.fromCharCodes(data);
 
-        collectmilkController.quantity = message.replaceAll("N", "");
+        quantity = message.replaceAll("N", "");
+        // collectmilkController.quantity = message.replaceAll("N", "");
         print(message);
         print(quantity);
       },
