@@ -31,7 +31,8 @@ class HomeController extends GetxController {
   List<RatechartModel> get rateChartData => _rateChartData;
   set rateChartData(List<RatechartModel> lst) => _rateChartData.assignAll(lst);
 
-  late Socket analyzer;
+  // late Socket analyzer;
+  Socket? socket;
   // Socket get analyzer => _analyzer.value;
   // set analyzer(Socket ss) => _analyzer.value = ss;
 
@@ -237,7 +238,7 @@ class HomeController extends GetxController {
     client.listen(
       (Uint8List data) {
         final message = String.fromCharCodes(data);
-        analyzer = client;
+        // analyzer = client;
 
         print(message);
 
@@ -279,7 +280,8 @@ class HomeController extends GetxController {
         final message = String.fromCharCodes(data);
 
         print(message);
-        client.write("object");
+        // client.write("object");
+        socket = client;
         // printer = client;
       },
       onError: (error) {

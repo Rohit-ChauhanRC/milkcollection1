@@ -85,25 +85,30 @@ class CollectmilkController extends GetxController {
   List<MilkCollectionModel> get exportData => _exportData;
   set exportData(List<MilkCollectionModel> lst) => _exportData.assignAll(lst);
 
-  final RxString _fat = "".obs;
-  String get fat => _fat.value;
-  set fat(String i) => _fat.value = i;
+  // final RxString _fat = "".obs;
+  // String get fat => _fat.value;
+  // set fat(String i) => _fat.value = i;
+  TextEditingController fat = TextEditingController();
+  TextEditingController snf = TextEditingController();
+  TextEditingController density = TextEditingController();
+  TextEditingController water = TextEditingController();
+  TextEditingController quantity = TextEditingController();
 
-  final RxString _snf = "".obs;
-  String get snf => _snf.value;
-  set snf(String i) => _snf.value = i;
+  // final RxString _snf = "".obs;
+  // String get snf => _snf.value;
+  // set snf(String i) => _snf.value = i;
 
-  final RxString _density = "".obs;
-  String get density => _density.value;
-  set density(String i) => _density.value = i;
+  // final RxString _density = "".obs;
+  // String get density => _density.value;
+  // set density(String i) => _density.value = i;
 
-  final RxString _water = "".obs;
-  String get water => _water.value;
-  set water(String i) => _water.value = i;
+  // final RxString _water = "".obs;
+  // String get water => _water.value;
+  // set water(String i) => _water.value = i;
 
-  final RxString _quantity = "".obs;
-  String get quantity => _quantity.value;
-  set quantity(String i) => _quantity.value = i;
+  // final RxString _quantity = "".obs;
+  // String get quantity => _quantity.value;
+  // set quantity(String i) => _quantity.value = i;
 
   final RxList<RatechartModel> _rateChartData = RxList<RatechartModel>();
   List<RatechartModel> get rateChartData => _rateChartData;
@@ -165,8 +170,10 @@ class CollectmilkController extends GetxController {
   String getPriceData(bool v) {
     for (var i = 0; i < rateChartData.length; i++) {
       if (v) {
-        if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
+        if (double.tryParse(fat.text) ==
+                double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(snf.text) ==
+                double.tryParse(rateChartData[i].snf)) {
           price = (rateChartData[i].price).toString();
           print(price);
         }
@@ -192,9 +199,12 @@ class CollectmilkController extends GetxController {
 
     for (var i = 0; i < rateChartData.length; i++) {
       if (v) {
-        if (double.tryParse(fat) == double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(snf) == double.tryParse(rateChartData[i].snf)) {
-          totalAmount = ((rateChartData[i].price * double.tryParse(quantity)!)
+        if (double.tryParse(fat.text) ==
+                double.tryParse(rateChartData[i].fat) &&
+            double.tryParse(snf.text) ==
+                double.tryParse(rateChartData[i].snf)) {
+          totalAmount = ((rateChartData[i].price *
+                      (double.tryParse(quantity.text) ?? 1.0))
                   .toPrecision(2))
               .toString();
           print(totalAmount);
@@ -257,6 +267,7 @@ class CollectmilkController extends GetxController {
               Scale_Mode: e.scaleMode,
               Shift: e.shift,
               Total_Amt: e.totalAmt,
+              FUploaded: 1,
             );
           }
         }
@@ -306,6 +317,7 @@ class CollectmilkController extends GetxController {
                 Scale_Mode: e.scaleMode,
                 Shift: e.shift,
                 Total_Amt: e.totalAmt,
+                FUploaded: 1,
               );
             }
           });
@@ -337,7 +349,7 @@ class CollectmilkController extends GetxController {
         await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
   }
 
-  getFarmerIdFinal() {
+  String getFarmerIdFinal() {
     var farmerfinalId = box.read(centerIdConst);
     if (farmerId.length == 1) {
       farmerfinalId = "${farmerfinalId}000$farmerId";
@@ -715,143 +727,40 @@ class CollectmilkController extends GetxController {
     }
   }
 
-  Future<void> checkIp() async {
-    var ip;
-    for (var interface in await NetworkInterface.list()) {
-      // print(interface);
-      for (var addr in interface.addresses) {
-        if (addr.type == InternetAddressType.IPv4 &&
-            addr.address.startsWith('192') &&
-            Platform.isAndroid &&
-            (interface.name.startsWith("swlan") ||
-                interface.name.startsWith("ap"))) {
-          ip = addr.address.split(".").getRange(0, 3).join(".");
-          for (var i = 0; i < 255; i++) {
-            printerConnection("$ip.$i");
-          }
-        } else if (addr.type == InternetAddressType.IPv4 &&
-            addr.address.startsWith('172') &&
-            Platform.isIOS) {
-          addr.address.split(".").getRange(0, 3).join(".");
-          for (var i = 0; i < 255; i++) {
-            printerConnection("$ip.$i");
-          }
-        }
-      }
-    }
-  }
-
-  Future<void> printerConnection(String ip) async {
-    final ip = InternetAddress.anyIPv4;
-    try {
-      final server = await ServerSocket.bind(ip, 8883);
-      server.listen((event) {
-        printerSocketConnection(event);
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  void printerSocketConnection(Socket client) {
-    client.listen(
-      (Uint8List data) {
-        final message = String.fromCharCodes(data);
-
-        print("[print]");
-        // if (printD) {
-        client.write(prinntData());
-        // }
-        // printer.value = client;
-      },
-      onError: (error) {
-        print("error: $error");
-        client.destroy();
-      },
-      onDone: () {
-        client.destroy();
-      },
-    );
-  }
-
-  String prinntData() {
-    String string_tobesend = "***Maklife Producer Company Ltd***" +
-        "\n\n" +
-        "Date  :  " +
-        "ManDate" +
-        "\n" +
-        "Time  :  " +
-        "Shift" +
-        "\n" +
-        "FarmerName    :     " +
-        "farmername.getText().toString()" +
-        "\n" +
-        "Farmer Id     :     " +
-        "farmer_id.getText().toString()" +
-        "\n" +
-        "Fat           :     " +
-        "fat.getText().toString()" +
-        "\n" +
-        "Snf           :     " +
-        "snf.getText().toString()" +
-        "\n" +
-        "Milk Type     :     " +
-        "type" +
-        "\n" +
-        "Weight        :     " +
-        "weight.getText().toString() " +
-        "\n" +
-        "Price         :     " +
-        "unit_price.getText().toString()" +
-        "\n" +
-        "Amount        :     " +
-        "amount.getText().toString()" +
-        "\n" +
-        "          " +
-        "\n" +
-        "            " +
-        "          \n" +
-        "          \n" +
-        "       \n" +
-        "               \n" +
-        "           \n";
-
-    return string_tobesend;
-  }
-
   Future<void> sendCollection() async {
+    Map<String, dynamic> _body = {
+      "Collection_Date":
+          DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
+      "Inserted_Time": DateFormat("hh:mm:ss").format(DateTime.now()).toString(),
+      "Calculations_ID": (box.read(calculationsId) + 1).toString(),
+      "FarmerId": getFarmerIdFinal(),
+      "Farmer_Name": farmerData.farmerName,
+      "Collection_Mode": !check ? manualConst : autoConst,
+      "Scale_Mode": !check ? manualConst : autoConst,
+      "Analyze_Mode": !check ? manualConst : autoConst,
+      "Milk_Status": "Accepted",
+      "Milk_Type": radio == 0 ? "CM" : "BM",
+      "Rate_Chart_Name": "1235ABC",
+      "Qty": !check ? quantity : homeController.quantity,
+      "FAT": !check ? fat : homeController.fat,
+      "SNF": !check ? snf : homeController.snf,
+      "Added_Water": !check ? water : homeController.water,
+      "Rate_Per_Liter": !check ? getPriceData(false) : getPriceData(true),
+      "Total_Amt": totalAmount,
+      "CollectionCenterId": box.read(centerIdConst),
+      "CollectionCenterName": box.read(centerName),
+      "Shift": shiftTime == 1 ? "Am" : "Pm",
+    };
     try {
       var res = await http.post(
           Uri.parse(
             "$baseUrlConst/$dailyCollection",
           ),
-          body: {
-            "Collection_Date":
-                DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
-            "Inserted_Time":
-                DateFormat("hh:mm:ss").format(DateTime.now()).toString(),
-            "Calculations_ID": box.read(calculationsId) + 1,
-            "FarmerId": getFarmerIdFinal(),
-            "Farmer_Name": farmerData.farmerName,
-            "Collection_Mode": !check ? manualConst : autoConst,
-            "Scale_Mode": !check ? manualConst : autoConst,
-            "Analyze_Mode": !check ? manualConst : autoConst,
-            "Milk_Status": "Accepted",
-            "Milk_Type": radio == 0 ? "CM" : "BM",
-            "Rate_Chart_Name": "1235ABC",
-            "Qty": !check ? quantity : homeController.quantity,
-            "FAT": !check ? fat : homeController.fat,
-            "SNF": !check ? snf : homeController.snf,
-            "Added_Water": !check ? water : homeController.water,
-            "Rate_Per_Liter": !check ? getPriceData(false) : getPriceData(true),
-            "Total_Amt": totalAmount,
-            "CollectionCenterId": box.read(centerIdConst).toString(),
-            "CollectionCenterName": box.read(centerName),
-            "Shift": shiftTime == 1 ? "Am" : "Pm"
-          });
-      print(res.body);
+          // headers: {
+          //   'Content-Type': 'application/json',
+          // },
+          body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
-        print(jsonDecode(res.body));
         await getCollectionThirtyDaysData();
       } else {
         await accept();
@@ -866,28 +775,28 @@ class CollectmilkController extends GetxController {
   Future<void> accept() async {
     await milkCollectionDB
         .create(
-      FarmerId: int.tryParse(farmerId),
-      Added_Water: double.tryParse(water),
-      Analyze_Mode: !check ? manualConst : autoConst,
-      CollectionCenterId: box.read(centerIdConst),
-      CollectionCenterName: box.read(centerName),
-      Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-      Collection_Mode: !check ? manualConst : autoConst,
-      FAT: double.tryParse(fat),
-      Farmer_Name: farmerData.farmerName,
-      Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
-      Milk_Status: "Accepted",
-      Milk_Type: radio == 0 ? "CM" : "BM",
-      Qty: double.tryParse(quantity),
-      Rate_Chart_Name: "1235ABC",
-      Rate_Per_Liter: double.tryParse(price),
-      SNF: double.tryParse(snf),
-      Scale_Mode: !check ? manualConst : autoConst,
-      Shift: shiftTime == 1 ? "AM" : "PM",
-      Total_Amt: !check
-          ? double.tryParse(getTotalAmount(false))
-          : double.tryParse(getTotalAmount(false)),
-    )
+            FarmerId: int.tryParse(farmerId),
+            Added_Water: double.tryParse(water.text),
+            Analyze_Mode: !check ? manualConst : autoConst,
+            CollectionCenterId: box.read(centerIdConst),
+            CollectionCenterName: box.read(centerName),
+            Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+            Collection_Mode: !check ? manualConst : autoConst,
+            FAT: double.tryParse(fat.text),
+            Farmer_Name: farmerData.farmerName,
+            Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
+            Milk_Status: "Accepted",
+            Milk_Type: radio == 0 ? "CM" : "BM",
+            Qty: double.tryParse(quantity.text),
+            Rate_Chart_Name: "1235ABC",
+            Rate_Per_Liter: double.tryParse(price),
+            SNF: double.tryParse(snf.text),
+            Scale_Mode: !check ? manualConst : autoConst,
+            Shift: shiftTime == 1 ? "AM" : "PM",
+            Total_Amt: !check
+                ? double.tryParse(getTotalAmount(false))
+                : double.tryParse(getTotalAmount(false)),
+            FUploaded: !check ? 0 : 1)
         .then((value) async {
       emptyData();
       Utils.showSnackbar("Accepted!");
@@ -898,14 +807,25 @@ class CollectmilkController extends GetxController {
 
   void emptyData() {
     printD = true;
-    fat = "";
-    snf = "";
-    water = "";
-    quantity = "";
+    fat.clear();
+    snf.clear();
+    water.clear();
+    quantity.clear();
     price = "";
     totalAmount = "";
     farmerData = FarmerListModel();
     farmerId = "";
     radio = 0;
+    homeController.fat = "";
+    homeController.snf = "";
+    homeController.water = "";
+    homeController.quantity = "";
+  }
+
+  printData() async {
+    String collectionPrint =
+        "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  ${DateFormat("hh:mm:ss").format(DateTime.now())}\nFarmerName    :     ${farmerData.farmerName}\nFarmer Id     :     ${getFarmerIdFinal()}\nFat           :     $fat\nSnf           :     $snf\nMilk Type     :     ${radio == 0 ? "CM" : "BM"}\nWeight        :     ${!check ? quantity : homeController.quantity}\nPrice         :     ${!check ? getPriceData(false) : getPriceData(true)}\nAmount        :     ${totalAmount}\n          \n                      \n          \n       \n               \n           \n";
+
+    homeController.socket!.write(collectionPrint);
   }
 }

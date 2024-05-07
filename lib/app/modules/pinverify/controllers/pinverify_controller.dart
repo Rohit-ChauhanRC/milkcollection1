@@ -4,9 +4,12 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
+import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
+import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 
@@ -16,6 +19,8 @@ class PinverifyController extends GetxController {
   final box = GetStorage();
 
   final FarmerDB farmerDB = FarmerDB();
+
+  final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
 
   GlobalKey<FormState> loginFormKey = GlobalKey();
 
@@ -35,11 +40,17 @@ class PinverifyController extends GetxController {
   List<FarmerListModel> get farmerData => _farmerData;
   set farmerData(List<FarmerListModel> lst) => _farmerData.assignAll(lst);
 
+  final RxList<MilkCollectionModel> _restoreData =
+      RxList<MilkCollectionModel>();
+  List<MilkCollectionModel> get restoreData => _restoreData;
+  set restoreData(List<MilkCollectionModel> lst) => _restoreData.assignAll(lst);
+
   final count = 0.obs;
   @override
   void onInit() async {
     super.onInit();
     farmerData.assignAll(await farmerDB.fetchAll());
+    restoreData.assignAll(await milkCollectionDB.fetchAll());
   }
 
   @override
@@ -62,7 +73,9 @@ class PinverifyController extends GetxController {
 
     if (box.read(pinConst) == pin) {
       await getFamerDataDB().then((v) async {
-        await getFarmerList();
+        await getFarmerList().then((value) async {
+          await postMilkCollectionDataDB();
+        });
       });
 
       box.write(verifyConst, true).then((value) => Get.toNamed(Routes.HOME));
@@ -101,6 +114,51 @@ class PinverifyController extends GetxController {
             print(jsonDecode(res.body));
 
             if (res.statusCode == 200) {
+              print(jsonDecode(res.body));
+            } else {
+              //
+            }
+            circularProgress = true;
+          } catch (e) {
+            // apiLopp(i);
+            print(e);
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> postMilkCollectionDataDB() async {
+    // print(farmerData.first.farmerId);
+    if (restoreData.isNotEmpty) {
+      for (var e in restoreData) {
+        if (e.FUploaded == 0) {
+          try {
+            var res = await http
+                .post(Uri.parse("$baseUrlConst/$dailyCollection"), body: {
+              "Collection_Date": e.collectionDate,
+              "Inserted_Time": e.insertedTime,
+              "Calculations_ID": e.calculationsId,
+              "FarmerId": e.farmerId,
+              "Farmer_Name": e.farmerName,
+              "Collection_Mode": e.collectionMode,
+              "Scale_Mode": e.scaleMode,
+              "Analyze_Mode": e.analyzeMode,
+              "Milk_Status": e.milkStatus,
+              "Milk_Type": e.milkType,
+              "Rate_Chart_Name": e.rateChartName,
+              "Qty": e.qty,
+              "FAT": e.fat,
+              "SNF": e.snf,
+              "Added_Water": e.addedWater,
+              "Rate_Per_Liter": e.ratePerLiter,
+              "Total_Amt": e.totalAmt,
+              "CollectionCenterId": e.collectionCenterId,
+              "CollectionCenterName": e.collectionCenterName,
+              "Shift": e.shift,
+            });
+
+            if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
               print(jsonDecode(res.body));
             } else {
               //

@@ -46,7 +46,7 @@ class DataBaseService {
   }
 
   void onUpgrade(Database database, int oldVersion, int newVersion) async {
-    // ProductDB().onUpgrade(database, oldVersion, newVersion);
+    // MilkCollectionDB().onUpgrade(database, oldVersion, newVersion);
     // VendorDB().onUpgrade(database, oldVersion, newVersion);
     // ReceivingDB().onUpgrade(database, oldVersion, newVersion);
     // SellDB().onUpgrade(database, oldVersion, newVersion);

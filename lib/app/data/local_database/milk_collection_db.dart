@@ -1,5 +1,3 @@
-import 'package:flutter/services.dart';
-import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -32,6 +30,7 @@ class MilkCollectionDB {
     "CollectionCenterId" INTEGER,
     "CollectionCenterName" TEXT,
     "Shift" TEXT,
+    "FUploaded" INTEGER,
     PRIMARY KEY("id" AUTOINCREMENT)
   );
 """);
@@ -59,11 +58,12 @@ class MilkCollectionDB {
     double? Added_Water,
     double? Rate_Per_Liter,
     double? Total_Amt,
+    int? FUploaded,
   }) async {
     final database = await DataBaseService().database;
     return await database.rawInsert(
       '''
-        INSERT INTO $tableName (Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        INSERT INTO $tableName (Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ''',
       [
         Collection_Date,
@@ -84,7 +84,8 @@ class MilkCollectionDB {
         Total_Amt,
         CollectionCenterId,
         CollectionCenterName,
-        Shift
+        Shift,
+        FUploaded
       ],
     );
   }
@@ -193,8 +194,8 @@ class MilkCollectionDB {
   }
 
   void onUpgrade(Database db, int oldVersion, int newVersion) {
-    // if (oldVersion < newVersion) {
-    //   db.execute("ALTER TABLE $tableName ADD COLUMN newCol TEXT;");
-    // }
+    if (oldVersion < newVersion) {
+      db.execute("ALTER TABLE $tableName ADD COLUMN FUploaded TEXT;");
+    }
   }
 }
