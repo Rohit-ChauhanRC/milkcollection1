@@ -552,7 +552,13 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.green,
                   ),
-                  child: const Text("ACCEPT"),
+                  child: Text(
+                    "ACCEPT",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displaySmall!
+                        .copyWith(color: AppColors.white),
+                  ),
                 ),
               ),
 
@@ -570,12 +576,20 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.emptyData();
+                    // controller.emptyData();
+                    controller.sendMessage();
+                    // controller.printData();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.red,
                   ),
-                  child: const Text("REJECT"),
+                  child: Text(
+                    "REJECT",
+                    style: Theme.of(context)
+                        .textTheme
+                        .displaySmall!
+                        .copyWith(color: AppColors.white),
+                  ),
                 ),
               ),
             ],

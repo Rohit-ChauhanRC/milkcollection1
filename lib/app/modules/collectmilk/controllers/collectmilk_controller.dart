@@ -174,7 +174,7 @@ class CollectmilkController extends GetxController {
                 double.tryParse(rateChartData[i].fat) &&
             double.tryParse(snf.text) ==
                 double.tryParse(rateChartData[i].snf)) {
-          price = (rateChartData[i].price).toString();
+          price = (rateChartData[i].price.toPrecision(2)).toString();
           print(price);
         }
       } else {
@@ -183,7 +183,7 @@ class CollectmilkController extends GetxController {
                 double.tryParse(rateChartData[i].fat) &&
             double.tryParse(homeController.snf) ==
                 double.tryParse(rateChartData[i].snf)) {
-          price = (rateChartData[i].price).toString();
+          price = (rateChartData[i].price.toPrecision(2)).toString();
           print(price);
         }
       }
@@ -245,7 +245,7 @@ class CollectmilkController extends GetxController {
         // print("res: ${jsonDecode(res.body.toString())}");
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
-          print(restoreData.length.toString());
+          // print(restoreData.length.toString());
           for (var e in restoreData) {
             milkCollectionDB.create(
               Added_Water: e.addedWater,
@@ -294,7 +294,7 @@ class CollectmilkController extends GetxController {
         // print("res: ${jsonDecode(res.body.toString())}");
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
-          print(restoreData.length.toString());
+          // print(restoreData.length.toString());
           await milkCollectionDB.deleteTable().then((value) async {
             for (var e in restoreData) {
               await milkCollectionDB.create(
@@ -326,10 +326,10 @@ class CollectmilkController extends GetxController {
         }
         // restoreData.assignAll([]);
       } else {
-        print(jsonDecode(res.body));
+        // print(jsonDecode(res.body));
       }
     } catch (e) {
-      print(e.toString());
+      // print(e.toString());
     }
   }
 
@@ -375,15 +375,15 @@ class CollectmilkController extends GetxController {
           headers: {"Content-Type": "application/json"});
 
       if (res.statusCode == 200) {
-        print(res.body);
+        // print(res.body);
         pinManual.assignAll([]);
         // print("res: ${res}");
         // print("res: ${jsonDecode(res.body.toString())}");
         pinManual.assignAll(pinnmanualModelFromMap(res.body));
         if (pinManual.isNotEmpty) {
-          print("pin :${pin}");
+          // print("pin :${pin}");
           if (pinManual[0].pin == int.tryParse(pin)) {
-            print(pin);
+            // print(pin);
             check = false;
             // Get.back();
             Utils.closeDialog();
@@ -395,10 +395,10 @@ class CollectmilkController extends GetxController {
         }
         // restoreData.assignAll([]);
       } else {
-        print(jsonDecode(res.body));
+        // print(jsonDecode(res.body));
       }
     } catch (e) {
-      print(e.toString());
+      // print(e.toString());
     }
   }
 
@@ -421,7 +421,7 @@ class CollectmilkController extends GetxController {
           label: "Please enter Pin...",
           onChanged: (val) {
             pin = val;
-            print(initialValue);
+            // print(initialValue);
           },
           keyboardType: const TextInputType.numberWithOptions(
             signed: true,
@@ -584,9 +584,10 @@ class CollectmilkController extends GetxController {
 
     if (exportData.isNotEmpty) {
       Excel excel = Excel.createExcel();
-      excel.rename(excel.getDefaultSheet()!, "CollectionData");
+      excel.rename(excel.getDefaultSheet()!,
+          "CollectionData_${box.read(centerIdConst)}");
 
-      Sheet sheet = excel["CollectionData"];
+      Sheet sheet = excel["CollectionData_${box.read(centerIdConst)}"];
 
       final indexList = [
         {"key": "A1", "value": "Collection Date"},
@@ -617,8 +618,8 @@ class CollectmilkController extends GetxController {
             indexList[i]["value"].toString(),
           )
           ..cellStyle = CellStyle(
-            fontSize: 14,
-            bold: true,
+            fontSize: 10,
+            // bold: true,
             backgroundColorHex: ExcelColor.yellow,
             fontColorHex: ExcelColor.black,
           );
@@ -728,6 +729,9 @@ class CollectmilkController extends GetxController {
   }
 
   Future<void> sendCollection() async {
+    await printData();
+    await sendMessage();
+
     Map<String, dynamic> _body = {
       "Collection_Date":
           DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
@@ -751,6 +755,7 @@ class CollectmilkController extends GetxController {
       "CollectionCenterName": box.read(centerName),
       "Shift": shiftTime == 1 ? "Am" : "Pm",
     };
+
     try {
       var res = await http.post(
           Uri.parse(
@@ -761,6 +766,7 @@ class CollectmilkController extends GetxController {
           // },
           body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
+        Utils.showSnackbar("accepted!");
         await getCollectionThirtyDaysData();
       } else {
         await accept();
@@ -823,9 +829,51 @@ class CollectmilkController extends GetxController {
   }
 
   printData() async {
-    String collectionPrint =
-        "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  ${DateFormat("hh:mm:ss").format(DateTime.now())}\nFarmerName    :     ${farmerData.farmerName}\nFarmer Id     :     ${getFarmerIdFinal()}\nFat           :     $fat\nSnf           :     $snf\nMilk Type     :     ${radio == 0 ? "CM" : "BM"}\nWeight        :     ${!check ? quantity : homeController.quantity}\nPrice         :     ${!check ? getPriceData(false) : getPriceData(true)}\nAmount        :     ${totalAmount}\n          \n                      \n          \n       \n               \n           \n";
+    // String collectionPrint =
+    //     "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  ${DateFormat("hh:mm:ss").format(DateTime.now())}\nFarmerName    :     ${farmerData.farmerName}\nFarmer Id     :     ${getFarmerIdFinal()}\nFat           :     ${!check ? fat.text : homeController.fat}\nSnf           :     ${!check ? snf.text : homeController.snf}\nMilk Type     :     ${radio == 0 ? "CM" : "BM"}\nWeight        :     ${!check ? quantity.text : homeController.quantity}\nPrice         :     ${!check ? getPriceData(false) : getPriceData(true)}\nAmount        :     ${totalAmount}\n          \n                      \n          \n       \n               \n           \n";
+    // homeController.socket!.write(collectionPrint);
+    homeController.printData(
+      shift: shiftTime == 1 ? "AM" : "PM",
+      farmerName: farmerData.farmerName!,
+      fat1: !check ? fat.text : homeController.fat,
+      getFarmerId: getFarmerIdFinal(),
+      milkType: radio == 0 ? "CM" : "BM",
+      price: !check ? getPriceData(false) : getPriceData(true),
+      quantity1: !check ? quantity.toString() : homeController.quantity,
+      snf1: !check ? snf.text : homeController.snf,
+      totalAmount: totalAmount,
+    );
+  }
 
-    homeController.socket!.write(collectionPrint);
+  Future<void> sendMessage() async {
+    try {
+      Map<String, dynamic>? queryParameters = {
+        "key": "36365EF4C86D67",
+        "campaign": "0",
+        "routeid": "9",
+        "type": "text",
+        "contacts": "9711784343",
+        "senderid": "MAKLIF",
+        "msg":
+            "MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: $farmerId%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A",
+        "template_id": "1207165769139334975"
+      };
+      var res = await http.post(
+          // Uri.http("Payment.maklife.in:9019", "/api/smsapi/index.php",
+          //     queryParameters),
+          Uri.parse(
+              "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
+      if (res.statusCode == 200) {
+        Utils.showSnackbar(jsonDecode(res.body)["message"]);
+        // await getCollectionThirtyDaysData();
+        print(jsonDecode(res.body));
+      } else {
+        // await accept();
+      }
+    } catch (e) {
+      // await accept();
+
+      print(e.toString());
+    }
   }
 }

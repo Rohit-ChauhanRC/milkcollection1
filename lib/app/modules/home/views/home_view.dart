@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
-import 'package:milkcollection/app/widgets/radio_list_tile_widget.dart';
 
 import '../../../widgets/backdround_container.dart';
 import '../controllers/home_controller.dart';
@@ -16,7 +15,8 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Maklife CenterId ${controller.box.read(centerIdConst)} "),
+        title:
+            Text("Maklife CenterId (${controller.box.read(centerIdConst)}) "),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -92,11 +92,11 @@ class HomeView extends GetView<HomeController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     intrinsicWidget(
-                        title1: "Total\nMilk",
+                        title1: "Tot Milk",
                         value1: "0.0",
-                        title2: "Average\nFat",
+                        title2: "Avg Fat",
                         value2: "0.0",
-                        title3: "Average\nSNF",
+                        title3: "Avg SNF",
                         value3: "0.0"),
                   ],
                 ),
@@ -112,11 +112,11 @@ class HomeView extends GetView<HomeController> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     intrinsicWidget(
-                        title1: "Average\nMilk",
+                        title1: "Avg Milk",
                         value1: "0.0",
-                        title2: "Average\nPrice",
+                        title2: "Avg Price",
                         value2: "0.0",
-                        title3: "Average \nAmount",
+                        title3: "Avg Amt",
                         value3: "0.0"),
                   ],
                 ),
@@ -161,7 +161,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   title1.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
               SizedBox(
@@ -172,7 +172,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   value1.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
             ],
@@ -196,7 +196,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   title2.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
               SizedBox(
@@ -207,7 +207,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   value2.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
             ],
@@ -231,7 +231,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   title3.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
               SizedBox(
@@ -243,7 +243,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   value3.toString(),
                   overflow: TextOverflow.visible,
-                  style: Theme.of(Get.context!).textTheme.bodyMedium,
+                  style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
             ],
@@ -266,7 +266,9 @@ class HomeView extends GetView<HomeController> {
                   // await controller.getRaateChart("C").then((value) async {
                   //   await controller.getRaateChart("B").then((value) async {
                   //     controller.pd.close();
-                  Get.toNamed(Routes.COLLECTMILK, arguments: [controller.fat]);
+                  Get.toNamed(
+                    Routes.COLLECTMILK,
+                  );
                   // });
                   // });
                 },
@@ -277,7 +279,7 @@ class HomeView extends GetView<HomeController> {
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 30.sp,
+                        radius: 20.sp,
                         backgroundColor: Colors.white,
                         child: Image.asset("assets/images/ic_collectmilk.png"),
                       ),
@@ -315,7 +317,7 @@ class HomeView extends GetView<HomeController> {
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 30.sp,
+                        radius: 20.sp,
                         backgroundColor: Colors.white,
                         child: Image.asset("assets/images/ic_farmer.png"),
                       ),
@@ -350,7 +352,7 @@ class HomeView extends GetView<HomeController> {
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 30.sp,
+                        radius: 20.sp,
                         backgroundColor: Colors.white,
                         child: Image.asset("assets/images/ic_report.png"),
                       ),
@@ -390,7 +392,7 @@ class HomeView extends GetView<HomeController> {
                       CircleAvatar(
                         // foregroundColor: Colors.transparent,
                         backgroundColor: Colors.white,
-                        radius: 30.sp,
+                        radius: 20.sp,
                         child: Image.asset(
                           "assets/images/ic_download.png",
                           fit: BoxFit.cover,
@@ -399,7 +401,7 @@ class HomeView extends GetView<HomeController> {
                       SizedBox(
                         // width: Get.width * 0.20,
                         child: Text(
-                          "Shift Detail",
+                          "Shift Details",
                           overflow: TextOverflow.visible,
                           textAlign: TextAlign.center,
                           style: Theme.of(Get.context!).textTheme.bodySmall,
@@ -430,7 +432,7 @@ class HomeView extends GetView<HomeController> {
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 30.sp,
+                        radius: 20.sp,
                         backgroundColor: Colors.white,
                         child: Image.asset("assets/images/ic_payment.png"),
                       ),
@@ -465,7 +467,7 @@ class HomeView extends GetView<HomeController> {
                     // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 30.sp,
+                        radius: 20.sp,
                         backgroundColor: Colors.white,
                         child: Image.asset("assets/images/ic_printer.png"),
                       ),

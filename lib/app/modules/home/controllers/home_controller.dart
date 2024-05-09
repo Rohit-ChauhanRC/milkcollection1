@@ -4,11 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
-import 'package:milkcollection/app/modules/collectmilk/controllers/collectmilk_controller.dart';
-import 'dart:convert';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:milkcollection/app/data/models/ratechart_model.dart';
 
@@ -67,6 +65,14 @@ class HomeController extends GetxController {
   final RxString _quantity = "".obs;
   String get quantity => _quantity.value;
   set quantity(String i) => _quantity.value = i;
+
+  final RxString _printSummaryData = "".obs;
+  String get printSummaryData => _printSummaryData.value;
+  set printSummaryData(String i) => _printSummaryData.value = i;
+
+  final RxBool _printStatus = false.obs;
+  bool get printStatus => _printStatus.value;
+  set printStatus(bool b) => _printStatus.value = b;
 
   @override
   void onInit() async {
@@ -223,10 +229,12 @@ class HomeController extends GetxController {
   }
 
   Future<void> printerConnection(String ip) async {
-    final ip = InternetAddress.anyIPv4;
+    // final ip = InternetAddress.anyIPv4;
     try {
       final server = await ServerSocket.bind(ip, 8883);
       server.listen((event) {
+        // socket = event;
+
         printerSocketConnection(event);
       });
     } catch (e) {
@@ -275,13 +283,20 @@ class HomeController extends GetxController {
   }
 
   void printerSocketConnection(Socket client) {
+    // client.write("object");
+
     client.listen(
       (Uint8List data) {
         final message = String.fromCharCodes(data);
 
-        print(message);
-        // client.write("object");
-        socket = client;
+        print("message:$message");
+        print("printer");
+
+        if (printStatus) {
+          client.write(printSummaryData);
+          printStatus = false;
+        }
+        // client.write("Santram");
         // printer = client;
       },
       onError: (error) {
@@ -299,7 +314,7 @@ class HomeController extends GetxController {
       (Uint8List data) {
         final message = String.fromCharCodes(data);
 
-        quantity = message.replaceAll("N", "");
+        quantity = message.replaceAll("N", "").toString().replaceAll("n", "");
         // collectmilkController.quantity = message.replaceAll("N", "");
         print(message);
         print(quantity);
@@ -314,46 +329,20 @@ class HomeController extends GetxController {
     );
   }
 
-  void prinntData() {
-    String string_tobesend = "***Maklife Producer Company Ltd***" +
-        "\n\n" +
-        "Date  :  " +
-        "ManDate" +
-        "\n" +
-        "Time  :  " +
-        "Shift" +
-        "\n" +
-        "FarmerName    :     " +
-        "farmername.getText().toString()" +
-        "\n" +
-        "Farmer Id     :     " +
-        "farmer_id.getText().toString()" +
-        "\n" +
-        "Fat           :     " +
-        "fat.getText().toString()" +
-        "\n" +
-        "Snf           :     " +
-        "snf.getText().toString()" +
-        "\n" +
-        "Milk Type     :     " +
-        "type" +
-        "\n" +
-        "Weight        :     " +
-        "weight.getText().toString() " +
-        "\n" +
-        "Price         :     " +
-        "unit_price.getText().toString()" +
-        "\n" +
-        "Amount        :     " +
-        "amount.getText().toString()" +
-        "\n" +
-        "          " +
-        "\n" +
-        "            " +
-        "          \n" +
-        "          \n" +
-        "       \n" +
-        "               \n" +
-        "           \n";
+  printData({
+    required String farmerName,
+    required String shift,
+    required String getFarmerId,
+    required String fat1,
+    required String snf1,
+    required String quantity1,
+    required String milkType,
+    required String price,
+    required String totalAmount,
+  }) async {
+    printSummaryData =
+        "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  $shift\nFarmerName    :     $farmerName\nFarmer Id     :     $getFarmerId\nFat           :     $fat1\nSnf           :     $snf1\nMilk Type     :     $milkType\nWeight        :     $quantity1\nPrice         :     $price\nAmount        :     $totalAmount\n          \n                      \n          \n       \n               \n           \n";
+    printStatus = true;
+    // homeController.socket!.write("collectionPrint");
   }
 }
