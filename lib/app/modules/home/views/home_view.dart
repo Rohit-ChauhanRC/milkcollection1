@@ -27,7 +27,8 @@ class HomeView extends GetView<HomeController> {
               //   height: 20.h,
               // ),
               Container(
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.only(
+                    top: 5, left: 20, right: 20, bottom: 5),
                 child: Row(
                   children: [
                     const Icon(
@@ -86,48 +87,61 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               Container(
-                margin: const EdgeInsets.all(15),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                  color: AppColors.white,
+                  width: 2,
+                )),
+                child: Column(
                   children: [
-                    intrinsicWidget(
-                        title1: "Tot Milk",
-                        value1: "0.0",
-                        title2: "Avg Fat",
-                        value2: "0.0",
-                        title3: "Avg SNF",
-                        value3: "0.0"),
+                    Container(
+                      // margin: const EdgeInsets.all(15),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          intrinsicWidget(
+                              title1: "Tot Milk",
+                              value1: "0.0",
+                              title2: "Avg Fat",
+                              value2: "0.0",
+                              title3: "Avg SNF",
+                              value3: "0.0"),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      color: AppColors.white,
+                      thickness: 2,
+                    ),
+                    Container(
+                      // margin: const EdgeInsets.all(15),
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          intrinsicWidget(
+                              title1: "Avg Milk",
+                              value1: "0.0",
+                              title2: "Avg Price",
+                              value2: "0.0",
+                              title3: "Avg Amt",
+                              value3: "0.0"),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const Divider(
-                color: AppColors.white,
-                thickness: 2,
+              const SizedBox(
+                height: 10,
               ),
-              Container(
-                margin: const EdgeInsets.all(15),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    intrinsicWidget(
-                        title1: "Avg Milk",
-                        value1: "0.0",
-                        title2: "Avg Price",
-                        value2: "0.0",
-                        title3: "Avg Amt",
-                        value3: "0.0"),
-                  ],
-                ),
-              ),
-
               Container(
                 padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.all(20),
+                // margin: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(10),
+                  // borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: AppColors.card,
                   ),

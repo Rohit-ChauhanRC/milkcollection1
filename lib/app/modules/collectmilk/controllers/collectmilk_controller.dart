@@ -730,7 +730,7 @@ class CollectmilkController extends GetxController {
 
   Future<void> sendCollection() async {
     await printData();
-    await sendMessage();
+    await checkSmsFlag();
 
     Map<String, dynamic> _body = {
       "Collection_Date":
@@ -768,6 +768,7 @@ class CollectmilkController extends GetxController {
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
         Utils.showSnackbar("accepted!");
         await getCollectionThirtyDaysData();
+        emptyData();
       } else {
         await accept();
       }
@@ -812,6 +813,8 @@ class CollectmilkController extends GetxController {
   }
 
   void emptyData() {
+    // _farmerId.close();
+    farmerId = "";
     printD = true;
     fat.clear();
     snf.clear();
@@ -826,6 +829,8 @@ class CollectmilkController extends GetxController {
     homeController.snf = "";
     homeController.water = "";
     homeController.quantity = "";
+    _farmerId.value = farmerId;
+    update();
   }
 
   printData() async {
@@ -843,6 +848,16 @@ class CollectmilkController extends GetxController {
       snf1: !check ? snf.text : homeController.snf,
       totalAmount: totalAmount,
     );
+  }
+
+  Future<void> checkSmsFlag() async {
+    // http://Payment.maklife.in:9019/api/getsmsflag
+    var res = await http.post(Uri.parse("$baseUrlConst/getsmsflag"), body: {
+      "CenterId": box.read(centerIdConst),
+    });
+    if (res.statusCode == 200 && jsonDecode(res.body) == "Y") {
+      await sendMessage();
+    }
   }
 
   Future<void> sendMessage() async {

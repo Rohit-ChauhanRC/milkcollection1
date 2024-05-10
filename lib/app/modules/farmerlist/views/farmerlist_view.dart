@@ -56,7 +56,8 @@ class FarmerlistView extends GetView<FarmerlistController> {
 
             Obx(
               () => Container(
-                  margin: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(
+                      top: 0, bottom: 20, left: 20, right: 20),
                   height: Get.height * 0.7,
                   // color: Colors.amber,
                   child: ListView.builder(
@@ -70,7 +71,7 @@ class FarmerlistView extends GetView<FarmerlistController> {
                               borderRadius: BorderRadius.circular(10)),
                           padding: const EdgeInsets.all(5),
                           margin: const EdgeInsets.symmetric(vertical: 10),
-                          child: ListTile(
+                          child: InkWell(
                             onTap: () {
                               Get.toNamed(Routes.FARMER, arguments: [
                                 true,
@@ -80,28 +81,45 @@ class FarmerlistView extends GetView<FarmerlistController> {
                                         .farmerData[i].farmerId
                               ]);
                             },
-                            title: Text(
-                              controller.searchActive
-                                  ? controller.searchfarmerData[i].farmerName!
-                                  : controller.pinverifyController.farmerData[i]
-                                      .farmerName!,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            subtitle: Text(
-                              controller.searchActive
-                                  ? controller.searchfarmerData[i].farmerId
-                                      .toString()
-                                  : controller.pinverifyController.farmerData[i]
-                                      .farmerId
-                                      .toString(),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            trailing: InkWell(
-                              onTap: () {},
-                              child: const Icon(
-                                Icons.settings,
-                                color: AppColors.white,
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Text(
+                                      controller.searchActive
+                                          ? controller
+                                              .searchfarmerData[i].farmerName!
+                                          : controller.pinverifyController
+                                              .farmerData[i].farmerName!,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    Text(
+                                      controller.searchActive
+                                          ? controller
+                                              .searchfarmerData[i].farmerId
+                                              .toString()
+                                          : controller.pinverifyController
+                                              .farmerData[i].farmerId
+                                              .toString(),
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                                InkWell(
+                                  onTap: () {},
+                                  child: const Icon(
+                                    Icons.settings,
+                                    color: AppColors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );

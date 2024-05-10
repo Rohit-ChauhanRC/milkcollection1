@@ -127,7 +127,7 @@ class FarmerDB {
   }
 
   Future<int> update({
-    required int calculationsID,
+    int? calculationsID,
     int? farmerId,
     String? farmerName,
     String? bankName,

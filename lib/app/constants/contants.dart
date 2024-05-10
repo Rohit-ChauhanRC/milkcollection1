@@ -15,3 +15,4 @@ const String manualConst = "Manual";
 const String autoConst = "Auto";
 const String dailyCollection = "DailyCollection";
 const String calculationsId = "calculationsId";
+const String getsmsflag = "getsmsflag";

@@ -35,6 +35,7 @@ class TextFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+        // key: UniqueKey(),
         controller: textController,
         validator: validator,
         initialValue: initialValue,

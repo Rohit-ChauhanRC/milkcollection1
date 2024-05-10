@@ -79,7 +79,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   Obx(() => Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          controller.farmerData.farmerName ?? "",
+                          controller.farmerId.isNotEmpty
+                              ? controller.farmerData.farmerName.toString()
+                              : "",
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )),
@@ -150,7 +152,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   Obx(() => Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "${controller.farmerData.farmerId ?? ""}",
+                          "${controller.farmerId.isNotEmpty ? controller.farmerData.farmerId : ""}",
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )),
@@ -576,8 +578,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
                 child: ElevatedButton(
                   onPressed: () {
-                    // controller.emptyData();
-                    controller.sendMessage();
+                    controller.emptyData();
+                    // controller.sendMessage();
                     // controller.printData();
                   },
                   style: ElevatedButton.styleFrom(

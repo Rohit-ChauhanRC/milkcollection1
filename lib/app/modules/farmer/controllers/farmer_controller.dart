@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
+import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:milkcollection/app/modules/farmerlist/controllers/farmerlist_controller.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 
@@ -16,6 +17,8 @@ class FarmerController extends GetxController {
   GlobalKey<FormState> farmerFormKey = GlobalKey();
 
   final FarmerlistController farmerlistController = FarmerlistController();
+
+  final FarmerDB farmerDB = FarmerDB();
 
   final RxList<ConnectivityResult> _connectionStatus =
       [ConnectivityResult.none].obs;
@@ -80,13 +83,17 @@ class FarmerController extends GetxController {
   bool get circularProgress => _circularProgress.value;
   set circularProgress(bool v) => _circularProgress.value = v;
 
+  final Rx<FarmerListModel> _farmerData = (FarmerListModel()).obs;
+  FarmerListModel get farmerData => _farmerData.value;
+  set farmerData(FarmerListModel lst) => _farmerData.value = lst;
+
   @override
   void onInit() async {
     super.onInit();
     type = Get.arguments[0];
-    print("arguments: ${Get.arguments}");
     if (Get.arguments[0] == true) {
       title = "Farmer Detail";
+      await getFarmerById();
     } else {
       title = "Add Farmer";
     }
@@ -105,6 +112,22 @@ class FarmerController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getFarmerById() async {
+    await farmerDB.fetchById(Get.arguments[1].toString()).then((value) {
+      farmerName = value.farmerName!;
+      bankName = value.bankName!;
+      branchName = value.branchName!;
+      accountNumber = value.accountName!;
+      ifscCode = value.ifscCode!;
+      aadharCard = value.aadharCardNo!;
+      mobileNumber = value.mobileNumber!;
+      numberOfCows = value.noOfCows.toString();
+      numberOfBuffalo = value.noOfBuffalos.toString();
+      address = value.address!;
+      radio = value.modeOfPay!;
+    });
   }
 
   Future<void> addFarmer() async {
@@ -206,5 +229,20 @@ class FarmerController extends GetxController {
       });
     }
     Get.back();
+  }
+
+  Future<void> localFarmerUpdate() async {
+    await farmerDB
+        .update(
+            address: address,
+            aadharCardNo: aadharCard,
+            mobileNumber: mobileNumber,
+            noOfBuffalos: int.parse(numberOfBuffalo),
+            noOfCows: int.parse(numberOfCows),
+            modeOfPay: radio)
+        .then((value) {
+      Utils.showSnackbar("Farmer details saved..");
+      Get.back();
+    });
   }
 }
