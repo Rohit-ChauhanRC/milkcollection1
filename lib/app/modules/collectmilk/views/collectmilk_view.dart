@@ -234,7 +234,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 // readOnly: controller.check,
-                                // initialValue: controller.fat.text,
+                                initialValue: controller.fat.text,
                                 label: "Please enter fat...",
                                 textController: controller.fat,
                                 onChanged: (e) async {
@@ -286,7 +286,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 // readOnly: controller.check,
-                                // initialValue: controller.snf,
+                                initialValue: controller.snf.text,
                                 label: "Please enter FarmerId...",
                                 // onChanged: onChanged2,
                                 textController: controller.snf,
@@ -335,7 +335,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 readOnly: controller.check,
-                                // initialValue: controller.water,
+                                initialValue: controller.water.text,
                                 label: "Please enter FarmerId...",
                                 // onChanged: onChanged3,
                                 // onChanged: (e) {
@@ -395,7 +395,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 readOnly: controller.check,
-                                // initialValue: controller.quantity,
+                                initialValue: controller.quantity.text,
                                 label: "Please enter fat...",
                                 textController: controller.quantity,
                                 onChanged: (e) {

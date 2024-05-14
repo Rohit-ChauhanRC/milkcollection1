@@ -13,7 +13,9 @@ class AppTheme {
     final textTheme = themeData.textTheme;
 
     return ThemeData(
+        scaffoldBackgroundColor: Color(0xffAF8260),
         fontFamily: "Nunito",
+        useMaterial3: true,
         textTheme: textTheme.copyWith(
             bodyLarge: const TextStyle(
               color: AppColors.white,
@@ -54,6 +56,11 @@ class AppTheme {
             labelMedium: const TextStyle(
               color: AppColors.black,
               fontSize: AppDimens.font14,
+              fontWeight: FontWeight.bold,
+            ),
+            titleSmall: const TextStyle(
+              color: AppColors.white,
+              fontSize: AppDimens.font12,
               fontWeight: FontWeight.bold,
             )),
         colorScheme: const ColorScheme.light(
@@ -129,6 +136,27 @@ class AppTheme {
           ),
         ),
         drawerTheme: DrawerThemeData(
-            backgroundColor: AppColors.blueDark.withOpacity(0.7)));
+          backgroundColor: AppColors.blueDark.withOpacity(0.7),
+        ),
+        datePickerTheme: const DatePickerThemeData(
+          dayStyle: TextStyle(
+            color: AppColors.black,
+            fontSize: AppDimens.font10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 5,
+          ),
+          weekdayStyle: TextStyle(
+            color: AppColors.black,
+            fontSize: AppDimens.font10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 5,
+          ),
+          yearStyle: TextStyle(
+            color: AppColors.black,
+            fontSize: AppDimens.font10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 5,
+          ),
+        ));
   }
 }

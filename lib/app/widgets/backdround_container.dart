@@ -14,16 +14,16 @@ class BackgroundContainer extends StatelessWidget {
     return Container(
       height: Get.height,
       width: Get.width,
-      decoration: BoxDecoration(
-          image: DecorationImage(
-              // alignment: Alignment.topCenter,
-              fit: BoxFit.cover,
-              image: Image.asset(
-                "assets/images/background.jpg",
-                fit: BoxFit.fill,
-                alignment: Alignment.topCenter,
-                scale: 1,
-              ).image)),
+      // decoration: BoxDecoration(
+      //     image: DecorationImage(
+      //         // alignment: Alignment.topCenter,
+      //         fit: BoxFit.cover,
+      //         image: Image.asset(
+      //           "assets/images/background.jpg",
+      //           fit: BoxFit.fill,
+      //           alignment: Alignment.topCenter,
+      //           scale: 1,
+      //         ).image)),
       child: child,
     );
   }

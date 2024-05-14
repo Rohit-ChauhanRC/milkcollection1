@@ -6,7 +6,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
+import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
+import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:milkcollection/app/data/models/ratechart_model.dart';
 
@@ -15,9 +17,7 @@ class HomeController extends GetxController {
   final box = GetStorage();
 
   final RateChartDB rateChartDB = RateChartDB();
-
-  // final CollectmilkController collectmilkController =
-  //     Get.put(CollectmilkController());
+  final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
 
   ProgressDialog pd = ProgressDialog(context: Get.context);
 
@@ -29,18 +29,9 @@ class HomeController extends GetxController {
   List<RatechartModel> get rateChartData => _rateChartData;
   set rateChartData(List<RatechartModel> lst) => _rateChartData.assignAll(lst);
 
-  // late Socket analyzer;
-  Socket? socket;
-  // Socket get analyzer => _analyzer.value;
-  // set analyzer(Socket ss) => _analyzer.value = ss;
-
-  // late Rx<Socket> _printer;
-  // Socket get printer => _printer.value;
-  // set printer(Socket ss) => _printer.value = ss;
-
-  // late Rx<Socket> _weighing;
-  // Socket get weighing => _weighing.value;
-  // set weighing(Socket ss) => _weighing.value = ss;
+  final RxString _fromDate = "${DateTime.now()}".obs;
+  String get fromDate => _fromDate.value;
+  set fromDate(String str) => _fromDate.value = str;
 
   final RxString _ip = "".obs;
   String get ip => _ip.value;
@@ -74,6 +65,12 @@ class HomeController extends GetxController {
   bool get printStatus => _printStatus.value;
   set printStatus(bool b) => _printStatus.value = b;
 
+  final RxList<MilkCollectionModel> _milkCollectionData =
+      RxList<MilkCollectionModel>();
+  List<MilkCollectionModel> get milkCollectionData => _milkCollectionData;
+  set milkCollectionData(List<MilkCollectionModel> lst) =>
+      _milkCollectionData.assignAll(lst);
+
   @override
   void onInit() async {
     super.onInit();
@@ -88,7 +85,7 @@ class HomeController extends GetxController {
         pd.close();
       });
     });
-
+    await fetchMilkCollection();
     await checkIp();
   }
 
@@ -344,5 +341,17 @@ class HomeController extends GetxController {
         "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  $shift\nFarmerName    :     $farmerName\nFarmer Id     :     $getFarmerId\nFat           :     $fat1\nSnf           :     $snf1\nMilk Type     :     $milkType\nWeight        :     $quantity1\nPrice         :     $price\nAmount        :     $totalAmount\n          \n                      \n          \n       \n               \n           \n";
     printStatus = true;
     // homeController.socket!.write("collectionPrint");
+  }
+
+  // fetchByDate
+  Future<void> fetchMilkCollectionDateWise() async {
+    milkCollectionData.assignAll(await milkCollectionDB.fetchByDate(
+        DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
+        radio == 1 ? "Am" : "Pm"));
+    print(milkCollectionData);
+  }
+
+  Future<void> fetchMilkCollection() async {
+    milkCollectionData.assignAll(await milkCollectionDB.fetchAll());
   }
 }

@@ -78,7 +78,7 @@ class Utils {
       );
   static void showDialogManualPin({
     Function()? onTap,
-    String? initialValue,
+    required String initialValue,
   }) =>
       Get.defaultDialog(
         barrierDismissible: false,

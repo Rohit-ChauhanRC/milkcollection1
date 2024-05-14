@@ -9,7 +9,7 @@ class TextFormWidget extends StatelessWidget {
     this.label,
     this.keyboardType,
     this.readOnly = false,
-    this.initialValue,
+    required this.initialValue,
     this.validator,
     this.textController,
     this.suffix = false,
@@ -24,7 +24,7 @@ class TextFormWidget extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool readOnly;
   final bool suffix;
-  final String? initialValue;
+  final String initialValue;
   final String? Function(String?)? validator;
   final TextEditingController? textController;
   final int? maxLength;
@@ -35,6 +35,7 @@ class TextFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+        // focusNode: FocusNode(),
         // key: UniqueKey(),
         controller: textController,
         validator: validator,

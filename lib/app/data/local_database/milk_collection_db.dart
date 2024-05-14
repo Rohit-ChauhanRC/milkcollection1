@@ -128,6 +128,17 @@ class MilkCollectionDB {
         farmer.isNotEmpty ? farmer.first : <String, dynamic>{});
   }
 
+  Future<Iterable<MilkCollectionModel>> fetchByDate(
+      String from, String shift) async {
+    final database = await DataBaseService().database;
+    final products = await database.rawQuery('''
+        SELECT * from $tableName WHERE Collection_Date ==? AND Shift == ?
+      
+      ''', [from, shift]);
+    print(products.toSet());
+    return products.map((e) => MilkCollectionModel.fromMap(e)).toList();
+  }
+
   Future<int> update({
     required int calculationsID,
     int? farmerId,

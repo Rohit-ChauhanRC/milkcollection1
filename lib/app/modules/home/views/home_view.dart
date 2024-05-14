@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
+import 'package:milkcollection/app/theme/app_dimens.dart';
+import 'package:milkcollection/app/widgets/date_time_picker.dart';
 
 import '../../../widgets/backdround_container.dart';
 import '../controllers/home_controller.dart';
@@ -23,20 +26,64 @@ class HomeView extends GetView<HomeController> {
         child: BackgroundContainer(
           child: Column(
             children: [
-              // SizedBox(
-              //   height: 20.h,
-              // ),
               Container(
                 margin: const EdgeInsets.only(
                     top: 5, left: 20, right: 20, bottom: 5),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.calendar_month_outlined,
-                      color: AppColors.white,
+                    InkWell(
+                      onTap: () async {
+                        showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2101),
+                          initialEntryMode: DatePickerEntryMode.calendarOnly,
+                        ).then((selectedDate) async {
+                          controller.fromDate = selectedDate!.toIso8601String();
+                          print(controller.fromDate);
+
+                          await controller.fetchMilkCollectionDateWise();
+
+                          // After selecting the date, display the time picker.
+                          if (selectedDate != null) {
+                            // DateTime selectedDateTime = DateTime(
+                            //   selectedDate.year,
+                            //   selectedDate.month,
+                            //   selectedDate.day,
+                            // );
+
+                            // showTimePicker(
+
+                            //   context: context,
+                            //   initialTime: TimeOfDay.now(),
+                            // ).then((selectedTime) {
+                            //   // Handle the selected date and time here.
+                            //   if (selectedTime != null) {
+                            //     DateTime selectedDateTime = DateTime(
+                            //       selectedDate.year,
+                            //       selectedDate.month,
+                            //       selectedDate.day,
+                            //       selectedTime.hour,
+                            //       selectedTime.minute,
+                            //     );
+                            //     print(
+                            //         selectedDateTime); // You can use the selectedDateTime as needed.
+                            //   }
+                            // });
+                          }
+                        });
+                      },
+                      child: const Icon(
+                        Icons.calendar_month_outlined,
+                        color: AppColors.white,
+                      ),
                     ),
-                    Text(
-                        "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}"),
+                    Obx(() => Text(
+                          DateFormat("dd-MMM-yyyy")
+                              .format(DateTime.parse(controller.fromDate)),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        )),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -49,11 +96,15 @@ class HomeView extends GetView<HomeController> {
                                 onChanged: (int? i) {
                                   print(i);
                                   controller.radio = i!;
+                                  controller.fetchMilkCollectionDateWise();
                                 },
                               ),
                             )),
                         InkWell(
-                          child: const Text("AM"),
+                          child: Text(
+                            "AM",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           onTap: () {
                             controller.radio = 1;
                           },
@@ -72,11 +123,15 @@ class HomeView extends GetView<HomeController> {
                                 onChanged: (int? i) {
                                   print(i);
                                   controller.radio = i!;
+                                  controller.fetchMilkCollectionDateWise();
                                 },
                               ),
                             )),
                         InkWell(
-                          child: const Text("PM"),
+                          child: Text(
+                            "PM",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           onTap: () {
                             controller.radio = 2;
                           },
@@ -137,10 +192,10 @@ class HomeView extends GetView<HomeController> {
                 height: 10,
               ),
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(10),
                 // margin: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: AppColors.button.withOpacity(0.3),
                   // borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: AppColors.card,
@@ -148,6 +203,44 @@ class HomeView extends GetView<HomeController> {
                 ),
                 child: cardWidget(),
               ),
+              const SizedBox(
+                height: 10,
+              ),
+              Obx(() => controller.milkCollectionData.isNotEmpty
+                  ? Container(
+                      height: Get.height * 0.35,
+                      child: ListView.builder(
+                          itemCount: controller.milkCollectionData.length,
+                          itemBuilder: (ctx, i) {
+                            return collectionTable(
+                              amtV: controller.milkCollectionData[i].totalAmt
+                                  .toString(),
+                              fId: controller.milkCollectionData[i].farmerId
+                                  .toString(),
+                              fNmae: controller.milkCollectionData[i].farmerName
+                                  .toString(),
+                              fatV: controller.milkCollectionData[i].fat
+                                  .toString(),
+                              miltType: controller
+                                  .milkCollectionData[i].milkType
+                                  .toString(),
+                              priceV: controller
+                                  .milkCollectionData[i].ratePerLiter
+                                  .toString(),
+                              qtyV: controller.milkCollectionData[i].qty!
+                                  .toDouble()
+                                  .ceil()
+                                  .toString(),
+                              snfV: controller.milkCollectionData[i].snf
+                                  .toString(),
+                              waterV: controller
+                                  .milkCollectionData[i].addedWater
+                                  .toString(),
+                            );
+                          }),
+                    )
+                  : const SizedBox()),
+              // collectionTable()
             ],
           ),
         ),
@@ -270,27 +363,21 @@ class HomeView extends GetView<HomeController> {
   Widget cardWidget() {
     return Column(
       // mainAxisAlignment: MainAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.center,
+      // crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         IntrinsicHeight(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
                 onTap: () async {
-                  // await controller.getRaateChart("C").then((value) async {
-                  //   await controller.getRaateChart("B").then((value) async {
-                  //     controller.pd.close();
                   Get.toNamed(
                     Routes.COLLECTMILK,
                   );
-                  // });
-                  // });
                 },
                 child: SizedBox(
                   width: Get.width * 0.19,
                   child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
                         radius: 20.sp,
@@ -303,7 +390,13 @@ class HomeView extends GetView<HomeController> {
                           "Collect Milk",
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -327,8 +420,6 @@ class HomeView extends GetView<HomeController> {
                 child: SizedBox(
                   width: Get.width * 0.19,
                   child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
                         radius: 20.sp,
@@ -341,7 +432,13 @@ class HomeView extends GetView<HomeController> {
                           "Farmer",
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -376,7 +473,13 @@ class HomeView extends GetView<HomeController> {
                           "Rate Chart",
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -392,6 +495,7 @@ class HomeView extends GetView<HomeController> {
         ),
         IntrinsicHeight(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
                 onTap: () {
@@ -400,11 +504,8 @@ class HomeView extends GetView<HomeController> {
                 child: SizedBox(
                   width: Get.width * 0.19,
                   child: Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
-                    // crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        // foregroundColor: Colors.transparent,
                         backgroundColor: Colors.white,
                         radius: 20.sp,
                         child: Image.asset(
@@ -418,7 +519,13 @@ class HomeView extends GetView<HomeController> {
                           "Shift Details",
                           overflow: TextOverflow.visible,
                           textAlign: TextAlign.center,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -456,7 +563,13 @@ class HomeView extends GetView<HomeController> {
                           "Payment",
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -488,10 +601,16 @@ class HomeView extends GetView<HomeController> {
                       SizedBox(
                         // width: Get.width * 0.20,
                         child: Text(
-                          "Print\nSummary",
+                          "Print Summary",
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.visible,
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                          style: Theme.of(Get.context!)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                fontSize: AppDimens.font12,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ),
                     ],
@@ -502,6 +621,247 @@ class HomeView extends GetView<HomeController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget collectionTable({
+    required String fNmae,
+    required String fId,
+    required String miltType,
+    required String fatV,
+    required String snfV,
+    required String waterV,
+    required String qtyV,
+    required String priceV,
+    required String amtV,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                color: AppColors.button.withOpacity(0.5),
+                border: const Border(
+                  top: BorderSide(
+                    color: AppColors.white,
+                    width: 2,
+                  ),
+                  left: BorderSide(
+                    color: AppColors.white,
+                    width: 2,
+                  ),
+                  right: BorderSide(
+                    color: AppColors.white,
+                    width: 2,
+                  ),
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                  bottomLeft: Radius.zero,
+                  bottomRight: Radius.zero,
+                )),
+            padding: const EdgeInsets.all(5),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    fNmae,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    style: Theme.of(Get.context!).textTheme.titleSmall,
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+                  Text(
+                    fId,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    style: Theme.of(Get.context!).textTheme.titleSmall,
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+                  Text(
+                    miltType,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.visible,
+                    style: Theme.of(Get.context!).textTheme.titleSmall,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: AppColors.brown,
+                border: Border.all(
+                  color: AppColors.white,
+                  width: 2,
+                )),
+            padding: const EdgeInsets.all(5),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        "Fat",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        fatV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+                  // SizedBox(
+                  //   width: 10.w,
+                  // ),
+                  Column(
+                    children: [
+                      Text(
+                        "Snf",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        snfV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+
+                  Column(
+                    children: [
+                      Text(
+                        "Water(%)",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        waterV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        "Qty",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        qtyV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+
+                  Column(
+                    children: [
+                      Text(
+                        "Price",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        priceV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                  const VerticalDivider(
+                    color: AppColors.white,
+                    thickness: 2,
+                  ),
+
+                  Column(
+                    children: [
+                      Text(
+                        "Amt",
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!)
+                            .textTheme
+                            .titleSmall!
+                            .copyWith(color: AppColors.black),
+                      ),
+                      Text(
+                        amtV,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.visible,
+                        style: Theme.of(Get.context!).textTheme.titleSmall,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

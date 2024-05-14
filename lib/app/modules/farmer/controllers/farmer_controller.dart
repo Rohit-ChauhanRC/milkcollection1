@@ -14,7 +14,8 @@ import 'package:milkcollection/app/utils/utils.dart';
 
 class FarmerController extends GetxController {
   //
-  GlobalKey<FormState> farmerFormKey = GlobalKey();
+  GlobalKey<FormState>? farmerFormKey = GlobalKey<FormState>();
+  final FocusNode myFocusNode = FocusNode();
 
   final FarmerlistController farmerlistController = FarmerlistController();
 
@@ -26,6 +27,10 @@ class FarmerController extends GetxController {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   final box = GetStorage();
+
+  final RxBool _progresBar = RxBool(true);
+  bool get progressBar => _progresBar.value;
+  set progressBar(bool b) => _progresBar.value = b;
 
   final RxBool _type = true.obs;
   bool get type => _type.value;
@@ -75,6 +80,8 @@ class FarmerController extends GetxController {
   String get address => _address.value;
   set address(String mob) => _address.value = mob;
 
+  TextEditingController address1 = TextEditingController();
+
   final RxInt _radio = 0.obs;
   int get radio => _radio.value;
   set radio(int i) => _radio.value = i;
@@ -92,10 +99,12 @@ class FarmerController extends GetxController {
     super.onInit();
     type = Get.arguments[0];
     if (Get.arguments[0] == true) {
+      // farmerFormKey.currentState!.reset();
       title = "Farmer Detail";
       await getFarmerById();
     } else {
       title = "Add Farmer";
+      progressBar = false;
     }
 
     _connectivitySubscription = _connectivity.onConnectivityChanged
@@ -105,28 +114,54 @@ class FarmerController extends GetxController {
   }
 
   @override
-  void onReady() {
+  void onReady() async {
     super.onReady();
+    if (Get.arguments[0] == true) {
+      title = "Farmer Detail";
+      await getFarmerById();
+    } else {
+      title = "Add Farmer";
+      progressBar = false;
+    }
   }
 
   @override
   void onClose() {
     super.onClose();
+    _aadharCard.close();
+    _accountNumber.close();
+    _address.close();
+    _bankName.close();
+    _branchName.close();
+    _circularProgress.close();
+    _connectionStatus.close();
+    _farmerData.close();
+    _farmerName.close();
+    _ifscCode.close();
+    _mobileNumber.close();
+    _numberOfBuffalo.close();
+    _numberOfCows.close();
+    _radio.close();
+    _title.close();
+    _type.close();
   }
 
   Future<void> getFarmerById() async {
     await farmerDB.fetchById(Get.arguments[1].toString()).then((value) {
-      farmerName = value.farmerName!;
-      bankName = value.bankName!;
-      branchName = value.branchName!;
-      accountNumber = value.accountName!;
-      ifscCode = value.ifscCode!;
-      aadharCard = value.aadharCardNo!;
-      mobileNumber = value.mobileNumber!;
+      farmerName = value.farmerName.toString();
+      bankName = value.bankName.toString();
+      branchName = value.branchName.toString();
+      accountNumber = value.accountName.toString();
+      ifscCode = value.ifscCode.toString();
+      aadharCard = value.aadharCardNo.toString();
+      mobileNumber = value.mobileNumber.toString();
       numberOfCows = value.noOfCows.toString();
       numberOfBuffalo = value.noOfBuffalos.toString();
-      address = value.address!;
+      address = value.address.toString();
       radio = value.modeOfPay!;
+      // address1.text = value.address.toString();
+    }).then((value) {
+      progressBar = false;
     });
   }
 

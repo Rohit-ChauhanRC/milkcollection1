@@ -8,6 +8,7 @@ import 'app/routes/app_pages.dart';
 import 'app/theme/app_theme.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   final box = GetStorage();
 

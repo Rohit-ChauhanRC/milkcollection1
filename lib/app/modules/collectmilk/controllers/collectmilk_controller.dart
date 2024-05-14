@@ -830,6 +830,7 @@ class CollectmilkController extends GetxController {
     homeController.water = "";
     homeController.quantity = "";
     _farmerId.value = farmerId;
+    Get.back();
     update();
   }
 
