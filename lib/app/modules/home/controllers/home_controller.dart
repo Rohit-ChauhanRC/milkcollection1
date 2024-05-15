@@ -71,6 +71,34 @@ class HomeController extends GetxController {
   set milkCollectionData(List<MilkCollectionModel> lst) =>
       _milkCollectionData.assignAll(lst);
 
+  final RxDouble _totalMilk = 0.0.obs;
+  double get totalMilk => _totalMilk.value;
+  set totalMilk(double i) => _totalMilk.value = i;
+
+  final RxInt _totalQty = 0.obs;
+  int get totalQty => _totalQty.value;
+  set totalQty(int i) => _totalQty.value = i;
+
+  final RxDouble _totalFat = 0.0.obs;
+  double get totalFat => _totalFat.value;
+  set totalFat(double i) => _totalFat.value = i;
+
+  final RxDouble _totalWater = 0.0.obs;
+  double get totalWater => _totalWater.value;
+  set totalWater(double i) => _totalWater.value = i;
+
+  final RxDouble _totalPrice = 0.0.obs;
+  double get totalPrice => _totalPrice.value;
+  set totalPrice(double i) => _totalPrice.value = i;
+
+  final RxDouble _totalSnf = 0.0.obs;
+  double get totalSnf => _totalSnf.value;
+  set totalSnf(double i) => _totalSnf.value = i;
+
+  final RxDouble _totalAmt = 0.0.obs;
+  double get totalAmt => _totalAmt.value;
+  set totalAmt(double i) => _totalAmt.value = i;
+
   @override
   void onInit() async {
     super.onInit();
@@ -85,7 +113,7 @@ class HomeController extends GetxController {
         pd.close();
       });
     });
-    await fetchMilkCollection();
+    await fetchMilkCollectionDateWise();
     await checkIp();
   }
 
@@ -345,10 +373,30 @@ class HomeController extends GetxController {
 
   // fetchByDate
   Future<void> fetchMilkCollectionDateWise() async {
+    totalAmt = 0.0;
+    totalFat = 0.0;
+    totalMilk = 0;
+    totalPrice = 0.0;
+    totalQty = 0;
+    totalSnf = 0.0;
+    totalWater = 0.0;
+
     milkCollectionData.assignAll(await milkCollectionDB.fetchByDate(
         DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
         radio == 1 ? "Am" : "Pm"));
     print(milkCollectionData);
+    if (milkCollectionData.isNotEmpty) {
+      totalQty = milkCollectionData.length;
+      for (var i = 0; i < milkCollectionData.length; i++) {
+        //
+        totalMilk += milkCollectionData[i].qty!;
+        totalFat += milkCollectionData[i].fat! * milkCollectionData[i].qty!;
+        totalSnf += milkCollectionData[i].snf! * milkCollectionData[i].qty!;
+        totalWater += milkCollectionData[i].addedWater!;
+        totalPrice += milkCollectionData[i].ratePerLiter!;
+        totalAmt += milkCollectionData[i].totalAmt!;
+      }
+    }
   }
 
   Future<void> fetchMilkCollection() async {

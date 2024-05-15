@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
@@ -143,48 +144,78 @@ class HomeView extends GetView<HomeController> {
               ),
               Container(
                 decoration: BoxDecoration(
+                    // color: AppColors.brown,
                     border: Border.all(
                   color: AppColors.white,
                   width: 2,
                 )),
                 child: Column(
                   children: [
-                    Container(
-                      // margin: const EdgeInsets.all(15),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          intrinsicWidget(
-                              title1: "Tot Milk",
-                              value1: "0.0",
-                              title2: "Avg Fat",
-                              value2: "0.0",
-                              title3: "Avg SNF",
-                              value3: "0.0"),
-                        ],
-                      ),
-                    ),
+                    Obx(() => Container(
+                          // margin: const EdgeInsets.all(15),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              intrinsicWidget(
+                                  title1: "Tot. Milk",
+                                  value1: controller.totalMilk >= 1.0
+                                      ? controller.totalMilk.toString()
+                                      : "0.0",
+                                  title2: "Avg Fat",
+                                  value2: controller.totalFat >= 1.0 &&
+                                          controller.totalQty >= 1
+                                      ? (controller.totalFat /
+                                              controller.totalMilk)
+                                          .toPrecision(2)
+                                          .toString()
+                                      : "0.0",
+                                  title3: "Avg SNF",
+                                  value3: controller.totalQty >= 1 &&
+                                          controller.totalSnf >= 1.0
+                                      ? (controller.totalSnf /
+                                              controller.totalMilk)
+                                          .toPrecision(2)
+                                          .toString()
+                                      : "0.0"),
+                            ],
+                          ),
+                        )),
                     const Divider(
                       color: AppColors.white,
                       thickness: 2,
                     ),
-                    Container(
-                      // margin: const EdgeInsets.all(15),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          intrinsicWidget(
-                              title1: "Avg Milk",
-                              value1: "0.0",
-                              title2: "Avg Price",
-                              value2: "0.0",
-                              title3: "Avg Amt",
-                              value3: "0.0"),
-                        ],
-                      ),
-                    ),
+                    Obx(() => Container(
+                          // margin: const EdgeInsets.all(15),
+                          alignment: Alignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              intrinsicWidget(
+                                  title1: "Avg Water",
+                                  value1: controller.totalQty >= 1.0 &&
+                                          controller.totalQty >= 1
+                                      ? (controller.totalWater /
+                                              controller.totalQty)
+                                          .toPrecision(2)
+                                          .toString()
+                                      : "0.0",
+                                  title2: "Avg Price",
+                                  value2: controller.totalPrice >= 1.0
+                                      ? (controller.totalPrice /
+                                              controller.totalQty)
+                                          .toPrecision(2)
+                                          .toString()
+                                      : "0.0",
+                                  title3: "Tot. Amt",
+                                  value3: controller.totalAmt >= 1.0
+                                      ? controller.totalAmt
+                                          .toPrecision(2)
+                                          .toString()
+                                      : "0.0"),
+                            ],
+                          ),
+                        )),
                   ],
                 ),
               ),
@@ -261,13 +292,14 @@ class HomeView extends GetView<HomeController> {
         children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            // crossAxisAlignment: CrossAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: Get.width * 0.20,
                 child: Text(
                   title1.toString(),
                   overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
@@ -278,6 +310,9 @@ class HomeView extends GetView<HomeController> {
                 width: Get.width * 0.20,
                 child: Text(
                   value1.toString(),
+                  // textAlign: TextAlign.justify,
+                  textAlign: TextAlign.center,
+
                   overflow: TextOverflow.visible,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
@@ -296,13 +331,14 @@ class HomeView extends GetView<HomeController> {
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            // crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
                 width: Get.width * 0.20,
                 child: Text(
                   title2.toString(),
                   overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
@@ -313,6 +349,7 @@ class HomeView extends GetView<HomeController> {
                 width: Get.width * 0.20,
                 child: Text(
                   value2.toString(),
+                  textAlign: TextAlign.center,
                   overflow: TextOverflow.visible,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
@@ -338,6 +375,7 @@ class HomeView extends GetView<HomeController> {
                 child: Text(
                   title3.toString(),
                   overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
                 ),
               ),
@@ -351,6 +389,7 @@ class HomeView extends GetView<HomeController> {
                   value3.toString(),
                   overflow: TextOverflow.visible,
                   style: Theme.of(Get.context!).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],
@@ -394,7 +433,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -404,7 +443,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               SizedBox(
-                width: 10.w,
+                width: 17.w,
               ),
               const VerticalDivider(
                 color: AppColors.white,
@@ -418,7 +457,7 @@ class HomeView extends GetView<HomeController> {
                   Get.toNamed(Routes.FARMERLIST);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.15,
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -436,7 +475,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -450,7 +489,7 @@ class HomeView extends GetView<HomeController> {
                 thickness: 2,
               ),
               SizedBox(
-                width: 10.w,
+                width: 17.w,
               ),
               InkWell(
                 onTap: () {
@@ -477,7 +516,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -523,7 +562,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -533,7 +572,7 @@ class HomeView extends GetView<HomeController> {
                 ),
               ),
               SizedBox(
-                width: 10.w,
+                width: 17.w,
               ),
               const VerticalDivider(
                 color: AppColors.white,
@@ -547,7 +586,7 @@ class HomeView extends GetView<HomeController> {
                   // Get.toNamed(Routes.P);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.16,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -567,7 +606,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -581,7 +620,7 @@ class HomeView extends GetView<HomeController> {
                 thickness: 2,
               ),
               SizedBox(
-                width: 10.w,
+                width: 17.w,
               ),
               InkWell(
                 onTap: () {
@@ -608,7 +647,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: AppDimens.font12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -641,7 +680,7 @@ class HomeView extends GetView<HomeController> {
         children: [
           Container(
             decoration: BoxDecoration(
-                color: AppColors.button.withOpacity(0.5),
+                color: AppColors.button.withOpacity(0.3),
                 border: const Border(
                   top: BorderSide(
                     color: AppColors.white,
@@ -705,11 +744,11 @@ class HomeView extends GetView<HomeController> {
           ),
           Container(
             decoration: BoxDecoration(
-                color: AppColors.brown,
+                // color: AppColors.brown,
                 border: Border.all(
-                  color: AppColors.white,
-                  width: 2,
-                )),
+              color: AppColors.white,
+              width: 2,
+            )),
             padding: const EdgeInsets.all(5),
             child: IntrinsicHeight(
               child: Row(
