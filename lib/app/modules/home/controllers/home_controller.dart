@@ -9,8 +9,12 @@ import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/milk_collection_model.dart';
+import 'package:milkcollection/app/theme/app_colors.dart';
+import 'package:milkcollection/app/theme/app_dimens.dart';
+import 'package:milkcollection/app/widgets/text_form_widget.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:milkcollection/app/data/models/ratechart_model.dart';
+import 'package:flutter/material.dart';
 
 class HomeController extends GetxController {
   //
@@ -98,6 +102,91 @@ class HomeController extends GetxController {
   final RxDouble _totalAmt = 0.0.obs;
   double get totalAmt => _totalAmt.value;
   set totalAmt(double i) => _totalAmt.value = i;
+
+  final RxString _totalCowCan = "".obs;
+  String get totalCowCan => _totalCowCan.value;
+  set totalCowCan(String i) => _totalCowCan.value = i;
+
+  final RxString _totalBuffaloCan = "".obs;
+  String get totalBuffaloCan => _totalBuffaloCan.value;
+  set totalBuffaloCan(String i) => _totalBuffaloCan.value = i;
+
+  // cow
+  final RxDouble _totalMilkCow = 0.0.obs;
+  double get totalMilkCow => _totalMilkCow.value;
+  set totalMilkCow(double i) => _totalMilkCow.value = i;
+
+  final RxInt _totalQtyCow = 0.obs;
+  int get totalQtyCow => _totalQtyCow.value;
+  set totalQtyCow(int i) => _totalQtyCow.value = i;
+
+  final RxDouble _totalFatCow = 0.0.obs;
+  double get totalFatCow => _totalFatCow.value;
+  set totalFatCow(double i) => _totalFatCow.value = i;
+
+  final RxDouble _totalWaterCow = 0.0.obs;
+  double get totalWaterCow => _totalWaterCow.value;
+  set totalWaterCow(double i) => _totalWaterCow.value = i;
+
+  final RxDouble _totalPriceCow = 0.0.obs;
+  double get totalPriceCow => _totalPriceCow.value;
+  set totalPriceCow(double i) => _totalPriceCow.value = i;
+
+  final RxDouble _totalSnfCow = 0.0.obs;
+  double get totalSnfCow => _totalSnfCow.value;
+  set totalSnfCow(double i) => _totalSnfCow.value = i;
+
+  final RxDouble _totalAmtCow = 0.0.obs;
+  double get totalAmtCow => _totalAmtCow.value;
+  set totalAmtCow(double i) => _totalAmtCow.value = i;
+  // Buffallo
+  final RxDouble _totalMilkBuffallo = 0.0.obs;
+  double get totalMilkBuffallo => _totalMilkBuffallo.value;
+  set totalMilkBuffallo(double i) => _totalMilkBuffallo.value = i;
+
+  final RxInt _totalQtyBuffallo = 0.obs;
+  int get totalQtyBuffallo => _totalQtyBuffallo.value;
+  set totalQtyBuffallo(int i) => _totalQtyBuffallo.value = i;
+
+  final RxDouble _totalFatBuffallo = 0.0.obs;
+  double get totalFatBuffallo => _totalFatBuffallo.value;
+  set totalFatBuffallo(double i) => _totalFatBuffallo.value = i;
+
+  final RxDouble _totalWaterBuffallo = 0.0.obs;
+  double get totalWaterBuffallo => _totalWaterBuffallo.value;
+  set totalWaterBuffallo(double i) => _totalWaterBuffallo.value = i;
+
+  final RxDouble _totalPriceBuffallo = 0.0.obs;
+  double get totalPriceBuffallo => _totalPriceBuffallo.value;
+  set totalPriceBuffallo(double i) => _totalPriceBuffallo.value = i;
+
+  final RxDouble _totalSnfBuffallo = 0.0.obs;
+  double get totalSnfBuffallo => _totalSnfBuffallo.value;
+  set totalSnfBuffallo(double i) => _totalSnfBuffallo.value = i;
+
+  final RxDouble _totalAmtBuffallo = 0.0.obs;
+  double get totalAmtBuffallo => _totalAmtBuffallo.value;
+  set totalAmtBuffallo(double i) => _totalAmtBuffallo.value = i;
+
+  final RxList<String> _farmerPrintD = [""].obs;
+  List<String> get farmerPrintD => _farmerPrintD;
+  set farmerPrintD(List<String> str) => _farmerPrintD.assignAll(str);
+
+  final RxBool _printDetails = false.obs;
+  bool get printDetails => _printDetails.value;
+  set printDetails(bool b) => _printDetails.value = b;
+
+  final RxBool _printSummary = false.obs;
+  bool get printSummary => _printSummary.value;
+  set printSummary(bool b) => _printSummary.value = b;
+
+  final RxString _cowCans = "0".obs;
+  String get cowCans => _cowCans.value;
+  set cowCans(String b) => _cowCans.value = b;
+
+  final RxString _bufCans = "0".obs;
+  String get bufCans => _bufCans.value;
+  set bufCans(String b) => _bufCans.value = b;
 
   @override
   void onInit() async {
@@ -321,15 +410,24 @@ class HomeController extends GetxController {
           client.write(printSummaryData);
           printStatus = false;
         }
+
+        if (printDetails) {
+          client.write(printShift());
+          printDetails = false;
+        }
+        if (printSummary) {
+          client.write(printSummaryDetails());
+          printSummary = false;
+        }
         // client.write("Santram");
         // printer = client;
       },
       onError: (error) {
         print("error: $error");
-        client.destroy();
+        // client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
@@ -386,6 +484,7 @@ class HomeController extends GetxController {
         radio == 1 ? "Am" : "Pm"));
     print(milkCollectionData);
     if (milkCollectionData.isNotEmpty) {
+      // totalMilk = 0.0;
       totalQty = milkCollectionData.length;
       for (var i = 0; i < milkCollectionData.length; i++) {
         //
@@ -395,11 +494,226 @@ class HomeController extends GetxController {
         totalWater += milkCollectionData[i].addedWater!;
         totalPrice += milkCollectionData[i].ratePerLiter!;
         totalAmt += milkCollectionData[i].totalAmt!;
+        // farmerPrintD.add(
+        // "${milkCollectionData[i].farmerId.toString().substring(milkCollectionData[i].farmerId.toString().length - 3, milkCollectionData[i].farmerId.toString().length)} ${milkCollectionData[i].milkType} ${milkCollectionData[i].qty} ${milkCollectionData[i].fat} ${milkCollectionData[i].snf} ${milkCollectionData[i].ratePerLiter} ${milkCollectionData[i].totalAmt}");
+        if (milkCollectionData[i].milkType == "CM") {
+          totalQtyCow += 1;
+          totalMilkCow += milkCollectionData[i].qty!;
+          totalFatCow +=
+              milkCollectionData[i].fat! * milkCollectionData[i].qty!;
+          totalSnfCow +=
+              milkCollectionData[i].snf! * milkCollectionData[i].qty!;
+          totalWaterCow += milkCollectionData[i].addedWater!;
+          totalPriceCow += milkCollectionData[i].ratePerLiter!;
+          totalAmtCow += milkCollectionData[i].totalAmt!;
+        }
+        if (milkCollectionData[i].milkType == "BM") {
+          totalQtyBuffallo += 1;
+          totalMilkBuffallo += milkCollectionData[i].qty!;
+          totalFatBuffallo +=
+              milkCollectionData[i].fat! * milkCollectionData[i].qty!;
+          totalSnfBuffallo +=
+              milkCollectionData[i].snf! * milkCollectionData[i].qty!;
+          totalWaterBuffallo += milkCollectionData[i].addedWater!;
+          totalPriceBuffallo += milkCollectionData[i].ratePerLiter!;
+          totalAmtBuffallo += milkCollectionData[i].totalAmt!;
+        }
       }
     }
   }
 
   Future<void> fetchMilkCollection() async {
     milkCollectionData.assignAll(await milkCollectionDB.fetchAll());
+  }
+
+  String printShift() {
+    late String farmDet = "";
+
+    for (var i = 0; i < milkCollectionData.length; i++) {
+      farmDet +=
+          "${milkCollectionData[i].farmerId.toString().substring(milkCollectionData[i].farmerId.toString().length - 3, milkCollectionData[i].farmerId.toString().length)} ${milkCollectionData[i].milkType!.replaceAll("M", "")} ${milkCollectionData[i].qty} ${milkCollectionData[i].fat} ${milkCollectionData[i].snf} ${milkCollectionData[i].ratePerLiter} ${milkCollectionData[i].totalAmt!.toPrecision(1)}\n";
+    }
+
+    var prin = """
+Summary
+Centre ID    :   ${box.read(centerIdConst)}
+Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
+Shift        :   ${radio == 1 ? "Am" : "Pm"}
+                
+    Cow Milk
+Total qty..........$totalQtyCow
+Avg Fat............${(totalFatCow / totalMilkCow).toPrecision(2)}
+Avg Snf............${(totalSnfCow / totalMilkCow).toPrecision(2)}
+Avg Rate...........${(totalPriceCow / totalQtyCow).toPrecision(2)}
+Total Amt..........${totalAmtCow.toPrecision(2)}
+        
+    Buffallo Milk
+Total qty..........$totalQtyBuffallo
+Avg Fat............${(totalFatBuffallo / totalMilkBuffallo).toPrecision(2)}
+Avg Snf............${(totalSnfBuffallo / totalMilkBuffallo).toPrecision(2)}
+Avg Rate...........${(totalPriceBuffallo / totalQtyBuffallo).toPrecision(2)}
+Total Amt..........${totalAmtBuffallo.toPrecision(2)}
+
+    Total milk
+Total qty..........$totalQty
+Avg Fat............${(totalFat / totalMilk).toPrecision(2)}
+Avg Snf............${(totalSnf / totalMilk).toPrecision(2)}
+Avg Rate...........${(totalPrice / totalQty).toPrecision(2)}
+Total Amt..........${totalAmt.toPrecision(2)}
+--------------------------------
+Pro Milk Qty FAT SNF Rate Amnt
+--------------------------------
+$farmDet
+Cow Cans       $cowCans
+Buf Cans       $bufCans
+Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
+        """;
+
+    return prin;
+    // return commonPrint() + promMilk() + farmDet.toString() + cansCowBuf();
+  }
+
+  Future<void> printShiftDetails() async {
+    // farmerPrintD
+    printDetails = true;
+  }
+
+  void showDialogManualPin({
+    Function()? onTap,
+  }) =>
+      Get.defaultDialog(
+        barrierDismissible: false,
+        backgroundColor: AppColors.white,
+        title: "Total Cans",
+        titleStyle: Theme.of(Get.context!).textTheme.displayMedium,
+        // title: success ? Strings.success : title,
+        content: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Ennter Cow Can:",
+                style: Theme.of(Get.context!).textTheme.bodyMedium,
+              ),
+            ),
+            TextFormWidget(
+              prefix: const Icon(
+                Icons.pin,
+                size: 30,
+              ),
+              initialValue: cowCans,
+              label: "Please enter Pin...",
+              onChanged: (val) {
+                cowCans = val;
+                // print(initialValue);
+              },
+              keyboardType: const TextInputType.numberWithOptions(
+                signed: true,
+              ),
+              maxLength: 10,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Ennter Buffallo Can:",
+                style: Theme.of(Get.context!).textTheme.bodyMedium,
+              ),
+            ),
+            TextFormWidget(
+              prefix: const Icon(
+                Icons.pin,
+                size: 30,
+              ),
+              initialValue: bufCans,
+              label: "Please enter Pin...",
+              onChanged: (val) {
+                bufCans = val;
+                // print(initialValue);
+              },
+              keyboardType: const TextInputType.numberWithOptions(
+                signed: true,
+              ),
+              maxLength: 10,
+            ),
+          ],
+        ),
+        // cancel: ,
+        confirm: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () {
+                  Get.back();
+                },
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: AppColors.darkBrown,
+                    fontSize: AppDimens.font16,
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: onTap,
+                child: const Text(
+                  "OK",
+                  style: TextStyle(
+                    color: AppColors.darkBrown,
+                    fontSize: AppDimens.font16,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  String printSummaryDetails() {
+    late String farmDet = "";
+
+    for (var i = 0; i < milkCollectionData.length; i++) {
+      farmDet +=
+          "${milkCollectionData[i].farmerId.toString().substring(milkCollectionData[i].farmerId.toString().length - 3, milkCollectionData[i].farmerId.toString().length)} ${milkCollectionData[i].milkType} ${milkCollectionData[i].qty} ${milkCollectionData[i].fat} ${milkCollectionData[i].snf} ${milkCollectionData[i].ratePerLiter} ${milkCollectionData[i].totalAmt}\n";
+    }
+
+    var prin = """
+Summary
+Centre ID    :   ${box.read(centerIdConst)}
+Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
+Shift        :   ${radio == 1 ? "Am" : "Pm"}
+                
+    Cow Milk
+Total qty..........$totalQtyCow
+Avg Fat............${(totalFatCow / totalMilkCow).toPrecision(2)}
+Avg Snf............${(totalSnfCow / totalMilkCow).toPrecision(2)}
+Avg Rate...........${(totalPriceCow / totalQtyCow).toPrecision(2)}
+Total Amt..........${totalAmtCow.toPrecision(2)}
+        
+    Buffallo Milk
+Total qty..........$totalQtyBuffallo
+Avg Fat............${(totalFatBuffallo / totalMilkBuffallo).toPrecision(2)}
+Avg Snf............${(totalSnfBuffallo / totalMilkBuffallo).toPrecision(2)}
+Avg Rate...........${(totalPriceBuffallo / totalQtyBuffallo).toPrecision(2)}
+Total Amt..........${totalAmtBuffallo.toPrecision(2)}
+
+    Total milk
+Total qty..........$totalQty
+Avg Fat............${(totalFat / totalMilk).toPrecision(2)}
+Avg Snf............${(totalSnf / totalMilk).toPrecision(2)}
+Avg Rate...........${(totalPrice / totalQty).toPrecision(2)}
+Total Amt..........${totalAmt.toPrecision(2)}
+
+Cow Cans       $cowCans
+Buf Cans       $bufCans
+Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
+        """;
+
+    return prin;
+    // return commonPrint() + promMilk() + farmDet.toString() + cansCowBuf();
   }
 }

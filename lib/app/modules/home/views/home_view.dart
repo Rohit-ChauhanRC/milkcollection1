@@ -23,8 +23,8 @@ class HomeView extends GetView<HomeController> {
             Text("Maklife CenterId (${controller.box.read(centerIdConst)}) "),
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        child: BackgroundContainer(
+      body: BackgroundContainer(
+        child: SingleChildScrollView(
           child: Column(
             children: [
               Container(
@@ -538,7 +538,11 @@ class HomeView extends GetView<HomeController> {
             children: [
               InkWell(
                 onTap: () {
-                  Get.toNamed(Routes.SHIFTDETAILS);
+                  // Get.toNamed(Routes.SHIFTDETAILS);
+                  // controller.printShiftDetails();
+                  controller.showDialogManualPin(onTap: () {
+                    controller.printShiftDetails().then((value) => Get.back());
+                  });
                 },
                 child: SizedBox(
                   width: Get.width * 0.19,
@@ -625,6 +629,10 @@ class HomeView extends GetView<HomeController> {
               InkWell(
                 onTap: () {
                   // Get.toNamed(Routes.COLLECTMILK);
+                  controller.showDialogManualPin(onTap: () {
+                    controller.printSummary = true;
+                    Get.back();
+                  });
                 },
                 child: SizedBox(
                   width: Get.width * 0.19,
