@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
@@ -152,7 +153,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   Obx(() => Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "${controller.farmerId.isNotEmpty ? controller.farmerData.farmerId : ""}",
+                          "${controller.farmerId.toString().isNotEmpty ? controller.farmerData.farmerId : ""}",
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )),
@@ -179,19 +180,24 @@ class CollectmilkView extends GetView<CollectmilkController> {
                       ),
                       initialValue: controller.farmerId,
                       label: "Please enter FarmerId...",
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       onChanged: (val) {
                         controller.farmerId = val;
                         if (controller.farmerId.trim().isNotEmpty) {
                           controller.getFarmerId();
                         }
                       },
-                      keyboardType:
-                          const TextInputType.numberWithOptions(signed: true),
+                      // keyboardType:
+                      //     const TextInputType.numberWithOptions(signed: true),
                       maxLength: 10,
                       // validator: (val) =>
                       //     val!.length < 1 ? "Field is required!" : null,
                     ),
                   )),
+
               SizedBox(
                 height: 20.h,
               ),
@@ -234,16 +240,20 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 // readOnly: controller.check,
-                                initialValue: controller.fat.text,
+                                // initialValue: controller.fat.text,
                                 label: "Please enter fat...",
                                 textController: controller.fat,
+                                keyboardType: TextInputType.number,
+                                // inputFormatters: [
+                                //   // FilteringTextInputFormatter.digitsOnly,
+                                // ],
                                 onChanged: (e) async {
                                   // controller.fat.text = e;
                                   await controller.getRateChart();
                                 },
 
                                 // onChanged: (e)=> controller.homeController.fat = controller.f,
-                                keyboardType: TextInputType.text,
+                                // keyboardType: TextInputType.text,
                                 maxLength: 10,
                               ),
                             )),
@@ -286,13 +296,17 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 // readOnly: controller.check,
-                                initialValue: controller.snf.text,
+                                // initialValue: controller.snf.text,
                                 label: "Please enter FarmerId...",
                                 // onChanged: onChanged2,
                                 textController: controller.snf,
                                 // onChanged: (e) => controller.snf = e,
 
-                                keyboardType: TextInputType.text,
+                                // keyboardType: TextInputType.text,
+                                keyboardType: TextInputType.number,
+                                // inputFormatters: [
+                                //   FilteringTextInputFormatter.digitsOnly,
+                                // ],
                                 maxLength: 10,
                               ),
                             )),
@@ -335,14 +349,16 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 readOnly: controller.check,
-                                initialValue: controller.water.text,
+                                // initialValue: controller.water.text,
                                 label: "Please enter FarmerId...",
                                 // onChanged: onChanged3,
                                 // onChanged: (e) {
                                 textController: controller.water,
                                 // },
 
-                                keyboardType: TextInputType.text,
+                                // keyboardType: TextInputType.text,
+                                keyboardType: TextInputType.number,
+
                                 maxLength: 10,
                               ),
                             )),
@@ -395,7 +411,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               // height: 65.h,
                               child: TextFormWidget(
                                 readOnly: controller.check,
-                                initialValue: controller.quantity.text,
+                                // initialValue: controller.quantity.text,
                                 label: "Please enter fat...",
                                 textController: controller.quantity,
                                 onChanged: (e) {
@@ -403,7 +419,11 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   controller.getPriceData(true);
                                   controller.getTotalAmount(true);
                                 },
-                                keyboardType: TextInputType.text,
+                                // keyboardType: TextInputType.text,
+                                keyboardType: TextInputType.number,
+                                // inputFormatters: [
+                                //   FilteringTextInputFormatter.digitsOnly,
+                                // ],
                                 maxLength: 10,
                               ),
                             )),
@@ -548,7 +568,19 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     if (controller.farmerId.isNotEmpty &&
                         (controller.fat.text.isNotEmpty ||
                             controller.homeController.fat.isNotEmpty)) {
-                      await controller.sendCollection();
+                      await controller.sendCollection().then((value) async {
+                        await controller.checkSmsFlag().then((value) async {
+                          await controller
+                              .getCollectionThirtyDaysData()
+                              .then((value) async {
+                            await controller.printData().then((value) async {
+                              controller.emptyData();
+                              await controller.homeController
+                                  .fetchMilkCollectionDateWise();
+                            });
+                          });
+                        });
+                      });
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -579,6 +611,11 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 child: ElevatedButton(
                   onPressed: () {
                     controller.emptyData();
+                    // Get.offAndToNamed(Routes.COLLECTMILK);
+                    controller.refresh();
+
+                    // Get.back();
+
                     // controller.sendMessage();
                     // controller.printData();
                   },

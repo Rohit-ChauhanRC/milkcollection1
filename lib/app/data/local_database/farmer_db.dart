@@ -128,7 +128,7 @@ class FarmerDB {
 
   Future<int> update({
     int? calculationsID,
-    int? farmerId,
+    required int farmerId,
     String? farmerName,
     String? bankName,
     String? branchName,
@@ -171,9 +171,9 @@ class FarmerDB {
         if (centerID != null) 'CenterID': centerID,
         if (FUploaded != null) 'FUploaded': FUploaded,
       },
-      where: 'Key_id = ?',
+      where: 'FarmerID = ?',
       conflictAlgorithm: ConflictAlgorithm.rollback,
-      whereArgs: [calculationsID],
+      whereArgs: [farmerId],
     );
   }
 

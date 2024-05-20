@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -203,6 +205,7 @@ class HomeController extends GetxController {
       });
     });
     await fetchMilkCollectionDateWise();
+    // await callApi();
     await checkIp();
   }
 
@@ -214,6 +217,23 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future entryPoint(SendPort sendPort) async {
+    var response = await checkIp();
+    // sendPort.send(response);
+  }
+
+  Future<void> callApi() async {
+    var recievePort = ReceivePort();
+    await Isolate.spawn(entryPoint, recievePort.sendPort);
+    final completer = Completer<Iterable<MilkCollectionModel>>();
+    recievePort.listen((data) {
+      print(data);
+      completer.complete(data);
+      recievePort.close();
+    });
+    // return completer.future;
   }
 
   Future<void> getRateChart(

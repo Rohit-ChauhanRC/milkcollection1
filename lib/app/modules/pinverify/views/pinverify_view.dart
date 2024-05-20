@@ -124,10 +124,7 @@ class PinverifyView extends GetView<PinverifyController> {
                   margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
                   child: CustomButton(
                     onPressed: () {
-                      Get.toNamed(Routes.HOME, arguments: ["O", "9711784343"]);
-                      // if (controller.check) {
-                      //   controller.login();
-                      // }
+                      // Get.offNamed(Routes.HOME);
                     },
                     title: "Upload",
                   ),

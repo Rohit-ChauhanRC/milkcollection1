@@ -191,17 +191,7 @@ class FarmerController extends GetxController {
       print(jsonDecode(res.body));
 
       if (res.statusCode == 200 && jsonDecode(res.body) == "Added succes..") {
-        //
-        // await farmerlistController.pinverifyController
-        //     .getFamerDataDB()
-        //     .then((value) async {
-        //   await farmerlistController.farmerDB.deleteTable().then((value) async {
-        //     await farmerlistController.pinverifyController.getFarmerList();
-        //   });
-        // });
-        await farmerlistController.pinverifyController.getFarmerList();
-
-        // print(jsonDecode(res.body));
+        await farmerlistController.getFarmerList();
       } else {
         //
         await farmerlistController.farmerDB.create(
@@ -226,8 +216,8 @@ class FarmerController extends GetxController {
           FUploaded: 0,
         );
         // await farmerlistController.pinverifyController.getFarmerList();
-        farmerlistController.pinverifyController.farmerData.assignAll(
-            await farmerlistController.pinverifyController.farmerDB.fetchAll());
+        farmerlistController.farmerData
+            .assignAll(await farmerlistController.farmerDB.fetchAll());
 
         Utils.showDialog(json.decode(res.body));
       }
@@ -259,8 +249,8 @@ class FarmerController extends GetxController {
         FUploaded: 0,
       )
           .then((value) async {
-        farmerlistController.pinverifyController.farmerData.assignAll(
-            await farmerlistController.pinverifyController.farmerDB.fetchAll());
+        farmerlistController.farmerData
+            .assignAll(await farmerlistController.farmerDB.fetchAll());
       });
     }
     Get.back();
@@ -269,6 +259,7 @@ class FarmerController extends GetxController {
   Future<void> localFarmerUpdate() async {
     await farmerDB
         .update(
+            farmerId: Get.arguments[1],
             address: address,
             aadharCardNo: aadharCard,
             mobileNumber: mobileNumber,

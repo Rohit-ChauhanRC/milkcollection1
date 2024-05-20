@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 
 class TextFormWidget extends StatelessWidget {
@@ -9,7 +10,7 @@ class TextFormWidget extends StatelessWidget {
     this.label,
     this.keyboardType,
     this.readOnly = false,
-    required this.initialValue,
+    this.initialValue,
     this.validator,
     this.textController,
     this.suffix = false,
@@ -24,7 +25,7 @@ class TextFormWidget extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool readOnly;
   final bool suffix;
-  final String initialValue;
+  final String? initialValue;
   final String? Function(String?)? validator;
   final TextEditingController? textController;
   final int? maxLength;

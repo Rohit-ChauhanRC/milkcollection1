@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
@@ -144,7 +145,7 @@ class FarmerView extends GetView<FarmerController> {
                                     ),
                                     padding: const EdgeInsets.all(8),
                                     child: Text(
-                                      controller.farmerName,
+                                      controller.branchName,
                                       style: Theme.of(context)
                                           .textTheme
                                           .displayMedium,
@@ -168,13 +169,14 @@ class FarmerView extends GetView<FarmerController> {
                             child: !controller.type
                                 ? TextFormWidget(
                                     readOnly: controller.type,
-
                                     initialValue: controller.accountNumber,
                                     onChanged: (p0) =>
                                         controller.accountNumber = p0,
-                                    keyboardType: TextInputType.text,
-                                    // maxLength: 10,
-                                    validator: (val) => val!.length < 3
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    validator: (val) => val!.length < 12
                                         ? "Field is required!"
                                         : null,
                                   )
@@ -187,7 +189,7 @@ class FarmerView extends GetView<FarmerController> {
                                     ),
                                     padding: const EdgeInsets.all(8),
                                     child: Text(
-                                      controller.farmerName,
+                                      controller.accountNumber,
                                       style: Theme.of(context)
                                           .textTheme
                                           .displayMedium,
@@ -253,10 +255,13 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.aadharCard,
                               onChanged: (p0) => controller.aadharCard = p0,
-                              keyboardType: TextInputType.text,
-                              // maxLength: 10,
-                              validator: (val) =>
-                                  val!.length < 3 ? "Field is required!" : null,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              validator: (val) => val!.length < 12
+                                  ? "Field is required!"
+                                  : null,
                             ),
                           )),
                       const SizedBox(
@@ -276,10 +281,13 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.mobileNumber,
                               onChanged: (p0) => controller.mobileNumber = p0,
-                              keyboardType: TextInputType.text,
-                              // maxLength: 10,
-                              validator: (val) =>
-                                  val!.length < 3 ? "Field is required!" : null,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              validator: (val) => val!.length < 10
+                                  ? "Field is required!"
+                                  : null,
                             ),
                           )),
                       const SizedBox(
@@ -299,8 +307,10 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.numberOfCows,
                               onChanged: (p0) => controller.numberOfCows = p0,
-                              keyboardType: TextInputType.text,
-                              // maxLength: 10,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               validator: (val) =>
                                   val!.length < 1 ? "Field is required!" : null,
                             ),
@@ -321,11 +331,12 @@ class FarmerView extends GetView<FarmerController> {
                       Obx(() => SizedBox(
                             child: TextFormWidget(
                               initialValue: controller.numberOfBuffalo,
-
                               onChanged: (p0) =>
                                   controller.numberOfBuffalo = p0,
-                              keyboardType: TextInputType.text,
-                              // maxLength: 10,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
                               validator: (val) =>
                                   val!.length < 1 ? "Field is required!" : null,
                             ),
@@ -368,28 +379,56 @@ class FarmerView extends GetView<FarmerController> {
                       ),
                       Row(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Obx(() => SizedBox(
-                                    width: Get.width * 0.2,
-                                    child: Radio(
-                                      activeColor: AppColors.yellow,
-                                      value: 0,
-                                      groupValue: controller.radio,
-                                      onChanged: (int? i) {
-                                        print(i);
-                                        controller.radio = i!;
-                                      },
-                                    ),
-                                  )),
-                              InkWell(
-                                child: const Text("Cash"),
-                                onTap: () {
-                                  controller.radio = 0;
-                                },
-                              ),
-                            ],
+                          Obx(
+                            () => !controller.type
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Obx(() => SizedBox(
+                                            width: Get.width * 0.2,
+                                            child: Radio(
+                                              activeColor: AppColors.yellow,
+                                              value: 0,
+                                              groupValue: controller.radio,
+                                              onChanged: (int? i) {
+                                                // print(i);
+
+                                                controller.radio = i!;
+                                              },
+                                            ),
+                                          )),
+                                      InkWell(
+                                        child: const Text("Cash"),
+                                        onTap: () {
+                                          controller.radio = 0;
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Obx(() => SizedBox(
+                                            width: Get.width * 0.2,
+                                            child: Radio(
+                                              activeColor: AppColors.yellow,
+                                              value: 0,
+                                              groupValue: controller.radio,
+                                              onChanged: (int? i) {
+                                                // print(i);
+
+                                                // controller.radio = i!;
+                                              },
+                                            ),
+                                          )),
+                                      InkWell(
+                                        child: const Text("Cash"),
+                                        onTap: () {
+                                          // controller.radio = 0;
+                                        },
+                                      ),
+                                    ],
+                                  ),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -401,7 +440,9 @@ class FarmerView extends GetView<FarmerController> {
                                       value: 1,
                                       groupValue: controller.radio,
                                       onChanged: (int? i) {
-                                        print(i);
+                                        // if (controller.type) {
+                                        //   controller.radio = i!;
+                                        // }
                                         controller.radio = i!;
                                       },
                                     ),

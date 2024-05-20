@@ -1,13 +1,12 @@
 import 'dart:io';
-import 'dart:io' as io;
 import 'package:excel/excel.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
+import 'package:milkcollection/app/data/local_database/farmer_db.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
@@ -18,7 +17,6 @@ import 'package:path/path.dart';
 
 import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:milkcollection/app/data/models/pin_manual_model.dart';
-import 'package:milkcollection/app/modules/pinverify/controllers/pinverify_controller.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/theme/app_dimens.dart';
 import 'package:milkcollection/app/utils/utils.dart';
@@ -39,7 +37,8 @@ class CollectmilkController extends GetxController {
 
   final HomeController homeController = Get.find<HomeController>();
 
-  final PinverifyController pinverifyController = Get.find();
+  // final PinverifyController pinverifyController = Get.find();
+  final FarmerDB farmerDB = FarmerDB();
 
   late ServerSocket weightServerSocket;
   late ServerSocket printerServerSocket;
@@ -69,6 +68,11 @@ class CollectmilkController extends GetxController {
   FarmerListModel get farmerData => _farmerData.value;
   set farmerData(FarmerListModel lst) => _farmerData.value = lst;
 
+  final RxList<FarmerListModel> _farmerDataList = RxList<FarmerListModel>();
+  List<FarmerListModel> get farmerDataList => _farmerDataList;
+  set farmerDataList(List<FarmerListModel> lst) =>
+      _farmerDataList.assignAll(lst);
+
   final RxBool _check = true.obs;
   bool get check => _check.value;
   set check(bool v) => _check.value = v;
@@ -92,7 +96,8 @@ class CollectmilkController extends GetxController {
   TextEditingController snf = TextEditingController();
   TextEditingController density = TextEditingController();
   TextEditingController water = TextEditingController();
-  TextEditingController quantity = TextEditingController();
+  TextEditingController quantity = TextEditingController(text: "0.0");
+  // TextEditingController farmerId = TextEditingController();
 
   // final RxString _snf = "".obs;
   // String get snf => _snf.value;
@@ -137,6 +142,8 @@ class CollectmilkController extends GetxController {
     super.onInit();
 
     // await checkIp();
+
+    farmerDataList.assignAll(await farmerDB.fetchAll());
 
     if (DateTime.now().hour < 12) {
       shiftTime = 1;
@@ -345,8 +352,19 @@ class CollectmilkController extends GetxController {
       farmerfinalId = farmerfinalId.toString() + farmerId;
       // }
     }
-    farmerData =
-        await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
+    for (var i = 0; i < farmerDataList.length; i++) {
+      if (farmerDataList[i]
+          .farmerId
+          .toString()
+          .toLowerCase()
+          .contains(farmerfinalId.toString().trim().toLowerCase())) {
+        // searchfarmerData.assign(farmerData[i]);
+        farmerData = farmerDataList[i];
+
+        update();
+      }
+    }
+    // farmerData = farmerDataList.where((e) => e.farmerId == farmerfinalId);
   }
 
   String getFarmerIdFinal() {
@@ -729,9 +747,6 @@ class CollectmilkController extends GetxController {
   }
 
   Future<void> sendCollection() async {
-    await printData();
-    await checkSmsFlag();
-
     Map<String, dynamic> _body = {
       "Collection_Date":
           DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
@@ -761,14 +776,11 @@ class CollectmilkController extends GetxController {
           Uri.parse(
             "$baseUrlConst/$dailyCollection",
           ),
-          // headers: {
-          //   'Content-Type': 'application/json',
-          // },
           body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
-        Utils.showSnackbar("accepted!");
-        await getCollectionThirtyDaysData();
-        emptyData();
+        // Utils.showSnackbar("accepted!");
+
+        //  ;
       } else {
         await accept();
       }
@@ -777,6 +789,7 @@ class CollectmilkController extends GetxController {
 
       print(e.toString());
     }
+    // emptyData();
   }
 
   Future<void> accept() async {
@@ -802,11 +815,11 @@ class CollectmilkController extends GetxController {
             Shift: shiftTime == 1 ? "AM" : "PM",
             Total_Amt: !check
                 ? double.tryParse(getTotalAmount(false))
-                : double.tryParse(getTotalAmount(false)),
+                : double.tryParse(getTotalAmount(true)),
             FUploaded: !check ? 0 : 1)
         .then((value) async {
-      emptyData();
-      Utils.showSnackbar("Accepted!");
+      // emptyData();
+      // Utils.showSnackbar("Accepted!");
 
       // await checkIp();
     });
@@ -823,21 +836,17 @@ class CollectmilkController extends GetxController {
     price = "";
     totalAmount = "";
     farmerData = FarmerListModel();
-    farmerId = "";
+    // farmerId.clear();
     radio = 0;
     homeController.fat = "";
     homeController.snf = "";
     homeController.water = "";
     homeController.quantity = "";
-    _farmerId.value = farmerId;
-    Get.back();
+    // _farmerId.value = farmerId;
     update();
   }
 
-  printData() async {
-    // String collectionPrint =
-    //     "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  ${DateFormat("hh:mm:ss").format(DateTime.now())}\nFarmerName    :     ${farmerData.farmerName}\nFarmer Id     :     ${getFarmerIdFinal()}\nFat           :     ${!check ? fat.text : homeController.fat}\nSnf           :     ${!check ? snf.text : homeController.snf}\nMilk Type     :     ${radio == 0 ? "CM" : "BM"}\nWeight        :     ${!check ? quantity.text : homeController.quantity}\nPrice         :     ${!check ? getPriceData(false) : getPriceData(true)}\nAmount        :     ${totalAmount}\n          \n                      \n          \n       \n               \n           \n";
-    // homeController.socket!.write(collectionPrint);
+  Future printData() async {
     homeController.printData(
       shift: shiftTime == 1 ? "AM" : "PM",
       farmerName: farmerData.farmerName!,
@@ -863,32 +872,14 @@ class CollectmilkController extends GetxController {
 
   Future<void> sendMessage() async {
     try {
-      Map<String, dynamic>? queryParameters = {
-        "key": "36365EF4C86D67",
-        "campaign": "0",
-        "routeid": "9",
-        "type": "text",
-        "contacts": "9711784343",
-        "senderid": "MAKLIF",
-        "msg":
-            "MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: $farmerId%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A",
-        "template_id": "1207165769139334975"
-      };
-      var res = await http.post(
-          // Uri.http("Payment.maklife.in:9019", "/api/smsapi/index.php",
-          //     queryParameters),
-          Uri.parse(
-              "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
+      var res = await http.post(Uri.parse(
+          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
       if (res.statusCode == 200) {
-        Utils.showSnackbar(jsonDecode(res.body)["message"]);
-        // await getCollectionThirtyDaysData();
-        print(jsonDecode(res.body));
-      } else {
-        // await accept();
-      }
-    } catch (e) {
-      // await accept();
+        // Utils.showSnackbar(jsonDecode(res.body)["message"]);
 
+        // print(jsonDecode(res.body));
+      } else {}
+    } catch (e) {
       print(e.toString());
     }
   }

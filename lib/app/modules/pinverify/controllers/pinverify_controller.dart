@@ -45,7 +45,6 @@ class PinverifyController extends GetxController {
   List<MilkCollectionModel> get restoreData => _restoreData;
   set restoreData(List<MilkCollectionModel> lst) => _restoreData.assignAll(lst);
 
-  final count = 0.obs;
   @override
   void onInit() async {
     super.onInit();
@@ -61,9 +60,11 @@ class PinverifyController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+    _check.close();
+    _circularProgress.close();
+    _pin.close();
+    // _initialized.close();
   }
-
-  void increment() => count.value++;
 
   Future<dynamic> login() async {
     Utils.closeKeyboard();
@@ -78,7 +79,7 @@ class PinverifyController extends GetxController {
         });
       });
 
-      box.write(verifyConst, true).then((value) => Get.toNamed(Routes.HOME));
+      box.write(verifyConst, true).then((value) => Get.offNamed(Routes.HOME));
     } else {
       Utils.showDialog("Incorrect pin!");
     }

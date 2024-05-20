@@ -33,7 +33,7 @@ class HomeView extends GetView<HomeController> {
                 child: Row(
                   children: [
                     InkWell(
-                      onTap: () async {
+                      onTap: () {
                         showDatePicker(
                           context: context,
                           initialDate: DateTime.now(),
@@ -45,46 +45,22 @@ class HomeView extends GetView<HomeController> {
                           print(controller.fromDate);
 
                           await controller.fetchMilkCollectionDateWise();
-
-                          // After selecting the date, display the time picker.
-                          if (selectedDate != null) {
-                            // DateTime selectedDateTime = DateTime(
-                            //   selectedDate.year,
-                            //   selectedDate.month,
-                            //   selectedDate.day,
-                            // );
-
-                            // showTimePicker(
-
-                            //   context: context,
-                            //   initialTime: TimeOfDay.now(),
-                            // ).then((selectedTime) {
-                            //   // Handle the selected date and time here.
-                            //   if (selectedTime != null) {
-                            //     DateTime selectedDateTime = DateTime(
-                            //       selectedDate.year,
-                            //       selectedDate.month,
-                            //       selectedDate.day,
-                            //       selectedTime.hour,
-                            //       selectedTime.minute,
-                            //     );
-                            //     print(
-                            //         selectedDateTime); // You can use the selectedDateTime as needed.
-                            //   }
-                            // });
-                          }
                         });
                       },
-                      child: const Icon(
-                        Icons.calendar_month_outlined,
-                        color: AppColors.white,
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.calendar_month_outlined,
+                            color: AppColors.white,
+                          ),
+                          Obx(() => Text(
+                                DateFormat("dd-MMM-yyyy").format(
+                                    DateTime.parse(controller.fromDate)),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              )),
+                        ],
                       ),
                     ),
-                    Obx(() => Text(
-                          DateFormat("dd-MMM-yyyy")
-                              .format(DateTime.parse(controller.fromDate)),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        )),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
