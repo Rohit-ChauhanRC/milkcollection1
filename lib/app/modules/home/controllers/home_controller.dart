@@ -252,9 +252,9 @@ class HomeController extends GetxController {
         if (rateChartData.isNotEmpty) {
           pd.show(
               max: rateChartData.length,
-              msgFontSize: 12,
-              valueFontSize: 12,
-              msg: 'Downloading Rate Chart ${rateChartData.length}...');
+              msgFontSize: 10,
+              valueFontSize: 10,
+              msg: 'Downloading Rate Chart $milkType');
           if (box.read(ratecounterConst) == null) {
             for (var e in rateChartData) {
               await rateChartDB.create(

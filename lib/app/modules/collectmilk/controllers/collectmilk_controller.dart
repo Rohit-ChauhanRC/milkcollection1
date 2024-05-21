@@ -35,7 +35,8 @@ class CollectmilkController extends GetxController {
 
   final RateChartDB rateChartDB = RateChartDB();
 
-  final HomeController homeController = Get.find<HomeController>();
+  final HomeController homeController =
+      Get.put<HomeController>(HomeController());
 
   // final PinverifyController pinverifyController = Get.find();
   final FarmerDB farmerDB = FarmerDB();
@@ -97,7 +98,7 @@ class CollectmilkController extends GetxController {
   TextEditingController density = TextEditingController();
   TextEditingController water = TextEditingController();
   TextEditingController quantity = TextEditingController(text: "0.0");
-  // TextEditingController farmerId = TextEditingController();
+  TextEditingController farmerIdC = TextEditingController();
 
   // final RxString _snf = "".obs;
   // String get snf => _snf.value;
@@ -137,6 +138,10 @@ class CollectmilkController extends GetxController {
   bool get printD => _printD.value;
   set printD(bool v) => _printD.value = v;
 
+  final RxBool _progress = false.obs;
+  bool get progress => _progress.value;
+  set progress(bool v) => _progress.value = v;
+
   @override
   void onInit() async {
     super.onInit();
@@ -147,8 +152,10 @@ class CollectmilkController extends GetxController {
 
     if (DateTime.now().hour < 12) {
       shiftTime = 1;
+      shift = 'Am';
     } else {
       shiftTime = 2;
+      shift = "Pm";
     }
     await Permission.storage.request();
 
@@ -166,6 +173,21 @@ class CollectmilkController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+    _check.close();
+    _exportData.clear();
+    _farmerData.close();
+    _farmerDataList.clear();
+    _farmerId.close();
+    _pin.close();
+    _pinManual.clear();
+    _price.close();
+    _printD.close();
+    _radio.close();
+    _rateChartData.clear();
+    _restoreData.clear();
+    _shift.close();
+    _shiftTime.close();
+    _totalAmount.close();
   }
 
   Future<void> getRateChart() async {
@@ -393,31 +415,20 @@ class CollectmilkController extends GetxController {
           headers: {"Content-Type": "application/json"});
 
       if (res.statusCode == 200) {
-        // print(res.body);
         pinManual.assignAll([]);
-        // print("res: ${res}");
-        // print("res: ${jsonDecode(res.body.toString())}");
+
         pinManual.assignAll(pinnmanualModelFromMap(res.body));
         if (pinManual.isNotEmpty) {
-          // print("pin :${pin}");
           if (pinManual[0].pin == int.tryParse(pin)) {
-            // print(pin);
             check = false;
-            // Get.back();
             Utils.closeDialog();
             showDialogSelectShift();
           } else {
-            // print("object");
             Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
           }
         }
-        // restoreData.assignAll([]);
-      } else {
-        // print(jsonDecode(res.body));
-      }
-    } catch (e) {
-      // print(e.toString());
-    }
+      } else {}
+    } catch (e) {}
   }
 
   void showDialogManualPin({
@@ -429,7 +440,6 @@ class CollectmilkController extends GetxController {
         backgroundColor: AppColors.white,
         title: "Validate Pin",
         titleStyle: Theme.of(Get.context!).textTheme.displayMedium,
-        // title: success ? Strings.success : title,
         content: TextFormWidget(
           prefix: const Icon(
             Icons.pin,
@@ -439,7 +449,6 @@ class CollectmilkController extends GetxController {
           label: "Please enter Pin...",
           onChanged: (val) {
             pin = val;
-            // print(initialValue);
           },
           keyboardType: const TextInputType.numberWithOptions(
             signed: true,
@@ -447,38 +456,41 @@ class CollectmilkController extends GetxController {
           maxLength: 10,
         ),
         // cancel: ,
-        confirm: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  Get.back();
-                },
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color: AppColors.darkBrown,
-                    fontSize: AppDimens.font16,
+        confirm: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: AppColors.darkBrown,
+                      fontSize: AppDimens.font16,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: InkWell(
-                onTap: onTap,
-                child: const Text(
-                  "OK",
-                  style: TextStyle(
-                    color: AppColors.darkBrown,
-                    fontSize: AppDimens.font16,
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: onTap,
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(
+                      color: AppColors.darkBrown,
+                      fontSize: AppDimens.font16,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
@@ -489,7 +501,7 @@ class CollectmilkController extends GetxController {
         titleStyle: Theme.of(Get.context!).textTheme.displayMedium,
         // title: success ? Strings.success : title,
         content: Container(
-          margin: const EdgeInsets.all(20),
+          margin: const EdgeInsets.all(10),
           child: Row(
             children: [
               const Icon(
@@ -523,6 +535,7 @@ class CollectmilkController extends GetxController {
                     ),
                     onTap: () {
                       shift = "AM";
+                      shiftTime = 1;
                     },
                   ),
                 ],
@@ -550,6 +563,7 @@ class CollectmilkController extends GetxController {
                     ),
                     onTap: () {
                       shift = "PM";
+                      shiftTime = 2;
                     },
                   ),
                 ],
@@ -768,7 +782,7 @@ class CollectmilkController extends GetxController {
       "Total_Amt": totalAmount,
       "CollectionCenterId": box.read(centerIdConst),
       "CollectionCenterName": box.read(centerName),
-      "Shift": shiftTime == 1 ? "Am" : "Pm",
+      "Shift": shift,
     };
 
     try {
@@ -781,48 +795,37 @@ class CollectmilkController extends GetxController {
         // Utils.showSnackbar("accepted!");
 
         //  ;
-      } else {
-        await accept();
-      }
+      } else {}
     } catch (e) {
-      await accept();
-
       print(e.toString());
     }
     // emptyData();
   }
 
   Future<void> accept() async {
-    await milkCollectionDB
-        .create(
-            FarmerId: int.tryParse(farmerId),
-            Added_Water: double.tryParse(water.text),
-            Analyze_Mode: !check ? manualConst : autoConst,
-            CollectionCenterId: box.read(centerIdConst),
-            CollectionCenterName: box.read(centerName),
-            Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-            Collection_Mode: !check ? manualConst : autoConst,
-            FAT: double.tryParse(fat.text),
-            Farmer_Name: farmerData.farmerName,
-            Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
-            Milk_Status: "Accepted",
-            Milk_Type: radio == 0 ? "CM" : "BM",
-            Qty: double.tryParse(quantity.text),
-            Rate_Chart_Name: "1235ABC",
-            Rate_Per_Liter: double.tryParse(price),
-            SNF: double.tryParse(snf.text),
-            Scale_Mode: !check ? manualConst : autoConst,
-            Shift: shiftTime == 1 ? "AM" : "PM",
-            Total_Amt: !check
-                ? double.tryParse(getTotalAmount(false))
-                : double.tryParse(getTotalAmount(true)),
-            FUploaded: !check ? 0 : 1)
-        .then((value) async {
-      // emptyData();
-      // Utils.showSnackbar("Accepted!");
-
-      // await checkIp();
-    });
+    await milkCollectionDB.create(
+        FarmerId: int.tryParse(farmerId),
+        Added_Water: double.tryParse(water.text),
+        Analyze_Mode: !check ? manualConst : autoConst,
+        CollectionCenterId: box.read(centerIdConst),
+        CollectionCenterName: box.read(centerName),
+        Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+        Collection_Mode: !check ? manualConst : autoConst,
+        FAT: double.tryParse(fat.text),
+        Farmer_Name: farmerData.farmerName,
+        Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
+        Milk_Status: "Accepted",
+        Milk_Type: radio == 0 ? "CM" : "BM",
+        Qty: double.tryParse(quantity.text),
+        Rate_Chart_Name: "1235ABC",
+        Rate_Per_Liter: double.tryParse(price),
+        SNF: double.tryParse(snf.text),
+        Scale_Mode: !check ? manualConst : autoConst,
+        Shift: shift,
+        Total_Amt: !check
+            ? double.tryParse(getTotalAmount(false))
+            : double.tryParse(getTotalAmount(true)),
+        FUploaded: !check ? 0 : 1);
   }
 
   void emptyData() {
@@ -842,19 +845,20 @@ class CollectmilkController extends GetxController {
     homeController.snf = "";
     homeController.water = "";
     homeController.quantity = "";
+    farmerIdC.clear();
     // _farmerId.value = farmerId;
     update();
   }
 
   Future printData() async {
     homeController.printData(
-      shift: shiftTime == 1 ? "AM" : "PM",
+      shift: shift,
       farmerName: farmerData.farmerName!,
       fat1: !check ? fat.text : homeController.fat,
       getFarmerId: getFarmerIdFinal(),
       milkType: radio == 0 ? "CM" : "BM",
       price: !check ? getPriceData(false) : getPriceData(true),
-      quantity1: !check ? quantity.toString() : homeController.quantity,
+      quantity1: !check ? quantity.text.toString() : homeController.quantity,
       snf1: !check ? snf.text : homeController.snf,
       totalAmount: totalAmount,
     );
@@ -873,9 +877,10 @@ class CollectmilkController extends GetxController {
   Future<void> sendMessage() async {
     try {
       var res = await http.post(Uri.parse(
-          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shiftTime == 1 ? "AM" : "PM"}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
+          //
+          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_$shift%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
       if (res.statusCode == 200) {
-        // Utils.showSnackbar(jsonDecode(res.body)["message"]);
+        Utils.showSnackbar(jsonDecode(res.body)["message"]);
 
         // print(jsonDecode(res.body));
       } else {}

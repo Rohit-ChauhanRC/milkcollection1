@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
 import 'package:milkcollection/app/widgets/text_form_widget.dart';
@@ -162,46 +163,45 @@ class CollectmilkView extends GetView<CollectmilkController> {
               SizedBox(
                 height: 10.h,
               ),
-              Obx(() => SizedBox(
-                    // width: Get.width * 0.7,
-                    // height: 65.h,
-                    child: TextFormWidget(
-                      // readOnly: controller.check,
-                      prefix: InkWell(
-                        onTap: () {
-                          if (controller.farmerId.trim().isNotEmpty) {
-                            controller.getFarmerId();
-                          }
-                        },
-                        child: const Icon(
-                          Icons.search,
-                          size: 30,
-                        ),
-                      ),
-                      initialValue: controller.farmerId,
-                      label: "Please enter FarmerId...",
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
-                      onChanged: (val) {
-                        controller.farmerId = val;
-                        if (controller.farmerId.trim().isNotEmpty) {
-                          controller.getFarmerId();
-                        }
-                      },
-                      // keyboardType:
-                      //     const TextInputType.numberWithOptions(signed: true),
-                      maxLength: 10,
-                      // validator: (val) =>
-                      //     val!.length < 1 ? "Field is required!" : null,
+              SizedBox(
+                // width: Get.width * 0.7,
+                // height: 65.h,
+                child: TextFormWidget(
+                  // readOnly: controller.check,
+                  prefix: InkWell(
+                    onTap: () {
+                      if (controller.farmerId.trim().isNotEmpty) {
+                        controller.getFarmerId();
+                      }
+                    },
+                    child: const Icon(
+                      Icons.search,
+                      size: 30,
                     ),
-                  )),
-
+                  ),
+                  // initialValue: controller.farmerId,
+                  label: "Please enter FarmerId...",
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                  ],
+                  textController: controller.farmerIdC,
+                  onChanged: (val) {
+                    controller.farmerId = val;
+                    if (controller.farmerId.trim().isNotEmpty) {
+                      controller.getFarmerId();
+                    }
+                  },
+                  // keyboardType:
+                  //     const TextInputType.numberWithOptions(signed: true),
+                  maxLength: 10,
+                  // validator: (val) =>
+                  //     val!.length < 1 ? "Field is required!" : null,
+                ),
+              ),
               SizedBox(
                 height: 20.h,
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -249,7 +249,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 // ],
                                 onChanged: (e) async {
                                   // controller.fat.text = e;
-                                  await controller.getRateChart();
+                                  // await controller.getRateChart();
                                 },
 
                                 // onChanged: (e)=> controller.homeController.fat = controller.f,
@@ -366,11 +366,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   ),
                 ],
               ),
-
               SizedBox(
                 height: 20.h,
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -429,208 +427,209 @@ class CollectmilkView extends GetView<CollectmilkController> {
                             )),
                     ],
                   ),
-                  Obx(() => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "PRICE",
+                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Obx(
+                        () => controller.check
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  "PRICE",
-                                  style: Theme.of(Get.context!)
-                                      .textTheme
-                                      .bodySmall,
+                                  controller.homeController.fat.isNotEmpty
+                                      ? controller.getPriceData(false)
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  controller.fat.text.isNotEmpty
+                                      ? controller.getPriceData(true)
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                              SizedBox(
-                                height: 10.h,
-                              ),
-                              controller.check
-                                  ? Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: AppColors.black,
-                                          // width: 2,
-                                        ),
-                                        color: AppColors.white,
-                                      ),
-                                      width: Get.width * .3,
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(
-                                        controller.homeController.fat.isNotEmpty
-                                            ? controller.getPriceData(false)
-                                            : "",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: AppColors.black,
-                                          // width: 2,
-                                        ),
-                                        color: AppColors.white,
-                                      ),
-                                      width: Get.width * .3,
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(
-                                        controller.fat.text.isNotEmpty
-                                            ? controller.getPriceData(true)
-                                            : "",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Align(
-                                alignment: Alignment.centerLeft,
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "AMOUNT",
+                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Obx(
+                        () => controller.check
+                            ? Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  "AMOUNT",
-                                  style: Theme.of(Get.context!)
-                                      .textTheme
-                                      .bodySmall,
+                                  controller.homeController.fat.isNotEmpty
+                                      ? controller.getTotalAmount(false)
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: AppColors.black,
+                                    // width: 2,
+                                  ),
+                                  color: AppColors.white,
+                                ),
+                                width: Get.width * .3,
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  controller.fat.text.isNotEmpty
+                                      ? controller.getTotalAmount(true)
+                                      : "",
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
-                              SizedBox(
-                                height: 10.h,
-                              ),
-                              controller.check
-                                  ? Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: AppColors.black,
-                                          // width: 2,
-                                        ),
-                                        color: AppColors.white,
-                                      ),
-                                      width: Get.width * .3,
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(
-                                        controller.homeController.fat.isNotEmpty
-                                            ? controller.getTotalAmount(false)
-                                            : "",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  : Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: AppColors.black,
-                                          // width: 2,
-                                        ),
-                                        color: AppColors.white,
-                                      ),
-                                      width: Get.width * .3,
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(
-                                        controller.fat.text.isNotEmpty
-                                            ? controller.getTotalAmount(true)
-                                            : "",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelMedium,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                            ],
-                          ),
-                        ],
-                      )),
+                      ),
+                    ],
+                  ),
+                  // ],
+                  // ),
                 ],
               ),
-
               SizedBox(
                 height: 20.h,
               ),
+              Obx(() => !controller.progress
+                  ? Container(
+                      width: Get.width,
+                      // padding: const EdgeInsets.all(20),
+                      margin:
+                          EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (controller.farmerId.isNotEmpty &&
+                              (controller.fat.text.isNotEmpty ||
+                                  controller.homeController.fat.isNotEmpty)) {
+                            controller.progress = true;
+                            await controller.accept().then((value) async {
+                              await controller.printData();
 
-              Container(
-                width: Get.width,
-                // padding: const EdgeInsets.all(20),
-                margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (controller.farmerId.isNotEmpty &&
-                        (controller.fat.text.isNotEmpty ||
-                            controller.homeController.fat.isNotEmpty)) {
-                      await controller.sendCollection().then((value) async {
-                        await controller.checkSmsFlag().then((value) async {
-                          await controller
-                              .getCollectionThirtyDaysData()
-                              .then((value) async {
-                            await controller.printData().then((value) async {
+                              await controller.sendCollection();
+                              await controller.checkSmsFlag();
                               controller.emptyData();
+
+                              // await controller.getCollectionThirtyDaysData();
                               await controller.homeController
                                   .fetchMilkCollectionDateWise();
+                              controller.progress = false;
                             });
-                          });
-                        });
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.green,
-                  ),
-                  child: Text(
-                    "ACCEPT",
-                    style: Theme.of(context)
-                        .textTheme
-                        .displaySmall!
-                        .copyWith(color: AppColors.white),
-                  ),
-                ),
-              ),
-
-              // CustomButton(
-              //   title: "ACCEPT",
-              //   onPressed: () {},
-              // ),
-              // Obx(() => Text("Weight: ${controller.quantity}")),
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: (controller.farmerId.isNotEmpty &&
+                                  (controller.fat.text.isNotEmpty ||
+                                      controller.homeController.fat.isNotEmpty))
+                              ? AppColors.green
+                              : const Color.fromARGB(255, 211, 240, 212),
+                        ),
+                        child: Text(
+                          "ACCEPT",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(color: AppColors.white),
+                        ),
+                      ),
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(),
+                    )),
               SizedBox(
                 height: 20.h,
               ),
-              Container(
-                width: Get.width,
-                // padding: const EdgeInsets.all(20),
-                margin: EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
-                child: ElevatedButton(
-                  onPressed: () {
-                    controller.emptyData();
-                    // Get.offAndToNamed(Routes.COLLECTMILK);
-                    controller.refresh();
-
-                    // Get.back();
-
-                    // controller.sendMessage();
-                    // controller.printData();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.red,
-                  ),
-                  child: Text(
-                    "REJECT",
-                    style: Theme.of(context)
-                        .textTheme
-                        .displaySmall!
-                        .copyWith(color: AppColors.white),
-                  ),
-                ),
-              ),
+              Obx(() => !controller.progress
+                  ? Container(
+                      width: Get.width,
+                      // padding: const EdgeInsets.all(20),
+                      margin:
+                          EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (controller.farmerId.isNotEmpty &&
+                              (controller.fat.text.isNotEmpty ||
+                                  controller.homeController.fat.isNotEmpty)) {
+                            controller.emptyData();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: (controller.farmerId.isNotEmpty &&
+                                  (controller.fat.text.isNotEmpty ||
+                                      controller.homeController.fat.isNotEmpty))
+                              ? AppColors.red
+                              : const Color.fromARGB(255, 247, 170, 165),
+                        ),
+                        child: Text(
+                          "REJECT",
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall!
+                              .copyWith(color: AppColors.white),
+                        ),
+                      ),
+                    )
+                  : const SizedBox()),
             ],
           ),
         )),
