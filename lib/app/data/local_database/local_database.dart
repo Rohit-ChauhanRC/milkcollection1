@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'cans_db.dart';
 import 'farmer_db.dart';
 import 'milk_collection_db.dart';
 import 'ratechart_db.dart';
@@ -40,6 +41,7 @@ class DataBaseService {
     await FarmerDB().createTable(database);
     await RateChartDB().createTable(database);
     await MilkCollectionDB().createTable(database);
+    await CansDB().createTable(database);
     // await ReceivingDB().createTable(database);
     // await SellDB().createTable(database);
     // await ProfileDB().createTable(database);

@@ -16,3 +16,5 @@ const String autoConst = "Auto";
 const String dailyCollection = "DailyCollection";
 const String calculationsId = "calculationsId";
 const String getsmsflag = "getsmsflag";
+const String canReceived = "CanReceived";
+const String getcenterMobile = "getcenter_mobile";

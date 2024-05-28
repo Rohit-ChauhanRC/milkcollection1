@@ -511,11 +511,30 @@ class HomeView extends GetView<HomeController> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               InkWell(
-                onTap: () {
-                  // Get.toNamed(Routes.SHIFTDETAILS);
-                  // controller.printShiftDetails();
-                  controller.showDialogManualPin(onTap: () {
-                    controller.printShiftDetails().then((value) => Get.back());
+                onTap: () async {
+                  await controller.getShiftDetails().then((value) {
+                    if (controller.cansModel.isNotEmpty) {
+                      controller
+                          .printShiftDetails()
+                          .then((value) => Get.back());
+                    } else {
+                      controller.showDialogManualPin(onTap: () async {
+                        await controller.cansDB
+                            .create(
+                          FUploaded: 1,
+                          bufCans: controller.bufCans,
+                          cowCans: controller.cowCans,
+                          date:
+                              DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+                          shift: controller.radio == 1 ? "Am" : "Pm",
+                        )
+                            .then((value) {
+                          controller
+                              .printShiftDetails()
+                              .then((value) => Get.back());
+                        });
+                      });
+                    }
                   });
                 },
                 child: SizedBox(
@@ -601,11 +620,11 @@ class HomeView extends GetView<HomeController> {
                 width: 17.w,
               ),
               InkWell(
-                onTap: () {
-                  // Get.toNamed(Routes.COLLECTMILK);
-                  controller.showDialogManualPin(onTap: () {
+                onTap: () async {
+                  await controller.getShiftDetails().then((value) async {
                     controller.printSummary = true;
-                    Get.back();
+
+                    await controller.checkSmsFlag();
                   });
                 },
                 child: SizedBox(

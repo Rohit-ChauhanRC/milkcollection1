@@ -82,7 +82,7 @@ class CollectmilkController extends GetxController {
   String get pin => _pin.value;
   set pin(String mob) => _pin.value = mob;
 
-  final RxString _shift = "AM".obs;
+  final RxString _shift = "Am".obs;
   String get shift => _shift.value;
   set shift(String i) => _shift.value = i;
 
@@ -167,7 +167,7 @@ class CollectmilkController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-    await getRateChart();
+    // await getRateChart();
   }
 
   @override
@@ -196,22 +196,20 @@ class CollectmilkController extends GetxController {
     print("await rateChartDB.fetchAll(): ${await rateChartDB.fetchAll()}");
   }
 
-  String getPriceData(bool v) {
+  String getPriceData() {
     for (var i = 0; i < rateChartData.length; i++) {
-      if (v) {
-        if (double.tryParse(fat.text) ==
-                double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(snf.text) ==
-                double.tryParse(rateChartData[i].snf)) {
+      if (!check) {
+        if (double.parse(fat.text) == double.parse(rateChartData[i].fat) &&
+            double.parse(snf.text) == double.parse(rateChartData[i].snf)) {
           price = (rateChartData[i].price.toPrecision(2)).toString();
           print(price);
         }
       } else {
         // homeController.
-        if (double.tryParse(homeController.fat) ==
-                double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(homeController.snf) ==
-                double.tryParse(rateChartData[i].snf)) {
+        if (double.parse(homeController.fat) ==
+                double.parse(rateChartData[i].fat) &&
+            double.parse(homeController.snf) ==
+                double.parse(rateChartData[i].snf)) {
           price = (rateChartData[i].price.toPrecision(2)).toString();
           print(price);
         }
@@ -221,33 +219,31 @@ class CollectmilkController extends GetxController {
     return price;
   }
 
-  String getTotalAmount(bool v) {
+  String getTotalAmount() {
     totalAmount = "";
 
     // print("rateChartData: $rateChartData");
 
     for (var i = 0; i < rateChartData.length; i++) {
-      if (v) {
-        if (double.tryParse(fat.text) ==
-                double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(snf.text) ==
-                double.tryParse(rateChartData[i].snf)) {
-          totalAmount = ((rateChartData[i].price *
-                      (double.tryParse(quantity.text) ?? 1.0))
-                  .toPrecision(2))
-              .toString();
+      if (!check) {
+        if (double.parse(fat.text) == double.parse(rateChartData[i].fat) &&
+            double.parse(snf.text) == double.parse(rateChartData[i].snf)) {
+          totalAmount =
+              ((rateChartData[i].price * (double.parse(quantity.text) ?? 1.0))
+                      .toPrecision(2))
+                  .toString();
           print(totalAmount);
         }
         update();
       } else {
-        if (double.tryParse(homeController.fat) ==
-                double.tryParse(rateChartData[i].fat) &&
-            double.tryParse(homeController.snf) ==
-                double.tryParse(rateChartData[i].snf)) {
-          totalAmount = ((rateChartData[i].price *
-                      double.tryParse(homeController.quantity)!)
-                  .toPrecision(2))
-              .toString();
+        if (double.parse(homeController.fat) ==
+                double.parse(rateChartData[i].fat) &&
+            double.parse(homeController.snf) ==
+                double.parse(rateChartData[i].snf)) {
+          totalAmount =
+              ((rateChartData[i].price * double.parse(homeController.quantity))
+                      .toPrecision(2))
+                  .toString();
           print(totalAmount);
         }
       }
@@ -419,7 +415,7 @@ class CollectmilkController extends GetxController {
 
         pinManual.assignAll(pinnmanualModelFromMap(res.body));
         if (pinManual.isNotEmpty) {
-          if (pinManual[0].pin == int.tryParse(pin)) {
+          if (pinManual[0].pin == int.parse(pin)) {
             check = false;
             Utils.closeDialog();
             showDialogSelectShift();
@@ -534,7 +530,7 @@ class CollectmilkController extends GetxController {
                       style: Theme.of(Get.context!).textTheme.displaySmall,
                     ),
                     onTap: () {
-                      shift = "AM";
+                      shift = "Am";
                       shiftTime = 1;
                     },
                   ),
@@ -551,7 +547,7 @@ class CollectmilkController extends GetxController {
                           groupValue: shift,
                           onChanged: (String? i) {
                             print(i);
-                            shift = i!;
+                            shift = "Pm";
                             shiftTime = 2;
                           },
                         ),
@@ -562,7 +558,7 @@ class CollectmilkController extends GetxController {
                       style: Theme.of(Get.context!).textTheme.displaySmall,
                     ),
                     onTap: () {
-                      shift = "PM";
+                      shift = "Pm";
                       shiftTime = 2;
                     },
                   ),
@@ -774,11 +770,11 @@ class CollectmilkController extends GetxController {
       "Milk_Status": "Accepted",
       "Milk_Type": radio == 0 ? "CM" : "BM",
       "Rate_Chart_Name": "1235ABC",
-      "Qty": !check ? quantity : homeController.quantity,
-      "FAT": !check ? fat : homeController.fat,
-      "SNF": !check ? snf : homeController.snf,
-      "Added_Water": !check ? water : homeController.water,
-      "Rate_Per_Liter": !check ? getPriceData(false) : getPriceData(true),
+      "Qty": !check ? quantity.text : homeController.quantity,
+      "FAT": !check ? fat.text : homeController.fat,
+      "SNF": !check ? snf.text : homeController.snf,
+      "Added_Water": !check ? water.text : homeController.water,
+      "Rate_Per_Liter": !check ? getPriceData() : getPriceData(),
       "Total_Amt": totalAmount,
       "CollectionCenterId": box.read(centerIdConst),
       "CollectionCenterName": box.read(centerName),
@@ -804,27 +800,31 @@ class CollectmilkController extends GetxController {
 
   Future<void> accept() async {
     await milkCollectionDB.create(
-        FarmerId: int.tryParse(farmerId),
-        Added_Water: double.tryParse(water.text),
+        FarmerId: int.parse(getFarmerIdFinal()),
+        Added_Water: !check
+            ? double.parse(water.text)
+            : double.parse(homeController.water),
         Analyze_Mode: !check ? manualConst : autoConst,
         CollectionCenterId: box.read(centerIdConst),
         CollectionCenterName: box.read(centerName),
         Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
         Collection_Mode: !check ? manualConst : autoConst,
-        FAT: double.tryParse(fat.text),
+        FAT: !check ? double.parse(fat.text) : double.parse(homeController.fat),
         Farmer_Name: farmerData.farmerName,
         Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
         Milk_Status: "Accepted",
         Milk_Type: radio == 0 ? "CM" : "BM",
-        Qty: double.tryParse(quantity.text),
+        Qty: !check
+            ? double.parse(quantity.text)
+            : double.parse(homeController.quantity),
         Rate_Chart_Name: "1235ABC",
-        Rate_Per_Liter: double.tryParse(price),
-        SNF: double.tryParse(snf.text),
+        Rate_Per_Liter: double.parse(price),
+        SNF: !check ? double.parse(snf.text) : double.parse(homeController.snf),
         Scale_Mode: !check ? manualConst : autoConst,
-        Shift: shift,
+        Shift: shift.capitalizeFirst,
         Total_Amt: !check
-            ? double.tryParse(getTotalAmount(false))
-            : double.tryParse(getTotalAmount(true)),
+            ? double.parse(getTotalAmount())
+            : double.parse(getTotalAmount()),
         FUploaded: !check ? 0 : 1);
   }
 
@@ -857,7 +857,7 @@ class CollectmilkController extends GetxController {
       fat1: !check ? fat.text : homeController.fat,
       getFarmerId: getFarmerIdFinal(),
       milkType: radio == 0 ? "CM" : "BM",
-      price: !check ? getPriceData(false) : getPriceData(true),
+      price: !check ? getPriceData() : getPriceData(),
       quantity1: !check ? quantity.text.toString() : homeController.quantity,
       snf1: !check ? snf.text : homeController.snf,
       totalAmount: totalAmount,
@@ -878,7 +878,7 @@ class CollectmilkController extends GetxController {
     try {
       var res = await http.post(Uri.parse(
           //
-          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_$shift%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData(false) : getPriceData(true)}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
+          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_$shift%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.text.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData() : getPriceData()}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
       if (res.statusCode == 200) {
         Utils.showSnackbar(jsonDecode(res.body)["message"]);
 

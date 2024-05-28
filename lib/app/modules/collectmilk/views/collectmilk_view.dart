@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
-import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
 import 'package:milkcollection/app/widgets/text_form_widget.dart';
@@ -14,7 +13,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
   const CollectmilkView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    controller.getRateChart();
+    // controller.getRateChart();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Maklife'),
@@ -414,8 +413,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 textController: controller.quantity,
                                 onChanged: (e) {
                                   // controller.quantity = e;
-                                  controller.getPriceData(true);
-                                  controller.getTotalAmount(true);
+                                  controller.getPriceData();
+                                  controller.getTotalAmount();
                                 },
                                 // keyboardType: TextInputType.text,
                                 keyboardType: TextInputType.number,
@@ -457,7 +456,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
                                   controller.homeController.fat.isNotEmpty
-                                      ? controller.getPriceData(false)
+                                      ? controller.getPriceData()
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
@@ -477,7 +476,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
                                   controller.fat.text.isNotEmpty
-                                      ? controller.getPriceData(true)
+                                      ? controller.getPriceData()
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
@@ -514,7 +513,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
                                   controller.homeController.fat.isNotEmpty
-                                      ? controller.getTotalAmount(false)
+                                      ? controller.getTotalAmount()
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
@@ -534,7 +533,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
                                   controller.fat.text.isNotEmpty
-                                      ? controller.getTotalAmount(true)
+                                      ? controller.getTotalAmount()
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
