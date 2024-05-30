@@ -10,6 +10,10 @@ import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/payment_summary/bindings/payment_summary_binding.dart';
+import '../modules/payment_summary/views/payment_summary_view.dart';
+import '../modules/payment_summary_details/bindings/payment_summary_details_binding.dart';
+import '../modules/payment_summary_details/views/payment_summary_details_view.dart';
 import '../modules/pinverify/bindings/pinverify_binding.dart';
 import '../modules/pinverify/views/pinverify_view.dart';
 import '../modules/shiftdetails/bindings/shiftdetails_binding.dart';
@@ -58,6 +62,16 @@ class AppPages {
       name: _Paths.FARMERLIST,
       page: () => const FarmerlistView(),
       binding: FarmerlistBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT_SUMMARY,
+      page: () => const PaymentSummaryView(),
+      binding: PaymentSummaryBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT_SUMMARY_DETAILS,
+      page: () => const PaymentSummaryDetailsView(),
+      binding: PaymentSummaryDetailsBinding(),
     ),
   ];
 }

@@ -10,6 +10,8 @@ abstract class Routes {
   static const FARMER = _Paths.FARMER;
   static const SHIFTDETAILS = _Paths.SHIFTDETAILS;
   static const FARMERLIST = _Paths.FARMERLIST;
+  static const PAYMENT_SUMMARY = _Paths.PAYMENT_SUMMARY;
+  static const PAYMENT_SUMMARY_DETAILS = _Paths.PAYMENT_SUMMARY_DETAILS;
 }
 
 abstract class _Paths {
@@ -21,4 +23,6 @@ abstract class _Paths {
   static const FARMER = '/farmer';
   static const SHIFTDETAILS = '/shiftdetails';
   static const FARMERLIST = '/farmerlist';
+  static const PAYMENT_SUMMARY = '/payment-summary';
+  static const PAYMENT_SUMMARY_DETAILS = '/payment-summary-details';
 }

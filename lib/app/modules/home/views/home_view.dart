@@ -580,7 +580,7 @@ class HomeView extends GetView<HomeController> {
               ),
               InkWell(
                 onTap: () {
-                  // Get.toNamed(Routes.P);
+                  Get.toNamed(Routes.PAYMENT_SUMMARY);
                 },
                 child: SizedBox(
                   width: Get.width * 0.16,
@@ -622,9 +622,31 @@ class HomeView extends GetView<HomeController> {
               InkWell(
                 onTap: () async {
                   await controller.getShiftDetails().then((value) async {
-                    controller.printSummary = true;
+                    if (controller.cansModel.isEmpty) {
+                      controller.showDialogManualPin(onTap: () async {
+                        await controller.cansDB
+                            .create(
+                          FUploaded: 1,
+                          bufCans: controller.bufCans,
+                          cowCans: controller.cowCans,
+                          date:
+                              DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+                          shift: controller.radio == 1 ? "Am" : "Pm",
+                        )
+                            .then((value) async {
+                          controller.printSummary = true;
 
-                    await controller.checkSmsFlag();
+                          await controller.checkSmsFlag();
+                        }).then((value) => Get.back());
+                      });
+                    } else {
+                      // await controller.getShiftDetails().then((value) async {
+                      // controller.;
+                      controller.printSummary = true;
+
+                      await controller.checkSmsFlag();
+                      // });
+                    }
                   });
                 },
                 child: SizedBox(

@@ -102,6 +102,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               onChanged: (int? i) {
                                 print(i);
                                 controller.radio = i!;
+                                controller.getRateChart();
                               },
                             ),
                           )),
@@ -109,6 +110,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         child: const Text("Cow"),
                         onTap: () {
                           controller.radio = 0;
+                          controller.getRateChart();
                         },
                       ),
                     ],
@@ -125,6 +127,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               onChanged: (int? i) {
                                 print(i);
                                 controller.radio = i!;
+                                controller.getRateChart();
+                                controller.getPriceData();
+                                controller.getTotalAmount();
                               },
                             ),
                           )),
@@ -132,6 +137,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         child: const Text("Buffallo"),
                         onTap: () {
                           controller.radio = 1;
+                          controller.getRateChart();
+                          controller.getPriceData();
+                          controller.getTotalAmount();
                         },
                       ),
                     ],
@@ -153,7 +161,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   Obx(() => Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "${controller.farmerId.toString().isNotEmpty ? controller.farmerData.farmerId : ""}",
+                          controller.farmerId.toString().isNotEmpty
+                              ? controller.getFarmerIdFinal()
+                              : "",
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       )),
@@ -193,7 +203,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                   },
                   // keyboardType:
                   //     const TextInputType.numberWithOptions(signed: true),
-                  maxLength: 10,
+                  maxLength: 4,
                   // validator: (val) =>
                   //     val!.length < 1 ? "Field is required!" : null,
                 ),
@@ -242,10 +252,10 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 // initialValue: controller.fat.text,
                                 label: "Please enter fat...",
                                 textController: controller.fat,
-                                keyboardType: TextInputType.number,
-                                // inputFormatters: [
-                                //   // FilteringTextInputFormatter.digitsOnly,
-                                // ],
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+
                                 onChanged: (e) async {
                                   // controller.fat.text = e;
                                   // await controller.getRateChart();
@@ -414,7 +424,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 onChanged: (e) {
                                   // controller.quantity = e;
                                   controller.getPriceData();
-                                  controller.getTotalAmount();
+                                  // controller.getTotalAmount();
                                 },
                                 // keyboardType: TextInputType.text,
                                 keyboardType: TextInputType.number,
@@ -560,26 +570,28 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         onPressed: () async {
                           if (controller.farmerId.isNotEmpty &&
                               (controller.fat.text.isNotEmpty ||
-                                  controller.homeController.fat.isNotEmpty)) {
+                                  controller.homeController.fat.isNotEmpty) &&
+                              controller.farmerData.farmerName != "Unknown") {
                             controller.progress = true;
-                            await controller.accept().then((value) async {
-                              await controller.printData();
+                            await controller.accept();
+                            await controller.printData();
 
-                              await controller.sendCollection();
-                              await controller.checkSmsFlag();
-                              controller.emptyData();
+                            await controller.sendCollection();
+                            await controller.checkSmsFlag();
+                            controller.emptyData();
 
-                              // await controller.getCollectionThirtyDaysData();
-                              await controller.homeController
-                                  .fetchMilkCollectionDateWise();
-                              controller.progress = false;
-                            });
+                            // await controller.getCollectionThirtyDaysData();
+                            await controller.homeController
+                                .fetchMilkCollectionDateWise();
+                            controller.progress = false;
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: (controller.farmerId.isNotEmpty &&
                                   (controller.fat.text.isNotEmpty ||
-                                      controller.homeController.fat.isNotEmpty))
+                                      controller
+                                          .homeController.fat.isNotEmpty) &&
+                                  controller.farmerData.farmerName != "Unknown")
                               ? AppColors.green
                               : const Color.fromARGB(255, 211, 240, 212),
                         ),
@@ -608,14 +620,17 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         onPressed: () {
                           if (controller.farmerId.isNotEmpty &&
                               (controller.fat.text.isNotEmpty ||
-                                  controller.homeController.fat.isNotEmpty)) {
+                                  controller.homeController.fat.isNotEmpty) &&
+                              controller.farmerData.farmerName != "Unknown") {
                             controller.emptyData();
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: (controller.farmerId.isNotEmpty &&
                                   (controller.fat.text.isNotEmpty ||
-                                      controller.homeController.fat.isNotEmpty))
+                                      controller
+                                          .homeController.fat.isNotEmpty) &&
+                                  controller.farmerData.farmerName != "Unknown")
                               ? AppColors.red
                               : const Color.fromARGB(255, 247, 170, 165),
                         ),

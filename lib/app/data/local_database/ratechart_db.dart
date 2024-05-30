@@ -50,6 +50,15 @@ class RateChartDB {
     return farmers.map((e) => RatechartModel.fromMap(e)).toList();
   }
 
+  Future<List<RatechartModel>> fetchByMilkType(String milktype) async {
+    final database = await DataBaseService().database;
+    final farmers = await database.rawQuery('''
+        SELECT * from $tableName where MilkType =?
+      ''', [milktype]);
+
+    return farmers.map((e) => RatechartModel.fromMap(e)).toList();
+  }
+
   Future<List<RatechartModel>> fetchPrice(String fat, String snf) async {
     final database = await DataBaseService().database;
     final farmers = await database.rawQuery('''

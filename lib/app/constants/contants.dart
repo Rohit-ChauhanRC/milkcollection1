@@ -18,3 +18,5 @@ const String calculationsId = "calculationsId";
 const String getsmsflag = "getsmsflag";
 const String canReceived = "CanReceived";
 const String getcenterMobile = "getcenter_mobile";
+const String getFatmerPaymentSummaryConst = "GetFatmerPaymentSummary";
+const String getFarmerPaymentDetialsConst = "GetFarmerPaymentDetials";

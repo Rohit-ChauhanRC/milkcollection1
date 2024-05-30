@@ -244,6 +244,8 @@ class HomeController extends GetxController {
     cansModel.assignAll(await cansDB.fetchCans(
         DateFormat("dd-MMM-yyyy").format(DateTime.now()),
         radio == 1 ? "Am" : "Pm"));
+    print(
+        "${await cansDB.fetchCans(DateFormat("dd-MMM-yyyy").format(DateTime.now()), radio == 1 ? "Am" : "Pm")}");
     if (cansModel.isNotEmpty) {
       cowCans = cansModel.first.cowCans != null
           ? cansModel.first.cowCans.toString()
@@ -252,6 +254,7 @@ class HomeController extends GetxController {
           ? cansModel.first.bufCans.toString()
           : "0";
     }
+    // printSummary = true;
   }
 
   Future entryPoint(SendPort sendPort) async {
@@ -291,7 +294,7 @@ class HomeController extends GetxController {
               valueFontSize: 10,
               msgTextAlign: TextAlign.left,
               msg:
-                  'Downloading Rate Chart ${milkType == "C" ? "Cow" : "Buffallo"}');
+                  'Downloading ${milkType == "C" ? "Cow" : "Buffallo"} Rate Chart...');
           if (box.read(ratecounterConst) == null) {
             for (var e in rateChartData) {
               await rateChartDB.create(
@@ -319,7 +322,7 @@ class HomeController extends GetxController {
                   max: rateChartData.length,
                   msgTextAlign: TextAlign.left,
                   msg:
-                      'Downloading Rate Chart ${milkType == "C" ? "Cow" : "Buffallo"}...');
+                      'Downloading ${milkType == "C" ? "Cow" : "Buffallo"} Rate Chart...');
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
@@ -450,21 +453,14 @@ class HomeController extends GetxController {
         client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
 
   void printerSocketConnection(Socket client) {
-    // client.write("object");
-
     client.listen(
       (Uint8List data) {
-        final message = String.fromCharCodes(data);
-
-        print("message:$message");
-        print("printer");
-
         if (printStatus) {
           client.write(printSummaryData);
           printStatus = false;
@@ -478,16 +474,11 @@ class HomeController extends GetxController {
           client.write(printSummaryDetails());
           printSummary = false;
         }
-        // client.write("Santram");
-        // printer = client;
       },
       onError: (error) {
         print("error: $error");
-        // client.destroy();
       },
-      onDone: () {
-        // client.destroy();
-      },
+      onDone: () {},
     );
   }
 
@@ -506,7 +497,7 @@ class HomeController extends GetxController {
         client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
@@ -549,22 +540,22 @@ class HomeController extends GetxController {
         //
         totalMilk += milkCollectionData[i].qty ?? 1.0;
         totalFat +=
-            milkCollectionData[i].fat ?? 1.0 * milkCollectionData[i].qty!;
+            milkCollectionData[i].fat!.toDouble() * milkCollectionData[i].qty!;
         totalSnf +=
-            milkCollectionData[i].snf ?? 1.0 * milkCollectionData[i].qty!;
-        totalWater += milkCollectionData[i].addedWater ?? 1.0;
-        totalPrice += milkCollectionData[i].ratePerLiter ?? 1.0;
-        totalAmt += milkCollectionData[i].totalAmt ?? 1.0;
+            milkCollectionData[i].snf!.toDouble() * milkCollectionData[i].qty!;
+        totalWater += milkCollectionData[i].addedWater!.toDouble();
+        totalPrice += milkCollectionData[i].ratePerLiter!.toDouble();
+        totalAmt += milkCollectionData[i].totalAmt!.toDouble();
         // farmerPrintD.add(
         // "${milkCollectionData[i].farmerId.toString().substring(milkCollectionData[i].farmerId.toString().length - 3, milkCollectionData[i].farmerId.toString().length)} ${milkCollectionData[i].milkType} ${milkCollectionData[i].qty} ${milkCollectionData[i].fat} ${milkCollectionData[i].snf} ${milkCollectionData[i].ratePerLiter} ${milkCollectionData[i].totalAmt}");
         if (milkCollectionData[i].milkType == "CM") {
           totalQtyCow += 1;
           totalMilkCow += milkCollectionData[i].qty!;
-          totalFatCow +=
-              milkCollectionData[i].fat ?? 1.0 * milkCollectionData[i].qty!;
-          totalSnfCow +=
-              milkCollectionData[i].snf ?? 1.0 * milkCollectionData[i].qty!;
-          totalWaterCow += milkCollectionData[i].addedWater ?? 1.0;
+          totalFatCow += milkCollectionData[i].fat!.toDouble() *
+              milkCollectionData[i].qty!;
+          totalSnfCow += milkCollectionData[i].snf!.toDouble() *
+              milkCollectionData[i].qty!;
+          totalWaterCow += milkCollectionData[i].addedWater!.toDouble();
           totalPriceCow += milkCollectionData[i].ratePerLiter!;
           totalAmtCow += milkCollectionData[i].totalAmt!;
         }
@@ -575,9 +566,9 @@ class HomeController extends GetxController {
               milkCollectionData[i].fat! * milkCollectionData[i].qty!;
           totalSnfBuffallo +=
               milkCollectionData[i].snf! * milkCollectionData[i].qty!;
-          totalWaterBuffallo += milkCollectionData[i].addedWater ?? 1.0;
-          totalPriceBuffallo += milkCollectionData[i].ratePerLiter ?? 1.0;
-          totalAmtBuffallo += milkCollectionData[i].totalAmt ?? 1.0;
+          totalWaterBuffallo += milkCollectionData[i].addedWater!.toDouble();
+          totalPriceBuffallo += milkCollectionData[i].ratePerLiter!.toDouble();
+          totalAmtBuffallo += milkCollectionData[i].totalAmt!.toDouble();
         }
       }
     }
@@ -840,12 +831,8 @@ Total Amt   : ${totalAmt.toPrecision(2)}
         recipents.add(mob3);
       }
 
-      String _result = await sendSMS(
-              message: message, recipients: recipents, sendDirect: true)
-          .catchError((onError) {
-        print(onError);
-      });
-      print(_result);
+      await sendSMS(message: message, recipients: recipents, sendDirect: true);
+      // print(_result);
     } catch (e) {
       print(e.toString());
     }

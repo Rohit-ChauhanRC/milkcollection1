@@ -28,16 +28,16 @@ class CansModel {
   factory CansModel.fromMap(Map<String, dynamic> json) => CansModel(
         date: json["_Date_"],
         shift: json["shift"],
-        cowCans: json["cowCans"],
-        bufCans: json["bufCans"],
+        cowCans: json["cow_cans"],
+        bufCans: json["buff_cans"],
         FUploaded: json["FUploaded"] ?? 1,
       );
 
   Map<String, dynamic> toMap() => {
         "_Date_": date,
         "shift": shift,
-        "cowCans": cowCans,
-        "bufCans": bufCans,
+        "cow_cans": cowCans,
+        "buff_cans": bufCans,
         "FUploaded": FUploaded,
       };
 }
