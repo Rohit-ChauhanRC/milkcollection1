@@ -480,7 +480,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 width: Get.width * .3,
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  controller.homeController.fat.isNotEmpty
+                                  controller.homeController.fat.isNotEmpty &&
+                                          controller
+                                              .homeController.snf.isNotEmpty
                                       ? controller.getPriceData()
                                       : "",
                                   style:
@@ -500,7 +502,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 width: Get.width * .3,
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  controller.fat.text.isNotEmpty
+                                  controller.fat.text.isNotEmpty &&
+                                          controller.snf.text.isNotEmpty
                                       ? controller.getPriceData()
                                       : "",
                                   style:
@@ -537,7 +540,11 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 width: Get.width * .3,
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  controller.homeController.fat.isNotEmpty
+                                  controller.homeController.fat.isNotEmpty &&
+                                          controller
+                                              .homeController.snf.isNotEmpty &&
+                                          controller.homeController.quantity
+                                              .isNotEmpty
                                       ? controller.getTotalAmount()
                                       : "",
                                   style:
