@@ -191,6 +191,7 @@ class FarmerController extends GetxController {
       print(jsonDecode(res.body));
 
       if (res.statusCode == 200 && jsonDecode(res.body) == "Added succes..") {
+        Utils.showSnackbar("Add Successfully!");
         await farmerlistController.getFarmerList();
       } else {
         //

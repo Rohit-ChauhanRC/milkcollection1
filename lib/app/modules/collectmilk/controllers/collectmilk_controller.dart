@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:sn_progress_dialog/progress_dialog.dart';
 
 class CollectmilkController extends GetxController {
   //
@@ -34,6 +36,8 @@ class CollectmilkController extends GetxController {
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
 
   final RateChartDB rateChartDB = RateChartDB();
+
+  ProgressDialog pd = ProgressDialog(context: Get.context);
 
   final HomeController homeController =
       Get.put<HomeController>(HomeController());
@@ -94,31 +98,12 @@ class CollectmilkController extends GetxController {
   List<MilkCollectionModel> get exportData => _exportData;
   set exportData(List<MilkCollectionModel> lst) => _exportData.assignAll(lst);
 
-  // final RxString _fat = "".obs;
-  // String get fat => _fat.value;
-  // set fat(String i) => _fat.value = i;
   TextEditingController fat = TextEditingController();
   TextEditingController snf = TextEditingController();
   TextEditingController density = TextEditingController();
   TextEditingController water = TextEditingController();
-  TextEditingController quantity = TextEditingController(text: "0.0");
+  TextEditingController quantity = TextEditingController();
   TextEditingController farmerIdC = TextEditingController();
-
-  // final RxString _snf = "".obs;
-  // String get snf => _snf.value;
-  // set snf(String i) => _snf.value = i;
-
-  // final RxString _density = "".obs;
-  // String get density => _density.value;
-  // set density(String i) => _density.value = i;
-
-  // final RxString _water = "".obs;
-  // String get water => _water.value;
-  // set water(String i) => _water.value = i;
-
-  // final RxString _quantity = "".obs;
-  // String get quantity => _quantity.value;
-  // set quantity(String i) => _quantity.value = i;
 
   final RxList<RatechartModel> _rateChartData = RxList<RatechartModel>();
   List<RatechartModel> get rateChartData => _rateChartData;
@@ -146,6 +131,10 @@ class CollectmilkController extends GetxController {
   bool get progress => _progress.value;
   set progress(bool v) => _progress.value = v;
 
+  final RxBool _circularProgress = true.obs;
+  bool get circularProgress => _circularProgress.value;
+  set circularProgress(bool v) => _circularProgress.value = v;
+
   @override
   void onInit() async {
     super.onInit();
@@ -164,7 +153,7 @@ class CollectmilkController extends GetxController {
     await Permission.storage.request();
 
     // WidgetsBinding.instance.initInstances();
-    await getCollectionThirtyDaysData();
+    // await getCollectionThirtyDaysData();
     await getRateChart();
   }
 
@@ -192,6 +181,11 @@ class CollectmilkController extends GetxController {
     _shift.close();
     _shiftTime.close();
     _totalAmount.close();
+    fat.clear();
+    snf.clear();
+    water.clear();
+    farmerIdC.clear();
+    quantity.clear();
   }
 
   Future<void> getRateChart() async {
@@ -240,9 +234,10 @@ class CollectmilkController extends GetxController {
             snf.text.isNotEmpty &&
             double.parse(fat.text) == double.parse(rateChartData[i].fat) &&
             double.parse(snf.text) == double.parse(rateChartData[i].snf) &&
-            quantity.text.isNotEmpty) {
+            quantity.text.isNotEmpty &&
+            quantity.text != "0.0") {
           totalAmount =
-              ((rateChartData[i].price * (double.parse(quantity.text) ?? 1.0))
+              ((rateChartData[i].price * (double.parse(quantity.text)))
                       .toPrecision(2))
                   .toString();
           // print(totalAmount);
@@ -254,7 +249,8 @@ class CollectmilkController extends GetxController {
                 double.parse(rateChartData[i].fat) &&
             double.parse(homeController.snf) ==
                 double.parse(rateChartData[i].snf) &&
-            homeController.quantity.isNotEmpty) {
+            homeController.quantity.isNotEmpty &&
+            quantity.text != "0.0") {
           totalAmount =
               ((rateChartData[i].price * double.parse(homeController.quantity))
                       .toPrecision(2))
@@ -282,9 +278,15 @@ class CollectmilkController extends GetxController {
       if (res.statusCode == 200) {
         restoreData.assignAll([]);
         // print("res: ${res}");
-        // print("res: ${jsonDecode(res.body.toString())}");
+        print("res: ${jsonDecode(res.body.toString())}");
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
+          pd.show(
+              max: restoreData.length,
+              msgFontSize: 10,
+              valueFontSize: 10,
+              msgTextAlign: TextAlign.left,
+              msg: 'Recover data!...');
           // print(restoreData.length.toString());
           for (var e in restoreData) {
             milkCollectionDB.create(
@@ -310,6 +312,7 @@ class CollectmilkController extends GetxController {
               FUploaded: 1,
             );
           }
+          pd.close();
         }
         // restoreData.assignAll([]);
       } else {
@@ -478,8 +481,12 @@ class CollectmilkController extends GetxController {
             pin = val;
           },
           keyboardType: const TextInputType.numberWithOptions(
-            signed: true,
+            signed: false,
           ),
+          inputFormatters: [
+            // TextInputFormatter(decimalRange: 1),
+            FilteringTextInputFormatter.digitsOnly,
+          ],
           maxLength: 10,
         ),
         // cancel: ,
@@ -600,38 +607,41 @@ class CollectmilkController extends GetxController {
         ),
 
         // cancel: ,
-        confirm: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: InkWell(
-                onTap: () {
-                  Get.back();
-                },
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color: AppColors.darkBrown,
-                    fontSize: AppDimens.font16,
+        confirm: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: AppColors.darkBrown,
+                      fontSize: AppDimens.font16,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: InkWell(
-                onTap: () => Get.back(),
-                child: const Text(
-                  "OK",
-                  style: TextStyle(
-                    color: AppColors.darkBrown,
-                    fontSize: AppDimens.font16,
+              Align(
+                alignment: Alignment.centerRight,
+                child: InkWell(
+                  onTap: () => Get.back(),
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(
+                      color: AppColors.darkBrown,
+                      fontSize: AppDimens.font16,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
 
@@ -792,7 +802,7 @@ class CollectmilkController extends GetxController {
       "Collection_Date":
           DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
       "Inserted_Time": DateFormat("hh:mm:ss").format(DateTime.now()).toString(),
-      "Calculations_ID": (box.read(calculationsId) + 1).toString(),
+      "Calculations_ID": (box.read(calculationsId) ?? 0 + 1).toString(),
       "FarmerId": getFarmerIdFinal(),
       "Farmer_Name": farmerData.farmerName,
       "Collection_Mode": !check ? manualConst : autoConst,
@@ -820,11 +830,14 @@ class CollectmilkController extends GetxController {
           body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
         // Utils.showSnackbar("accepted!");
-
+        progress = false;
         //  ;
-      } else {}
+      } else {
+        progress = false;
+      }
     } catch (e) {
       print(e.toString());
+      progress = false;
     }
     // emptyData();
   }
@@ -867,15 +880,15 @@ class CollectmilkController extends GetxController {
     snf.clear();
     water.clear();
     quantity.clear();
-    price = "0.0";
-    totalAmount = "0.0";
+    price = "";
+    totalAmount = "";
     farmerData = FarmerListModel();
     // farmerId.clear();
     radio = 0;
-    homeController.fat = "0.0";
-    homeController.snf = "0.0";
-    homeController.water = "0.0";
-    homeController.quantity = "0.0";
+    homeController.fat = "";
+    homeController.snf = "";
+    homeController.water = "";
+    homeController.quantity = "";
     farmerIdC.clear();
     // _farmerId.value = farmerId;
     update();
@@ -901,6 +914,7 @@ class CollectmilkController extends GetxController {
       "CenterId": box.read(centerIdConst),
     });
     if (res.statusCode == 200 && jsonDecode(res.body) == "Y") {
+      progress = false;
       await sendMessage();
     }
   }

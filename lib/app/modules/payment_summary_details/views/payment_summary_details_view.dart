@@ -20,12 +20,24 @@ class PaymentSummaryDetailsView
         child: SingleChildScrollView(
           child: Column(
             children: [
+              SizedBox(
+                  width: 100,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      controller.printSummary();
+                    },
+                    child: Text(
+                      "Print",
+                      style: Theme.of(context).textTheme.bodySmall!,
+                    ),
+                  )),
               Obx(() =>
                   controller.farmerPaymentList.isNotEmpty && controller.progress
                       ? Container(
                           margin: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 10),
-                          height: Get.height * 0.85,
+                          height: Get.height * 0.75,
+                          // color: Colors.amber,
                           child: ListView.builder(
                               itemCount: controller.farmerPaymentList.length,
                               itemBuilder: (ctx, i) {

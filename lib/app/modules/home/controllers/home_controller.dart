@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_sms_android/flutter_sms.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -15,6 +16,8 @@ import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/cans_model.dart';
 import 'package:milkcollection/app/data/models/centerMobileSmsModel.dart';
+import 'package:milkcollection/app/data/models/get_farmer_payment_details_model.dart';
+import 'package:milkcollection/app/data/models/get_farmer_payment_model.dart';
 import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/theme/app_dimens.dart';
@@ -209,9 +212,49 @@ class HomeController extends GetxController {
   String get bufCans => _bufCans.value;
   set bufCans(String b) => _bufCans.value = b;
 
+  final RxBool _printPaymentSummary = false.obs;
+  bool get printPaymentSummary => _printPaymentSummary.value;
+  set printPaymentSummary(bool b) => _printPaymentSummary.value = b;
+
+  final RxBool _printPaymentDetails = false.obs;
+  bool get printPaymentDetails => _printPaymentDetails.value;
+  set printPaymentDetails(bool b) => _printPaymentDetails.value = b;
+
+  final RxList<GetFarmerPaymentModel> _farmerPaymentList =
+      RxList<GetFarmerPaymentModel>();
+  List<GetFarmerPaymentModel> get farmerPaymentList => _farmerPaymentList;
+  set farmerPaymentList(List<GetFarmerPaymentModel> lst) =>
+      _farmerPaymentList.assignAll(lst);
+
+  final RxList<GetFarmerPaymentModel> _searchfarmerPaymentList =
+      RxList<GetFarmerPaymentModel>();
+  List<GetFarmerPaymentModel> get searchfarmerPaymentList =>
+      _searchfarmerPaymentList;
+  set searchfarmerPaymentList(List<GetFarmerPaymentModel> lst) =>
+      _searchfarmerPaymentList.assignAll(lst);
+
+  final RxBool _searchActive = false.obs;
+  bool get searchActive => _searchActive.value;
+  set searchActive(bool v) => _searchActive.value = v;
+
+  final RxString _fromDateP = "".obs;
+  String get fromDateP => _fromDateP.value;
+  set fromDateP(String str) => _fromDateP.value = str;
+
+  final RxString _toDateP = "".obs;
+  String get toDateP => _toDateP.value;
+  set toDateP(String str) => _toDateP.value = str;
+
+  final RxString _printDetailsPaymentFarmer = "".obs;
+  String get printDetailsPaymentFarmer => _printDetailsPaymentFarmer.value;
+  set printDetailsPaymentFarmer(String str) =>
+      _printDetailsPaymentFarmer.value = str;
+
   @override
   void onInit() async {
     super.onInit();
+    await checkIp();
+
     if (DateTime.now().hour < 12) {
       radio = 1;
     } else {
@@ -225,7 +268,6 @@ class HomeController extends GetxController {
     });
     await fetchMilkCollectionDateWise();
     // await callApi();
-    await checkIp();
 
     // await
   }
@@ -294,7 +336,7 @@ class HomeController extends GetxController {
               valueFontSize: 10,
               msgTextAlign: TextAlign.left,
               msg:
-                  'Downloading ${milkType == "C" ? "Cow" : "Buffallo"} Rate Chart...');
+                  'Downloading ${milkType == "C" ? "CM" : "BM"} Rate Chart...');
           if (box.read(ratecounterConst) == null) {
             for (var e in rateChartData) {
               await rateChartDB.create(
@@ -322,7 +364,7 @@ class HomeController extends GetxController {
                   max: rateChartData.length,
                   msgTextAlign: TextAlign.left,
                   msg:
-                      'Downloading ${milkType == "C" ? "Cow" : "Buffallo"} Rate Chart...');
+                      'Downloading ${milkType == "C" ? "CM" : "BM"} Rate Chart...');
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
@@ -422,30 +464,25 @@ class HomeController extends GetxController {
     client.listen(
       (Uint8List data) {
         final message = String.fromCharCodes(data);
-        // analyzer = client;
 
-        print(message);
+        print(" annalyzer $message");
 
-        // collectmilkController.fat =
-        //     "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
-        fat =
-            "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
-        print(fat);
-        // collectmilkController.snf =
-        //     "${message.split(" ")[1].split("@")[3]}.${message.split(" ")[1].split("@")[4]}";
-        snf =
-            "${message.split(" ")[1].split("@")[3]}.${message.split(" ")[1].split("@")[4]}";
-        print(snf);
-        density =
-            "${message.split(" ")[1].split("@")[5]}.${message.split(" ")[1].split("@")[6]}";
-        // collectmilkController.density =
-        //     "${message.split(" ")[1].split("@")[5]}.${message.split(" ")[1].split("@")[6]}";
-        print(density);
-        water =
-            "${message.split(" ")[1].split("@")[7]}.${message.split(" ")[1].split("@")[8]}";
-        // collectmilkController.water =
-        //     "${message.split(" ")[1].split("@")[7]}.${message.split(" ")[1].split("@")[8]}";
-        print(water);
+        // if(message.split(" "))
+
+        if (message.split(" ")[1].split("@").length < 4) {
+          print("tata: $message");
+        } else {
+          fat =
+              "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
+          snf =
+              "${message.split(" ")[1].split("@")[3]}.${message.split(" ")[1].split("@")[4]}";
+
+          density =
+              "${message.split(" ")[1].split("@")[5]}.${message.split(" ")[1].split("@")[6]}";
+          water =
+              "${message.split(" ")[1].split("@")[7]}.${message.split(" ")[1].split("@")[8]}";
+        }
+
         update();
       },
       onError: (error) {
@@ -453,7 +490,7 @@ class HomeController extends GetxController {
         client.destroy();
       },
       onDone: () {
-        // client.destroy();
+        client.destroy();
       },
     );
   }
@@ -461,6 +498,13 @@ class HomeController extends GetxController {
   void printerSocketConnection(Socket client) {
     client.listen(
       (Uint8List data) {
+        final message = String.fromCharCodes(data);
+
+        print(" printer $message");
+        print(" printer ${client.remoteAddress}: ${client.port}");
+        // GET Hex@2@7@4@2@8@6@1@6@@
+        // client.write("pulkit");
+
         if (printStatus) {
           client.write(printSummaryData);
           printStatus = false;
@@ -474,11 +518,22 @@ class HomeController extends GetxController {
           client.write(printSummaryDetails());
           printSummary = false;
         }
+        if (printPaymentSummary) {
+          client.write(printPaymentsFarmerList());
+          printPaymentSummary = false;
+        }
+        if (printPaymentDetails) {
+          client.write(printDetailsPaymentFarmer);
+          printPaymentDetails = false;
+        }
       },
       onError: (error) {
         print("error: $error");
+        client.destroy();
       },
-      onDone: () {},
+      onDone: () {
+        client.destroy();
+      },
     );
   }
 
@@ -497,7 +552,7 @@ class HomeController extends GetxController {
         client.destroy();
       },
       onDone: () {
-        // client.destroy();
+        client.destroy();
       },
     );
   }
@@ -666,8 +721,12 @@ Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
                 // print(initialValue);
               },
               keyboardType: const TextInputType.numberWithOptions(
-                signed: true,
+                signed: false,
+                decimal: false,
               ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
               maxLength: 10,
             ),
             Align(
@@ -689,8 +748,12 @@ Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
                 // print(initialValue);
               },
               keyboardType: const TextInputType.numberWithOptions(
-                signed: true,
+                signed: false,
+                decimal: false,
               ),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
               maxLength: 10,
             ),
           ],
@@ -855,5 +918,62 @@ Total Amt   : ${totalAmt.toPrecision(2)}
     } catch (e) {
       print(e.toString());
     }
+  }
+
+  String printPaymentsFarmerList() {
+    late String farmDet = "";
+    final data = !searchActive ? farmerPaymentList : searchfarmerPaymentList;
+
+    for (var i = 0; i < data.length; i++) {
+      farmDet +=
+          "${data[i].idNo}      ${data[i].farmerName}\n${data[i].totalQty} ${data[i].totalAmount} ${data[i].paymentId} ${data[i].payGenerationDate.toString().substring(5)}\n";
+    }
+    var prin = """
+Center Id   : ${box.read(centerIdConst)}
+Center Name : ${box.read(centerName)} 
+From date   : $fromDateP
+To Date     : $toDateP
+Farmer Id  Farmer Name
+Qty   Amt   PI'd   Gdate**********01-10**********
+$farmDet
+
+
+""";
+    return prin;
+  }
+
+  void printFarmerPaymentDetails({
+    required List<GetFarmerPaymentDetailsModel> data,
+    required String farmerName,
+    required String farmerId,
+  }) {
+    late String farmDet = "";
+    late double totalAmt = 0.0;
+    late double totalQty = 0.0;
+    for (var i = 0; i < data.length; i++) {
+      totalAmt += double.parse(data[i].totalAmount.toString());
+      totalQty += double.parse(data[i].quantity.toString());
+      farmDet +=
+          "${data[i].collectionDate.toString().substring(0, 2)} ${data[i].shift} ${data[i].milkType.toString().substring(0, 1)} ${double.parse(data[i].fat.toString()).toPrecision(1)} ${double.parse(data[i].snf.toString()).toPrecision(1)} ${data[i].quantity.toString()} ${data[i].rate} ${data[i].totalAmount}\n";
+    }
+
+    printDetailsPaymentFarmer = """
+******* Payment Details *******
+Date :${DateFormat("dd-MMM-yyyy").format(DateTime.now())} Time :${DateFormat("hh:mm:ss").format(DateTime.now())}
+C Id : ${box.read(centerIdConst)}
+C Name : ${box.read(centerName)} 
+F Id : $farmerId
+F Name : $farmerName
+From:$fromDateP To:$toDateP 
+Dt Sf M Fat Snf Qty Price Amt
+$farmDet
+Total Quantity : $totalQty
+Total Amount   : $totalAmt
+
+
+
+""";
+    printPaymentDetails = true;
+    // return prin;
   }
 }

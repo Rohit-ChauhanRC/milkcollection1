@@ -172,7 +172,9 @@ class FarmerView extends GetView<FarmerController> {
                                     initialValue: controller.accountNumber,
                                     onChanged: (p0) =>
                                         controller.accountNumber = p0,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true, signed: false),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
@@ -255,7 +257,9 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.aadharCard,
                               onChanged: (p0) => controller.aadharCard = p0,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true, signed: false),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
@@ -281,7 +285,9 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.mobileNumber,
                               onChanged: (p0) => controller.mobileNumber = p0,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true, signed: false),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
@@ -307,7 +313,9 @@ class FarmerView extends GetView<FarmerController> {
                             child: TextFormWidget(
                               initialValue: controller.numberOfCows,
                               onChanged: (p0) => controller.numberOfCows = p0,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true, signed: false),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
@@ -333,7 +341,9 @@ class FarmerView extends GetView<FarmerController> {
                               initialValue: controller.numberOfBuffalo,
                               onChanged: (p0) =>
                                   controller.numberOfBuffalo = p0,
-                              keyboardType: TextInputType.number,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true, signed: false),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
                               ],

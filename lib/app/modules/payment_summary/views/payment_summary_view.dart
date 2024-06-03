@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:milkcollection/app/data/models/get_farmer_payment_model.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
@@ -40,10 +39,10 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                           lastDate: DateTime(2101),
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
                         ).then((selectedDate) async {
-                          controller.fromDate = DateFormat("dd-MMM-yyyy")
-                              .format(DateTime.parse(
+                          controller.homeController.fromDateP =
+                              DateFormat("dd-MMM-yyyy").format(DateTime.parse(
                                   selectedDate!.toIso8601String()));
-                          print(controller.fromDate);
+                          print(controller.homeController.fromDateP);
                         });
                       },
                       child: Row(
@@ -53,8 +52,8 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                             color: AppColors.white,
                           ),
                           Obx(() => Text(
-                                controller.fromDate.isNotEmpty
-                                    ? controller.fromDate
+                                controller.homeController.fromDateP.isNotEmpty
+                                    ? controller.homeController.fromDateP
                                     : "from date",
                                 style: Theme.of(context)
                                     .textTheme
@@ -76,9 +75,10 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                           lastDate: DateTime(2101),
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
                         ).then((selectedDate) async {
-                          controller.toDate = DateFormat("dd-MMM-yyyy").format(
-                              DateTime.parse(selectedDate!.toIso8601String()));
-                          print(controller.toDate);
+                          controller.homeController.toDateP =
+                              DateFormat("dd-MMM-yyyy").format(DateTime.parse(
+                                  selectedDate!.toIso8601String()));
+                          print(controller.homeController.toDateP);
                         });
                       },
                       child: Row(
@@ -88,8 +88,8 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                             color: AppColors.white,
                           ),
                           Obx(() => Text(
-                                controller.toDate.isNotEmpty
-                                    ? controller.toDate
+                                controller.homeController.toDateP.isNotEmpty
+                                    ? controller.homeController.toDateP
                                     : "to date",
                                 style: Theme.of(context)
                                     .textTheme
@@ -116,6 +116,17 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                   ],
                 ),
               ),
+              SizedBox(
+                  width: 100,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      controller.printSummary();
+                    },
+                    child: Text(
+                      "Print",
+                      style: Theme.of(context).textTheme.bodySmall!,
+                    ),
+                  )),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Align(
@@ -144,10 +155,10 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                       onChanged: (val) {
                         controller.search = val;
                         if (controller.search.trim().isNotEmpty) {
-                          controller.searchActive = true;
+                          controller.homeController.searchActive = true;
                           controller.getSearchFarmerData();
                         } else {
-                          controller.searchActive = false;
+                          controller.homeController.searchActive = false;
                           controller.getFamerPaymentSummaryApi();
                         }
                       },
@@ -158,25 +169,30 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
               const SizedBox(
                 height: 10,
               ),
-              Obx(() => controller.farmerPaymentList.isNotEmpty
+              Obx(() => controller.homeController.farmerPaymentList.isNotEmpty
                   ? Container(
                       margin: const EdgeInsets.symmetric(horizontal: 10),
                       height: Get.height * 0.7,
                       child: ListView.builder(
-                          itemCount: controller.searchActive
-                              ? controller.searchfarmerPaymentList.length
-                              : controller.farmerPaymentList.length,
+                          itemCount: controller.homeController.searchActive
+                              ? controller
+                                  .homeController.searchfarmerPaymentList.length
+                              : controller
+                                  .homeController.farmerPaymentList.length,
                           itemBuilder: (ctx, i) {
-                            final farmer = controller.searchActive
-                                ? controller.searchfarmerPaymentList[i]
-                                : controller.farmerPaymentList[i];
+                            final farmer =
+                                controller.homeController.searchActive
+                                    ? controller.homeController
+                                        .searchfarmerPaymentList[i]
+                                    : controller
+                                        .homeController.farmerPaymentList[i];
                             return InkWell(
                               onTap: () {
                                 Get.toNamed(Routes.PAYMENT_SUMMARY_DETAILS,
                                     arguments: [
                                       farmer.idNo,
-                                      controller.fromDate,
-                                      controller.toDate
+                                      controller.homeController.fromDateP,
+                                      controller.homeController.toDateP
                                     ]);
                               },
                               child: PaymentFarmerWidget(

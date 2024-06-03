@@ -3,11 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
+import 'package:milkcollection/app/widgets/decimal_nu.dart';
 import 'package:milkcollection/app/widgets/text_form_widget.dart';
 
 import '../controllers/collectmilk_controller.dart';
+import 'package:flutter/services.dart';
 
 class CollectmilkView extends GetView<CollectmilkController> {
   const CollectmilkView({Key? key}) : super(key: key);
@@ -248,8 +251,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               // height: 65.h,
                               child: TextFormWidget(
-                                // readOnly: controller.check,
-                                // initialValue: controller.fat.text,
                                 label: "Please enter fat...",
                                 textController: controller.fat,
                                 keyboardType:
@@ -260,10 +261,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   // controller.fat.text = e;
                                   // await controller.getRateChart();
                                 },
-
+                                inputFormatters: [
+                                  DecimalTextInputFormatter(decimalRange: 1),
+                                ],
                                 // onChanged: (e)=> controller.homeController.fat = controller.f,
                                 // keyboardType: TextInputType.text,
-                                maxLength: 10,
+                                maxLength: 3,
                               ),
                             )),
                     ],
@@ -312,10 +315,13 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 // onChanged: (e) => controller.snf = e,
 
                                 // keyboardType: TextInputType.text,
-                                keyboardType: TextInputType.number,
-                                // inputFormatters: [
-                                //   FilteringTextInputFormatter.digitsOnly,
-                                // ],
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                inputFormatters: [
+                                  DecimalTextInputFormatter(decimalRange: 1),
+                                  // FilteringTextInputFormatter.digitsOnly,
+                                ],
                                 maxLength: 10,
                               ),
                             )),
@@ -366,8 +372,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 // },
 
                                 // keyboardType: TextInputType.text,
-                                keyboardType: TextInputType.number,
-
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                inputFormatters: [
+                                  DecimalTextInputFormatter(decimalRange: 1),
+                                ],
                                 maxLength: 10,
                               ),
                             )),
@@ -423,15 +433,20 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 textController: controller.quantity,
                                 onChanged: (e) {
                                   // controller.quantity = e;
-                                  controller.getPriceData();
+                                  // controller.getPriceData();
                                   // controller.getTotalAmount();
                                 },
                                 // keyboardType: TextInputType.text,
-                                keyboardType: TextInputType.number,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true, signed: false),
+                                inputFormatters: [
+                                  // DecimalTextInputFormatter(decimalRange: 1),
+                                ],
                                 // inputFormatters: [
                                 //   FilteringTextInputFormatter.digitsOnly,
                                 // ],
-                                maxLength: 10,
+                                // maxLength: 3,
                               ),
                             )),
                     ],
@@ -542,7 +557,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 width: Get.width * .3,
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
-                                  controller.fat.text.isNotEmpty
+                                  controller.fat.text.isNotEmpty &&
+                                          controller.snf.text.isNotEmpty &&
+                                          controller.quantity.text.isNotEmpty
                                       ? controller.getTotalAmount()
                                       : "",
                                   style:
@@ -566,43 +583,126 @@ class CollectmilkView extends GetView<CollectmilkController> {
                       // padding: const EdgeInsets.all(20),
                       margin:
                           EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (controller.farmerId.isNotEmpty &&
-                              (controller.fat.text.isNotEmpty ||
-                                  controller.homeController.fat.isNotEmpty) &&
-                              controller.farmerData.farmerName != "Unknown") {
-                            controller.progress = true;
-                            await controller.accept();
-                            await controller.printData();
+                      child: controller.check
+                          ? ElevatedButton(
+                              onPressed: () async {
+                                bool result = await InternetConnection()
+                                    .hasInternetAccess;
 
-                            await controller.sendCollection();
-                            await controller.checkSmsFlag();
-                            controller.emptyData();
+                                if (controller.farmerId.isNotEmpty &&
+                                    controller.homeController.fat.isNotEmpty &&
+                                    controller.farmerData.farmerName !=
+                                        "Unknown" &&
+                                    controller
+                                        .homeController.water.isNotEmpty &&
+                                    controller
+                                        .homeController.quantity.isNotEmpty) {
+                                  if (double.parse(
+                                              controller.homeController.fat) <=
+                                          10 &&
+                                      double.parse(
+                                              controller.homeController.snf) <=
+                                          10) {
+                                    controller.progress = true;
+                                    await controller.accept();
+                                    await controller.printData();
+                                    if (result) {
+                                      await controller.sendCollection();
+                                      await controller.checkSmsFlag();
+                                      await controller.homeController
+                                          .fetchMilkCollectionDateWise();
+                                    }
 
-                            // await controller.getCollectionThirtyDaysData();
-                            await controller.homeController
-                                .fetchMilkCollectionDateWise();
-                            controller.progress = false;
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: (controller.farmerId.isNotEmpty &&
-                                  (controller.fat.text.isNotEmpty ||
-                                      controller
-                                          .homeController.fat.isNotEmpty) &&
-                                  controller.farmerData.farmerName != "Unknown")
-                              ? AppColors.green
-                              : const Color.fromARGB(255, 211, 240, 212),
-                        ),
-                        child: Text(
-                          "ACCEPT",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall!
-                              .copyWith(color: AppColors.white),
-                        ),
-                      ),
+                                    controller.emptyData();
+                                    controller.progress = false;
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (controller
+                                            .farmerId.isNotEmpty &&
+                                        (controller
+                                            .homeController.fat.isNotEmpty) &&
+                                        controller.farmerData.farmerName !=
+                                            "Unknown" &&
+                                        (controller
+                                            .homeController.water.isNotEmpty) &&
+                                        (controller.homeController.quantity
+                                            .isNotEmpty))
+                                    ? (double.parse(controller
+                                                    .homeController.fat) <=
+                                                10 &&
+                                            double.parse(controller
+                                                    .homeController.snf) <=
+                                                10)
+                                        ? AppColors.green
+                                        : const Color.fromARGB(
+                                            255, 211, 240, 212)
+                                    : const Color.fromARGB(255, 211, 240, 212),
+                              ),
+                              child: Text(
+                                "ACCEPT",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displaySmall!
+                                    .copyWith(color: AppColors.white),
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: () async {
+                                bool result = await InternetConnection()
+                                    .hasInternetAccess;
+
+                                if (controller.farmerId.isNotEmpty &&
+                                    controller.fat.text.isNotEmpty &&
+                                    controller.farmerData.farmerName !=
+                                        "Unknown" &&
+                                    controller.water.text.isNotEmpty &&
+                                    controller.quantity.text.isNotEmpty &&
+                                    controller.totalAmount.isNotEmpty) {
+                                  if (double.parse(controller.fat.text) <= 10 &&
+                                      double.parse(controller.snf.text) <= 10) {
+                                    controller.progress = true;
+                                    await controller.accept();
+                                    await controller.printData();
+
+                                    if (result) {
+                                      await controller.sendCollection();
+                                      await controller.checkSmsFlag();
+                                      await controller.homeController
+                                          .fetchMilkCollectionDateWise();
+                                    }
+                                    controller.emptyData();
+                                    controller.progress = false;
+                                  }
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: (controller
+                                            .farmerId.isNotEmpty &&
+                                        (controller.fat.text.isNotEmpty) &&
+                                        controller.farmerData.farmerName !=
+                                            "Unknown" &&
+                                        (controller.water.text.isNotEmpty) &&
+                                        (controller.quantity.text.isNotEmpty) &&
+                                        controller.totalAmount.isNotEmpty)
+                                    ? (double.parse(controller.fat.text) <=
+                                                10 &&
+                                            double.parse(controller.snf.text) <=
+                                                10)
+                                        ? AppColors.green
+                                        : const Color.fromARGB(
+                                            255, 211, 240, 212)
+                                    : const Color.fromARGB(255, 211, 240, 212),
+                              ),
+                              child: Text(
+                                "ACCEPT",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .displaySmall!
+                                    .copyWith(color: AppColors.white),
+                              ),
+                            ),
                     )
                   : const Center(
                       child: CircularProgressIndicator(),
@@ -621,7 +721,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                           if (controller.farmerId.isNotEmpty &&
                               (controller.fat.text.isNotEmpty ||
                                   controller.homeController.fat.isNotEmpty) &&
-                              controller.farmerData.farmerName != "Unknown") {
+                              controller.farmerData.farmerName != "Unknown" &&
+                              controller.totalAmount.isNotEmpty) {
                             controller.emptyData();
                           }
                         },

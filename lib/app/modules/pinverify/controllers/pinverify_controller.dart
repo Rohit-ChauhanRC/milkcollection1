@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
@@ -73,13 +74,21 @@ class PinverifyController extends GetxController {
     }
 
     if (box.read(pinConst) == pin) {
-      await getFamerDataDB().then((v) async {
-        await getFarmerList().then((value) async {
-          await postMilkCollectionDataDB();
-        });
-      });
+      bool result = await InternetConnection().hasInternetAccess;
 
-      box.write(verifyConst, true).then((value) => Get.offNamed(Routes.HOME));
+      if (result) {
+        await getFamerDataDB().then((v) async {
+          await getFarmerList().then((value) async {
+            await postMilkCollectionDataDB().then((value) async {
+              box
+                  .write(verifyConst, true)
+                  .then((value) => Get.offNamed(Routes.HOME));
+            });
+          });
+        });
+      } else {
+        box.write(verifyConst, true).then((value) => Get.offNamed(Routes.HOME));
+      }
     } else {
       Utils.showDialog("Incorrect pin!");
     }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/models/login_model.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../routes/app_pages.dart';
 import '../../../utils/utils.dart';
@@ -36,8 +37,10 @@ class LoginController extends GetxController {
   set loginModel(List<LoginModel> lst) => _loginModel.assignAll(lst);
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
+
+    await Permission.storage.request();
   }
 
   @override

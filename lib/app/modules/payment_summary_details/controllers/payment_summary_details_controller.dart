@@ -3,11 +3,14 @@ import 'package:get_storage/get_storage.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/models/get_farmer_payment_details_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:milkcollection/app/modules/home/controllers/home_controller.dart';
 
 class PaymentSummaryDetailsController extends GetxController {
   //farmer.idNo,
   // controller.fromDate,
   // controller.toDate
+
+  final HomeController homeController = Get.find();
 
   final box = GetStorage();
 
@@ -61,5 +64,15 @@ class PaymentSummaryDetailsController extends GetxController {
       } else {}
     } catch (e) {}
     progress = true;
+  }
+
+  void printSummary() {
+    if (farmerPaymentList.isNotEmpty) {
+      homeController.printFarmerPaymentDetails(
+        data: farmerPaymentList,
+        farmerId: farmerPaymentList[0].idNo.toString(),
+        farmerName: farmerPaymentList[0].farmerName.toString(),
+      );
+    }
   }
 }
