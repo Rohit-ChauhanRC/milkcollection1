@@ -19,7 +19,7 @@ void main() async {
         splitScreenMode: true,
         builder: (_, child) {
           return GetMaterialApp(
-            title: "MaklifeEcom",
+            title: "Milk Collection",
             initialRoute: box.read("verify") != null
                 ? AppPages.INITIAL1
                 : AppPages.INITIAL,

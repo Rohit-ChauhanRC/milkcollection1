@@ -77,12 +77,15 @@ class PinverifyController extends GetxController {
       bool result = await InternetConnection().hasInternetAccess;
 
       if (result) {
+        circularProgress = false;
         await getFamerDataDB().then((v) async {
           await getFarmerList().then((value) async {
             await postMilkCollectionDataDB().then((value) async {
-              box
-                  .write(verifyConst, true)
-                  .then((value) => Get.offNamed(Routes.HOME));
+              // restoreData.assignAll(await milkCollectionDB.fetchAll());
+              box.write(verifyConst, true).then((value) => {
+                    circularProgress = true,
+                    Get.offNamed(Routes.HOME),
+                  });
             });
           });
         });
@@ -128,7 +131,7 @@ class PinverifyController extends GetxController {
             } else {
               //
             }
-            circularProgress = true;
+            // circularProgress = true;
           } catch (e) {
             // apiLopp(i);
             print(e);
@@ -146,36 +149,32 @@ class PinverifyController extends GetxController {
           try {
             var res = await http
                 .post(Uri.parse("$baseUrlConst/$dailyCollection"), body: {
-              "Collection_Date": e.collectionDate,
-              "Inserted_Time": e.insertedTime,
-              "Calculations_ID": e.calculationsId,
-              "FarmerId": e.farmerId,
-              "Farmer_Name": e.farmerName,
-              "Collection_Mode": e.collectionMode,
-              "Scale_Mode": e.scaleMode,
-              "Analyze_Mode": e.analyzeMode,
-              "Milk_Status": e.milkStatus,
-              "Milk_Type": e.milkType,
-              "Rate_Chart_Name": e.rateChartName,
-              "Qty": e.qty,
-              "FAT": e.fat,
-              "SNF": e.snf,
-              "Added_Water": e.addedWater,
-              "Rate_Per_Liter": e.ratePerLiter,
-              "Total_Amt": e.totalAmt,
-              "CollectionCenterId": e.collectionCenterId,
-              "CollectionCenterName": e.collectionCenterName,
-              "Shift": e.shift,
+              "Collection_Date": e.collectionDate.toString(),
+              "Inserted_Time": e.insertedTime.toString(),
+              "Calculations_ID": "",
+              "FarmerId": e.farmerId.toString(),
+              "Farmer_Name": e.farmerName.toString(),
+              "Collection_Mode": e.collectionMode.toString(),
+              "Scale_Mode": e.scaleMode.toString(),
+              "Analyze_Mode": e.analyzeMode.toString(),
+              "Milk_Status": e.milkStatus.toString(),
+              "Milk_Type": e.milkType.toString(),
+              "Rate_Chart_Name": e.rateChartName.toString(),
+              "Qty": e.qty.toString(),
+              "FAT": e.fat.toString(),
+              "SNF": e.snf.toString(),
+              "Added_Water": e.addedWater.toString(),
+              "Rate_Per_Liter": e.ratePerLiter.toString(),
+              "Total_Amt": e.totalAmt.toString(),
+              "CollectionCenterId": e.collectionCenterId.toString(),
+              "CollectionCenterName": e.collectionCenterName.toString(),
+              "Shift": e.shift.toString(),
             });
 
-            if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
+            if (res.statusCode == 200) {
               print(jsonDecode(res.body));
-            } else {
-              //
             }
-            circularProgress = true;
           } catch (e) {
-            // apiLopp(i);
             print(e);
           }
         }
@@ -223,11 +222,11 @@ class PinverifyController extends GetxController {
         //
         // Utils.showDialog(json.decode(res.body));
       }
-      circularProgress = true;
+      // circularProgress = true;
     } catch (e) {
       // Get.toNamed(Routes.HOME);
       // apiLopp(i);
-      circularProgress = true;
+      // circularProgress = true;
     }
   }
 }

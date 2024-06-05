@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
@@ -105,17 +106,25 @@ class CollectmilkController extends GetxController {
   TextEditingController quantity = TextEditingController();
   TextEditingController farmerIdC = TextEditingController();
 
+  final RxString _fatDC = ''.obs;
+  String get fatDC => _fatDC.value;
+  set fatDC(String mob) => _fatDC.value = mob;
+
+  final RxString _snfDC = ''.obs;
+  String get snfDC => _snfDC.value;
+  set snfDC(String mob) => _snfDC.value = mob;
+
+  final RxString _waterDC = ''.obs;
+  String get waterDC => _waterDC.value;
+  set waterDC(String mob) => _waterDC.value = mob;
+
+  final RxString _quantityDC = ''.obs;
+  String get quantityDC => _quantityDC.value;
+  set quantityDC(String mob) => _quantityDC.value = mob;
+
   final RxList<RatechartModel> _rateChartData = RxList<RatechartModel>();
   List<RatechartModel> get rateChartData => _rateChartData;
   set rateChartData(List<RatechartModel> lst) => _rateChartData.assignAll(lst);
-
-  final RxString _price = "0.0".obs;
-  String get price => _price.value;
-  set price(String i) => _price.value = i;
-
-  final RxString _totalAmount = "0.0".obs;
-  String get totalAmount => _totalAmount.value;
-  set totalAmount(String i) => _totalAmount.value = i;
 
   final RxInt _shiftTime = 1.obs;
   int get shiftTime => _shiftTime.value;
@@ -173,14 +182,12 @@ class CollectmilkController extends GetxController {
     _farmerId.close();
     _pin.close();
     _pinManual.clear();
-    _price.close();
     _printD.close();
     _radio.close();
     _rateChartData.clear();
     _restoreData.clear();
     _shift.close();
     _shiftTime.close();
-    _totalAmount.close();
     fat.clear();
     snf.clear();
     water.clear();
@@ -197,15 +204,16 @@ class CollectmilkController extends GetxController {
   }
 
   String getPriceData() {
+    late String priceP = "0.0";
     for (var i = 0; i < rateChartData.length; i++) {
       if (!check) {
-        if (fat.text.isNotEmpty &&
-            snf.text.isNotEmpty &&
-            double.parse(fat.text) == double.parse(rateChartData[i].fat) &&
-            double.parse(snf.text) == double.parse(rateChartData[i].snf)) {
-          price = (rateChartData[i].price.toPrecision(2)).toString();
+        if (fatDC.isNotEmpty &&
+            snfDC.isNotEmpty &&
+            double.parse(fatDC) == double.parse(rateChartData[i].fat) &&
+            double.parse(snfDC) == double.parse(rateChartData[i].snf)) {
+          priceP = (rateChartData[i].price.toPrecision(2)).toString();
           // print(price);
-          print("price:$price");
+          print("price:$priceP");
         }
       } else {
         // homeController.
@@ -213,54 +221,51 @@ class CollectmilkController extends GetxController {
                 double.parse(rateChartData[i].fat) &&
             double.parse(homeController.snf) ==
                 double.parse(rateChartData[i].snf)) {
-          price = (rateChartData[i].price.toPrecision(2)).toString();
-          print("price:$price");
+          priceP = (rateChartData[i].price.toPrecision(2)).toString();
+          print("price:$priceP");
         }
       }
     }
 
-    return price;
+    return priceP;
   }
 
   String getTotalAmount() {
-    totalAmount = "";
-
-    // print("rateChartData: $rateChartData");
-
+    late String totalAmountP = "0.0";
     for (var i = 0; i < rateChartData.length; i++) {
       if (!check) {
-        // if()
-        if (fat.text.isNotEmpty &&
-            snf.text.isNotEmpty &&
-            double.parse(fat.text) == double.parse(rateChartData[i].fat) &&
-            double.parse(snf.text) == double.parse(rateChartData[i].snf) &&
-            quantity.text.isNotEmpty &&
-            quantity.text != "0.0") {
-          totalAmount =
-              ((rateChartData[i].price * (double.parse(quantity.text)))
-                      .toPrecision(2))
-                  .toString();
-          // print(totalAmount);
-          print("totalAmount:$totalAmount");
+        if (fatDC.isNotEmpty &&
+            snfDC.isNotEmpty &&
+            quantityDC.isNotEmpty &&
+            double.parse(quantityDC) > 0) {
+          if (double.parse(fatDC) == double.parse(rateChartData[i].fat) &&
+              double.parse(snfDC) == double.parse(rateChartData[i].snf)) {
+            totalAmountP =
+                ((rateChartData[i].price * (double.parse(quantityDC)))
+                        .toPrecision(2))
+                    .toString();
+            print("totalAmount:$totalAmountP");
+          }
         }
-        update();
       } else {
-        if (double.parse(homeController.fat) ==
-                double.parse(rateChartData[i].fat) &&
-            double.parse(homeController.snf) ==
-                double.parse(rateChartData[i].snf) &&
-            homeController.quantity.isNotEmpty &&
-            quantity.text != "0.0") {
-          totalAmount =
-              ((rateChartData[i].price * double.parse(homeController.quantity))
-                      .toPrecision(2))
-                  .toString();
-          print("totalAmount:$totalAmount");
+        if (homeController.fat.isNotEmpty && homeController.snf.isNotEmpty) {
+          if (double.parse(homeController.fat) ==
+                  double.parse(rateChartData[i].fat) &&
+              double.parse(homeController.snf) ==
+                  double.parse(rateChartData[i].snf) &&
+              homeController.quantity.isNotEmpty &&
+              double.parse(homeController.quantity) > 0) {
+            totalAmountP = ((rateChartData[i].price *
+                        double.parse(homeController.quantity))
+                    .toPrecision(2))
+                .toString();
+            print("totalAmount:$totalAmountP");
+          }
         }
       }
     }
 
-    return totalAmount;
+    return totalAmountP;
   }
 
   dateFormat(DateTime date) {
@@ -277,8 +282,6 @@ class CollectmilkController extends GetxController {
 
       if (res.statusCode == 200) {
         restoreData.assignAll([]);
-        // print("res: ${res}");
-        print("res: ${jsonDecode(res.body.toString())}");
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
           pd.show(
@@ -287,7 +290,6 @@ class CollectmilkController extends GetxController {
               valueFontSize: 10,
               msgTextAlign: TextAlign.left,
               msg: 'Recover data!...');
-          // print(restoreData.length.toString());
           for (var e in restoreData) {
             milkCollectionDB.create(
               Added_Water: e.addedWater,
@@ -314,10 +316,7 @@ class CollectmilkController extends GetxController {
           }
           pd.close();
         }
-        // restoreData.assignAll([]);
-      } else {
-        print(jsonDecode(res.body));
-      }
+      } else {}
     } catch (e) {
       print(e.toString());
     }
@@ -394,29 +393,16 @@ class CollectmilkController extends GetxController {
           farmerfinalId.toString().trim()) {
         farmerData = FarmerListModel(farmerName: "Unknown");
         print("farmerData:${farmerData.farmerName}");
-
-        update();
-        // break;
       }
 
       if (farmerDataList[i].farmerId.toString() ==
           farmerfinalId.toString().trim()) {
-        // searchfarmerData.assign(farmerData[i]);
         farmerData = farmerDataList[i];
         print("farmerData:${farmerData.farmerName}");
 
-        update();
         break;
       }
-      // else {
-      //   farmerData = FarmerListModel(farmerName: "Unknown");
-      //   print("farmerData:${farmerData.farmerName}");
-
-      //   update();
-      //   break;
-      // }
     }
-    // farmerData = farmerDataList.where((e) => e.farmerId == farmerfinalId);
   }
 
   String getFarmerIdFinal() {
@@ -815,8 +801,8 @@ class CollectmilkController extends GetxController {
       "FAT": !check ? fat.text : homeController.fat,
       "SNF": !check ? snf.text : homeController.snf,
       "Added_Water": !check ? water.text : homeController.water,
-      "Rate_Per_Liter": !check ? getPriceData() : getPriceData(),
-      "Total_Amt": totalAmount,
+      "Rate_Per_Liter": getPriceData(),
+      "Total_Amt": getTotalAmount(),
       "CollectionCenterId": box.read(centerIdConst),
       "CollectionCenterName": box.read(centerName),
       "Shift": shift.capitalizeFirst,
@@ -843,6 +829,7 @@ class CollectmilkController extends GetxController {
   }
 
   Future<void> accept() async {
+    bool result = await InternetConnection().hasInternetAccess;
     await milkCollectionDB.create(
         FarmerId: int.parse(getFarmerIdFinal()),
         Added_Water: !check
@@ -862,14 +849,13 @@ class CollectmilkController extends GetxController {
             ? double.parse(quantity.text)
             : double.parse(homeController.quantity),
         Rate_Chart_Name: "1235ABC",
-        Rate_Per_Liter: double.parse(price),
+        Rate_Per_Liter: double.parse(getPriceData()),
         SNF: !check ? double.parse(snf.text) : double.parse(homeController.snf),
         Scale_Mode: !check ? manualConst : autoConst,
         Shift: shift.capitalizeFirst,
-        Total_Amt: !check
-            ? double.parse(getTotalAmount())
-            : double.parse(getTotalAmount()),
-        FUploaded: !check ? 0 : 1);
+        Total_Amt: double.parse(getTotalAmount()),
+        FUploaded: result ? 1 : 0);
+    await homeController.fetchMilkCollectionDateWise();
   }
 
   void emptyData() {
@@ -880,18 +866,20 @@ class CollectmilkController extends GetxController {
     snf.clear();
     water.clear();
     quantity.clear();
-    price = "";
-    totalAmount = "";
+
     farmerData = FarmerListModel();
-    // farmerId.clear();
     radio = 0;
     homeController.fat = "";
     homeController.snf = "";
     homeController.water = "";
     homeController.quantity = "";
     farmerIdC.clear();
-    // _farmerId.value = farmerId;
-    update();
+    progress = false;
+    // update();
+    fatDC = "";
+    snfDC = "";
+    waterDC = "";
+    quantityDC = "";
   }
 
   Future printData() async {
@@ -901,15 +889,14 @@ class CollectmilkController extends GetxController {
       fat1: !check ? fat.text : homeController.fat,
       getFarmerId: getFarmerIdFinal(),
       milkType: radio == 0 ? "CM" : "BM",
-      price: !check ? getPriceData() : getPriceData(),
+      price: getPriceData(),
       quantity1: !check ? quantity.text.toString() : homeController.quantity,
       snf1: !check ? snf.text : homeController.snf,
-      totalAmount: totalAmount,
+      totalAmount: getTotalAmount(),
     );
   }
 
   Future<void> checkSmsFlag() async {
-    // http://Payment.maklife.in:9019/api/getsmsflag
     var res = await http.post(Uri.parse("$baseUrlConst/getsmsflag"), body: {
       "CenterId": box.read(centerIdConst),
     });
@@ -923,11 +910,9 @@ class CollectmilkController extends GetxController {
     try {
       var res = await http.post(Uri.parse(
           //
-          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shift.capitalizeFirst}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.text.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${!check ? getPriceData() : getPriceData()}%0D%0ATot Amt.: Rs.$totalAmount%0D%0A&template_id=1207165769139334975"));
+          "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=${farmerData.mobileNumber}&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: ${getFarmerIdFinal()}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${shift.capitalizeFirst}%0D%0AMilk Type: ${radio == 0 ? "CM" : "BM"}%0D%0AQty: ${!check ? quantity.text.toString() : homeController.quantity}%0D%0AFAT: ${!check ? fat.text : homeController.fat}%0D%0ASNF: ${!check ? snf.text : homeController.snf}%0D%0AWATER %: ${!check ? water.text : homeController.water}%0D%0ARATE: ${getPriceData()}%0D%0ATot Amt.: Rs.${getTotalAmount()}%0D%0A&template_id=1207165769139334975"));
       if (res.statusCode == 200) {
         Utils.showSnackbar(jsonDecode(res.body)["message"]);
-
-        // print(jsonDecode(res.body));
       } else {}
     } catch (e) {
       print(e.toString());

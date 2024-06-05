@@ -260,13 +260,13 @@ class HomeController extends GetxController {
     } else {
       radio = 2;
     }
+    await fetchMilkCollectionDateWise();
 
     await getRateChart("C").then((value) async {
       await getRateChart("B").then((value) async {
         pd.close();
       });
     });
-    await fetchMilkCollectionDateWise();
     // await callApi();
 
     // await
