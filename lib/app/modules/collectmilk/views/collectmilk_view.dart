@@ -109,8 +109,21 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               groupValue: controller.radio,
                               onChanged: (int? i) {
                                 print(i);
-                                controller.radio = i!;
-                                controller.getRateChart();
+                                controller.radio = 0;
+                                controller.getRateCMChart();
+                                if (double.parse(controller.homeController
+                                                .quantity.isNotEmpty
+                                            ? controller.homeController.quantity
+                                            : "0") >
+                                        0 ||
+                                    double.parse(
+                                            controller.quantityDC.isNotEmpty
+                                                ? controller.quantityDC
+                                                : "0") >
+                                        0) {
+                                  controller.getTotalAmount();
+                                  controller.getPriceData();
+                                }
                               },
                             ),
                           )),
@@ -118,7 +131,19 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         child: const Text("Cow"),
                         onTap: () {
                           controller.radio = 0;
-                          controller.getRateChart();
+                          controller.getRateCMChart();
+                          if (double.parse(controller
+                                          .homeController.quantity.isNotEmpty
+                                      ? controller.homeController.quantity
+                                      : "0") >
+                                  0 ||
+                              double.parse(controller.quantityDC.isNotEmpty
+                                      ? controller.quantityDC
+                                      : "0") >
+                                  0) {
+                            controller.getTotalAmount();
+                            controller.getPriceData();
+                          }
                         },
                       ),
                     ],
@@ -133,9 +158,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               value: 1,
                               groupValue: controller.radio,
                               onChanged: (int? i) {
-                                controller.radio = i!;
-                                controller.getRateChart();
-                                controller.getPriceData();
+                                controller.radio = 1;
+                                controller.getRateBMChart();
+                                // controller.getPriceData();
                                 if (double.parse(controller.homeController
                                                 .quantity.isNotEmpty
                                             ? controller.homeController.quantity
@@ -147,6 +172,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                 : "0") >
                                         0) {
                                   controller.getTotalAmount();
+                                  controller.getPriceData();
                                 }
                               },
                             ),
@@ -155,8 +181,8 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         child: const Text("Buffallo"),
                         onTap: () {
                           controller.radio = 1;
-                          controller.getRateChart();
-                          controller.getPriceData();
+                          controller.getRateBMChart();
+                          // controller.getPriceData();
                           if (double.parse(controller
                                           .homeController.quantity.isNotEmpty
                                       ? controller.homeController.quantity
@@ -167,6 +193,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       : "0") >
                                   0) {
                             controller.getTotalAmount();
+                            controller.getPriceData();
                           }
                         },
                       ),
@@ -433,6 +460,13 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 label: "Please enter fat...",
                                 textController: controller.quantity,
                                 onChanged: (v) => controller.quantityDC = v,
+                                inputFormatters: [
+                                  DecimalTextInputFormatter(decimalRange: 4),
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r"[0-9.]")),
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d+\.?\d*')),
+                                ],
                                 keyboardType:
                                     const TextInputType.numberWithOptions(
                                         decimal: true, signed: false),
@@ -469,7 +503,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 child: Text(
                                   controller.homeController.fat.isNotEmpty &&
                                           controller
-                                              .homeController.snf.isNotEmpty
+                                              .homeController.snf.isNotEmpty &&
+                                          (controller.radio == 1 ||
+                                              controller.radio == 0)
                                       ? controller.getPriceData()
                                       : "",
                                   style:
@@ -490,7 +526,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 padding: const EdgeInsets.all(10),
                                 child: Text(
                                   controller.fatDC.isNotEmpty &&
-                                          controller.snfDC.isNotEmpty
+                                          controller.snfDC.isNotEmpty &&
+                                          (controller.radio == 1 ||
+                                              controller.radio == 0)
                                       ? controller.getPriceData()
                                       : "",
                                   style:
@@ -526,16 +564,18 @@ class CollectmilkView extends GetView<CollectmilkController> {
                         padding: const EdgeInsets.all(10),
                         child: Obx(() => Text(
                               (double.parse(controller.homeController.quantity
-                                                  .isNotEmpty
-                                              ? controller
-                                                  .homeController.quantity
-                                              : "0") >
-                                          0 ||
-                                      double.parse(
-                                              controller.quantityDC.isNotEmpty
+                                                      .isNotEmpty
+                                                  ? controller
+                                                      .homeController.quantity
+                                                  : "0") >
+                                              0 ||
+                                          double.parse(controller
+                                                      .quantityDC.isNotEmpty
                                                   ? controller.quantityDC
                                                   : "0") >
-                                          0)
+                                              0) &&
+                                      (controller.radio == 1 ||
+                                          controller.radio == 0)
                                   ? controller.getTotalAmount()
                                   : "",
                               style: Theme.of(context).textTheme.labelMedium,
@@ -573,14 +613,14 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       controller
                                           .homeController.water.isNotEmpty &&
                                       controller
-                                          .homeController.quantity.isNotEmpty) {
-                                    if (double.parse(controller.homeController.fat) <= 10 &&
-                                        double.parse(controller
-                                                .homeController.snf) <=
-                                            10 &&
-                                        double.parse(controller
-                                                .homeController.quantity) >
-                                            0) {
+                                          .homeController.quantity.isNotEmpty &&
+                                      (controller.radio == 1 ||
+                                          controller.radio == 0) &&
+                                      (double.parse(controller.getPriceData()) >
+                                          0)) {
+                                    if (double.parse(controller
+                                            .homeController.quantity) >
+                                        0) {
                                       controller.progress = true;
                                       await controller.accept();
                                       await controller.printData();
@@ -597,27 +637,27 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: (controller.farmerId.isNotEmpty &&
-                                          (controller
-                                              .homeController.fat.isNotEmpty) &&
-                                          controller.farmerData.farmerName !=
-                                              "Unknown" &&
-                                          (controller.homeController.water
-                                              .isNotEmpty) &&
-                                          (controller.homeController.quantity
-                                              .isNotEmpty))
-                                      ? (double.parse(controller.homeController.fat) <=
-                                                      10 &&
-                                                  double.parse(controller
-                                                          .homeController
-                                                          .snf) <=
-                                                      10) &&
-                                              double.parse(controller
-                                                      .homeController
-                                                      .quantity) >
-                                                  0
+                                  backgroundColor: (controller
+                                                  .farmerId.isNotEmpty &&
+                                              (controller.homeController.fat
+                                                  .isNotEmpty) &&
+                                              controller.farmerData.farmerName !=
+                                                  "Unknown" &&
+                                              (controller.homeController.water
+                                                  .isNotEmpty) &&
+                                              (controller.homeController
+                                                  .quantity.isNotEmpty)) &&
+                                          (controller.radio == 1 ||
+                                              controller.radio == 0) &&
+                                          (double.parse(
+                                                  controller.getPriceData()) >
+                                              0)
+                                      ? double.parse(controller
+                                                  .homeController.quantity) >
+                                              0
                                           ? AppColors.green
-                                          : const Color.fromARGB(255, 211, 240, 212)
+                                          : const Color.fromARGB(
+                                              255, 211, 240, 212)
                                       : const Color.fromARGB(255, 211, 240, 212),
                                 ),
                                 child: Text(
@@ -639,10 +679,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                         "Unknown" &&
                                     controller.waterDC.isNotEmpty &&
                                     controller.quantityDC.isNotEmpty &&
-                                    controller.snfDC.isNotEmpty) {
-                                  if (double.parse(controller.fatDC) <= 10 &&
-                                      double.parse(controller.snfDC) <= 10 &&
-                                      double.parse(controller.quantityDC) > 0) {
+                                    controller.snfDC.isNotEmpty &&
+                                    (controller.radio == 1 ||
+                                        controller.radio == 0) &&
+                                    (double.parse(controller.getPriceData()) >
+                                        0)) {
+                                  if (double.parse(controller.quantityDC) > 0) {
                                     controller.progress = true;
                                     await controller.accept();
                                     await controller.printData();
@@ -660,20 +702,20 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: (controller
-                                            .farmerId.isNotEmpty &&
-                                        (controller.fatDC.isNotEmpty) &&
-                                        controller.farmerData.farmerName !=
-                                            "Unknown" &&
-                                        (controller.waterDC.isNotEmpty) &&
-                                        (controller.quantityDC.isNotEmpty) &&
-                                        controller.snfDC.isNotEmpty)
-                                    ? (double.parse(controller.fatDC) <= 10 &&
-                                                double.parse(
-                                                        controller.snfDC) <=
-                                                    10) &&
-                                            double.parse(
-                                                    controller.quantityDC) >
-                                                0 &&
+                                                .farmerId.isNotEmpty &&
+                                            (controller.fatDC.isNotEmpty) &&
+                                            controller.farmerData.farmerName !=
+                                                "Unknown" &&
+                                            (controller.waterDC.isNotEmpty) &&
+                                            (controller
+                                                .quantityDC.isNotEmpty) &&
+                                            controller.snfDC.isNotEmpty) &&
+                                        (controller.radio == 1 ||
+                                            controller.radio == 0) &&
+                                        (double.parse(
+                                                controller.getPriceData()) >
+                                            0)
+                                    ? double.parse(controller.quantityDC) > 0 &&
                                             controller.farmerIdC.text.isNotEmpty
                                         ? AppColors.green
                                         : const Color.fromARGB(

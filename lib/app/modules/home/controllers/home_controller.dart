@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:udp/udp.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -9,10 +10,12 @@ import 'package:flutter_sms_android/flutter_sms.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/cans_db.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
+import 'package:milkcollection/app/data/local_database/rateChartCM_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/cans_model.dart';
 import 'package:milkcollection/app/data/models/centerMobileSmsModel.dart';
@@ -28,12 +31,19 @@ import 'package:milkcollection/app/data/models/ratechart_model.dart';
 import 'package:flutter/material.dart';
 // import 'package:sms_advanced/sms_advanced.dart';
 // import 'package:telephony_sms/telephony_sms.dart';
+import 'dart:math';
+
+import 'package:conversion/conversion.dart';
+
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:esptouch_flutter/esptouch_flutter.dart';
 
 class HomeController extends GetxController {
   //
   final box = GetStorage();
 
   final RateChartDB rateChartDB = RateChartDB();
+  final RateChartCMDB rateChartCMDB = RateChartCMDB();
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
   final CansDB cansDB = CansDB();
 
@@ -204,11 +214,11 @@ class HomeController extends GetxController {
   bool get printSummary => _printSummary.value;
   set printSummary(bool b) => _printSummary.value = b;
 
-  final RxString _cowCans = "0".obs;
+  final RxString _cowCans = "".obs;
   String get cowCans => _cowCans.value;
   set cowCans(String b) => _cowCans.value = b;
 
-  final RxString _bufCans = "0".obs;
+  final RxString _bufCans = "".obs;
   String get bufCans => _bufCans.value;
   set bufCans(String b) => _bufCans.value = b;
 
@@ -250,26 +260,29 @@ class HomeController extends GetxController {
   set printDetailsPaymentFarmer(String str) =>
       _printDetailsPaymentFarmer.value = str;
 
+  // final RxInt _count = 0.obs;
+  // int get count => _count.value;
+  // set count(int i) => _count.value = i;
+
   @override
   void onInit() async {
     super.onInit();
-    await checkIp();
+    bool result = await InternetConnection().hasInternetAccess;
 
     if (DateTime.now().hour < 12) {
       radio = 1;
     } else {
       radio = 2;
     }
+
+    if (result) {
+      await getRateChartBM("B");
+      await getRateChartCM("C");
+    }
+
+    await checkIp();
+
     await fetchMilkCollectionDateWise();
-
-    await getRateChart("C").then((value) async {
-      await getRateChart("B").then((value) async {
-        pd.close();
-      });
-    });
-    // await callApi();
-
-    // await
   }
 
   @override
@@ -291,10 +304,10 @@ class HomeController extends GetxController {
     if (cansModel.isNotEmpty) {
       cowCans = cansModel.first.cowCans != null
           ? cansModel.first.cowCans.toString()
-          : "0";
+          : "";
       bufCans = cansModel.first.bufCans != null
           ? cansModel.first.bufCans.toString()
-          : "0";
+          : "";
     }
     // printSummary = true;
   }
@@ -316,7 +329,17 @@ class HomeController extends GetxController {
     // return completer.future;
   }
 
-  Future<void> getRateChart(
+  void ccConvert() {
+    // var lst = [2402, 8100, 7652, "c722", "7cc5", "6ff4", "30b7", "8ebb"];
+    // lst[6].toString().substring(0, 1);
+    // var li = ["fc", "cc", "a9", "e1"];
+    // Convert convert = Convert();
+    // final abc = convert.hexToDecimal(hexString: li);
+    // print(abc);
+    // RawServerSocket.bind(address, port);
+  }
+
+  Future<void> getRateChartBM(
     String milkType,
   ) async {
     try {
@@ -330,73 +353,223 @@ class HomeController extends GetxController {
 
         rateChartData.assignAll(ratechartModelFromMap(res.body));
         if (rateChartData.isNotEmpty) {
-          pd.show(
-              max: rateChartData.length,
-              msgFontSize: 10,
-              valueFontSize: 10,
-              msgTextAlign: TextAlign.left,
-              msg:
-                  'Downloading ${milkType == "C" ? "CM" : "BM"} Rate Chart...');
-          if (box.read(ratecounterConst) == null) {
+          final abc = box.read(rateChartBM);
+
+          final counter = rateChartData.map((e) {
+            final List lst = [];
+            lst.add(int.parse(e.counters));
+            return lst.reduce((curr, next) => curr > next ? curr : next);
+          });
+          print(abc);
+          print(counter);
+
+          if (box.read(rateChartBM) == null) {
+            int count = 0;
+            pd.show(
+                max: rateChartData.length,
+                msgFontSize: 10,
+                valueFontSize: 10,
+                msgTextAlign: TextAlign.left,
+                msg: 'Downloading BM Rate Chart');
+
             for (var e in rateChartData) {
+              pd.update(value: count += 1);
+
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
                 fat: e.fat,
-                insertedDate: e.insertedDate.toIso8601String(),
+                insertedDate: e.insertedDate.toString(),
                 milkType: e.milkType,
                 price: e.price.toString(),
                 snf: e.snf,
               );
             }
-            if (milkType == "B") {
-              box.write("ratecounter", rateChartData.first.counters);
-              pd.close();
-            }
+            pd.close();
+            box.write(rateChartBM, rateChartData.first.counters);
           }
-          if (box.read(ratecounterConst) != null &&
-              (int.tryParse(box.read(ratecounterConst))! <
-                  int.tryParse(rateChartData.first.counters)!)) {
+          if (box.read(rateChartBM) != null &&
+              (int.tryParse(box.read(rateChartBM))! <
+                  int.parse(counter.first.toString()))) {
+            await rateChartDB.deleteTable();
+            int count = 0;
+            count = 0;
+            pd.show(
+                msgFontSize: 10,
+                valueFontSize: 10,
+                max: rateChartData.length,
+                msgTextAlign: TextAlign.left,
+                msg: 'Downloading BM Rate Chart');
+
             for (var e in rateChartData) {
-              pd.show(
-                  msgFontSize: 10,
-                  valueFontSize: 10,
-                  max: rateChartData.length,
-                  msgTextAlign: TextAlign.left,
-                  msg:
-                      'Downloading ${milkType == "C" ? "CM" : "BM"} Rate Chart...');
+              pd.update(value: count += 1);
+
               await rateChartDB.create(
                 collectionCenterId: box.read("centerId"),
                 counters: e.counters,
                 fat: e.fat,
-                insertedDate: e.insertedDate.toIso8601String(),
+                insertedDate: e.insertedDate.toString(),
                 milkType: e.milkType,
                 price: e.price.toString(),
                 snf: e.snf,
               );
             }
-            if (milkType == "B") {
-              box.write("ratecounter", rateChartData.first.counters);
-              pd.close();
-            }
+            pd.close();
+
+            box.write(rateChartBM, rateChartData.first.counters);
           }
+
+          rateChartData.assignAll([]);
         }
-        pd.close();
         rateChartData.assignAll([]);
-      } else {}
-    } catch (e) {}
+      }
+    } catch (e) {
+      rateChartData.assignAll([]);
+    }
+  }
+
+  Future<void> getRateChartCM(
+    String milkType,
+  ) async {
+    try {
+      var res = await http.get(
+        Uri.parse(
+            "http://Payment.maklife.in:9019/api/GetRateChart?CollectionCenterId=${box.read("centerId")}&MilkType=$milkType"),
+      );
+
+      if (res.statusCode == 200) {
+        rateChartData.assignAll([]);
+
+        rateChartData.assignAll(ratechartModelFromMap(res.body));
+        if (rateChartData.isNotEmpty) {
+          final abc = box.read(rateChartCM);
+          final counter = rateChartData.map((e) {
+            late String counter = '';
+            final List lst = [];
+            lst.add(int.parse(e.counters));
+            return lst.reduce((curr, next) => curr > next ? curr : next);
+          });
+
+          print(abc);
+          print(counter);
+
+          if (box.read(rateChartCM) == null) {
+            int count = 0;
+            pd.show(
+                max: rateChartData.length,
+                msgFontSize: 10,
+                valueFontSize: 10,
+                msgTextAlign: TextAlign.left,
+                msg: 'Downloading CM Rate Chart');
+
+            for (var e in rateChartData) {
+              // count += 1;
+              pd.update(value: count += 1);
+
+              await rateChartCMDB.create(
+                collectionCenterId: box.read("centerId"),
+                counters: e.counters,
+                fat: e.fat,
+                insertedDate: e.insertedDate.toString(),
+                milkType: e.milkType,
+                price: e.price.toString(),
+                snf: e.snf,
+              );
+              // pd.close();
+            }
+            pd.close();
+
+            box.write(rateChartCM, rateChartData.first.counters);
+          }
+          if (box.read(rateChartCM) != null &&
+              (int.tryParse(box.read(rateChartCM))! <
+                  int.tryParse(counter.first.toString())!)) {
+            await rateChartCMDB.deleteTable();
+            int count = 0;
+            count = 0;
+            pd.show(
+                msgFontSize: 10,
+                valueFontSize: 10,
+                max: rateChartData.length,
+                msgTextAlign: TextAlign.left,
+                msg: 'Downloading CM Rate Chart');
+
+            for (var e in rateChartData) {
+              // count += 1;
+              pd.update(value: count += 1);
+
+              await rateChartCMDB.create(
+                collectionCenterId: box.read("centerId"),
+                counters: e.counters,
+                fat: e.fat,
+                insertedDate: e.insertedDate.toString(),
+                milkType: e.milkType,
+                price: e.price.toString(),
+                snf: e.snf,
+              );
+            }
+            pd.close();
+
+            box.write(rateChartCM, rateChartData.first.counters);
+          }
+
+          rateChartData.assignAll([]);
+        }
+        rateChartData.assignAll([]);
+      }
+    } catch (e) {
+      rateChartData.assignAll([]);
+    }
+  }
+
+  Future<void> Santram() async {
+    try {
+      Socket socket =
+          await Socket.connect("2402:3a80:43a2:6141:dabf:c0ff:fef5:5341", 23);
+      print(
+          'Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
+
+      // Handle socket communication
+      socket.write('Hello from Flutter');
+
+      socket.listen(
+        (Uint8List data) {
+          print('Received: ${String.fromCharCodes(data)}');
+          socket.write("pulkit");
+        },
+        onError: (error) {
+          print('Socket error: $error');
+          // socket.destroy();
+        },
+        onDone: () {
+          print('Socket closed');
+          // socket.destroy();
+        },
+      );
+
+      // Close the socket
+      // socket.close();
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   Future<void> checkIp() async {
+    final info = NetworkInfo();
+    await Permission.locationWhenInUse.request();
+
+    final wifiBSSID = await info.getWifiBSSID(); // 11:22:33:44:55:66
+
     // var ip;
     for (var interface in await NetworkInterface.list()) {
       // print(interface);
+      // print(interface.addresses);
       for (var addr in interface.addresses) {
         if (addr.type == InternetAddressType.IPv4 &&
             addr.address.startsWith('192') &&
-            Platform.isAndroid &&
             (interface.name.startsWith("swlan") ||
-                interface.name.startsWith("ap"))) {
+                interface.name.startsWith("ap") ||
+                interface.name.startsWith("'en0'"))) {
           ip = addr.address.split(".").getRange(0, 3).join(".");
           for (var i = 0; i < 255; i++) {
             anaylzerConnection("$ip.$i");
@@ -406,8 +579,7 @@ class HomeController extends GetxController {
             printerConnection("$ip.$i");
           }
         } else if (addr.type == InternetAddressType.IPv4 &&
-            addr.address.startsWith('172') &&
-            Platform.isIOS) {
+            addr.address.startsWith('172')) {
           addr.address.split(".").getRange(0, 3).join(".");
           for (var i = 0; i < 255; i++) {
             anaylzerConnection("$ip.$i");
@@ -416,6 +588,111 @@ class HomeController extends GetxController {
 
             printerConnection("$ip.$i");
           }
+        } else if (addr.type == InternetAddressType.IPv6) {
+          var li = addr.address.split(":");
+
+          // interface
+          final ipv = await info.getWifiIPv6();
+
+          // try {
+          //   await http.post(
+          //       Uri.parse(
+          //           "http://2402:3a80:4380:820a:5ecf:7fff:fe55:a878/status"),
+          //       body: {
+          //         "print": """Pullow""",
+          //       }).then((res) {
+          //     print(res);
+          //     if (res.statusCode == 200) {
+          //       // setStatus("http://$ip.$i/status");
+          //     } else {
+          //       print(res.body);
+          //     }
+          //   });
+          // } catch (e) {
+          //   // apiLopp(i);
+          //   print("e: ${e.toString()}");
+          // }
+          // await info.getWifiBSSID().then((value) async {
+          // print(wifiBSSID);
+          // print(await info.getWifiIPv6());
+          // print(await info.getWifiGatewayIP());
+          // print(await info.getWifiIP());
+          // printerConnection(ipv.toString());
+          // await ServerSocket.bind(
+          //         "2402:3a80:4380:820a:5ecf:7fff:fe55:a878", 8883,
+          //         shared: true, v6Only: true)
+          //     .then((value) {
+          //   value.listen((event) {
+          //     event.write("object");
+          //     event.add([44556566]);
+          //     print(event);
+          //   });
+          // });
+
+          // final socket = await Socket.connect(
+          //     InternetAddress(
+          //       "2402:3a80:4380:820a:5ecf:7fff:fe55:a878",
+          //       type: InternetAddressType.IPv6,
+          //     ),
+          //     8883,
+          //     sourcePort: 8883,
+          //     sourceAddress: InternetAddress(
+          //       "2402:3a80:4380:820a:5ecf:7fff:fe55:a878",
+          //       type: InternetAddressType.IPv6,
+          //     ),
+          //     timeout: Duration(seconds: 160));
+          // socket.writeln('Hello, server!');
+
+          // RawDatagramSocket.bind(InternetAddress.anyIPv6, 8883).then((value) {
+          //   print(value.address);
+          // });
+
+          // final ESPTouchTask task = ESPTouchTask(
+          //     ssid: 'Admin',
+          //     bssid: wifiBSSID.toString(),
+          //     password: '12345678',
+          //     taskParameter: const ESPTouchTaskParameter(
+          //       portTarget: 8883,
+          //     ));
+          // final Stream<ESPTouchResult> stream = task.execute();
+          // printResult(ESPTouchResult result) {
+          //   print('IP: ${result.ip} MAC: ${result.bssid}');
+          // }
+
+          // final StreamController<int> _controller = StreamController<int>();
+          // // _controller.stream = task.execute();
+
+          // StreamSubscription<ESPTouchResult> streamSubscription =
+          //     stream.listen(printResult);
+          // }); // 11:22:33:44:55:66
+
+// Somewhere in your widget...
+
+          // Future.delayed((Duration(seconds: 5)), () async {
+          // var multicastEndpoint = Endpoint.multicast(
+          //     InternetAddress(
+          //       "2402:3a80:43a9:9ce9:5ecf:7fff:fe55:a878",
+          //       type: InternetAddressType.IPv6,
+          //     ),
+          //     port: Port(8883));
+
+          // if (li.length >= 8) {
+          //   var lst = [
+          //     li[li.length - 2].toString().substring(0, 2),
+          //     li[li.length - 2].toString().substring(2, 4),
+          //     li[li.length - 1].toString().substring(0, 2),
+          //     li[li.length - 1].toString().substring(2, 4),
+          //   ];
+          //   print(lst);
+          //   Convert convert = Convert();
+          //   final abc = convert.hexToDecimal(hexString: lst);
+          //   // print(abc.join("."));
+          //   print(addr.host);
+          //   // weighingConnection(addr.address);
+          //   // RawServerSocket.bind(addr.address, 8883).then((value) {
+          //   //   print(value.address);
+          //   // });
+          // }
         }
       }
     }
@@ -487,10 +764,10 @@ class HomeController extends GetxController {
       },
       onError: (error) {
         print("error: $error");
-        client.destroy();
+        // client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
@@ -529,10 +806,10 @@ class HomeController extends GetxController {
       },
       onError: (error) {
         print("error: $error");
-        client.destroy();
+        // client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
@@ -549,10 +826,10 @@ class HomeController extends GetxController {
       },
       onError: (error) {
         print("error: $error");
-        client.destroy();
+        // client.destroy();
       },
       onDone: () {
-        client.destroy();
+        // client.destroy();
       },
     );
   }
@@ -671,9 +948,12 @@ Total Amt..........${totalAmt.toPrecision(2)}
 Pro Milk Qty FAT SNF Rate Amnt
 --------------------------------
 $farmDet
-Cow Cans       $cowCans
-Buf Cans       $bufCans
-Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
+Cow Cans       ${cowCans.isNotEmpty ? cowCans : "0"}
+Buf Cans       ${bufCans.isNotEmpty ? bufCans : "0"}
+Total cans     ${int.parse("${bufCans.isNotEmpty ? bufCans : 0}") + int.parse("${cowCans.isNotEmpty ? cowCans : 0}")}
+        
+        
+        
         """;
 
     return prin;
@@ -829,9 +1109,12 @@ Avg Snf............${(totalSnf / totalMilk).toPrecision(2)}
 Avg Rate...........${(totalPrice / totalQty).toPrecision(2)}
 Total Amt..........${totalAmt.toPrecision(2)}
 
-Cow Cans       $cowCans
-Buf Cans       $bufCans
-Total cans     ${int.parse(bufCans) + int.parse(cowCans)}
+Cow Cans       ${cowCans.isNotEmpty ? cowCans : '0'}
+Buf Cans       ${bufCans.isNotEmpty ? bufCans : "0"}
+Total cans     ${int.parse("${cowCans.isNotEmpty ? cowCans : 0}") + int.parse("${bufCans.isNotEmpty ? bufCans : 0}")}
+        
+        
+        
         """;
 
     return prin;
@@ -908,8 +1191,8 @@ Total Amt   : ${totalAmt.toPrecision(2)}
           "$baseUrlConst/$canReceived"), body: {
         "CenterID": box.read(centerIdConst),
         "Shift": radio == 1 ? "Am" : "Pm",
-        "Bm": bufCans,
-        "Cm": cowCans,
+        "Bm": bufCans.isNotEmpty ? bufCans : "0",
+        "Cm": cowCans.isNotEmpty ? cowCans : "0",
         "Remark": "",
         "Dated": DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))
       });
@@ -976,4 +1259,19 @@ Total Amount   : $totalAmt
     printPaymentDetails = true;
     // return prin;
   }
+}
+
+class SimpleWifiInfo {
+  static const platform =
+      MethodChannel('eng.smaho.com/esptouch_plugin/example');
+
+  /// Get WiFi SSID using platform channels.
+  ///
+  /// Can return null if BSSID information is not available.
+  static Future<String?> get ssid => platform.invokeMethod('ssid');
+
+  /// Get WiFi BSSID using platform channels.
+  ///
+  /// Can return null if BSSID information is not available.
+  static Future<String?> get bssid => platform.invokeMethod('bssid');
 }

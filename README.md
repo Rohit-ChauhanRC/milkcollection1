@@ -1,21 +1,59 @@
-# milkcollection
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+ESP8266WebServer server(80);
 
-A new Flutter project.
+void handle404();
 
-## Getting Started
+// if D3 not work just use 3
 
-This project is a starting point for a Flutter application.
+void setup() {
 
-A few resources to get you started if this is your first Flutter project:
+//WiFi-Setup
+Serial.begin(9600);
+WiFi.begin("Admin", "Admin1234"); //enter your ssid , password
+Serial.print("Connecting");
+while (WiFi.status() != WL_CONNECTED)
+{
+delay(500);
+Serial.print(".");
+}
+Serial.println();
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Serial.print("Connected, IP address: ");
+Serial.println(WiFi.localIP());
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Serial.println(WiFi.broadcastIP());
+// Serial.println(WiFi.BSSID());
 
-<!-- AIzaSyDKtg7xB7Zt1aDM5dWTRahnhRgzLhbfQZo -->
+//Server-Setup
+server.on("/status", HTTP_POST, handleStatus);
+server.onNotFound(handle404);
 
-<!-- annalyzer GET Hex@3@6@3@2@1@3@8@8@@ -->
-<!--  annalyzer GET Hex@@ HTTP/1.1-->
+server.begin();
+// power-up safety delay
+
+}
+
+void loop()
+{
+server.handleClient();
+
+}
+
+void handleStatus(){
+String bulboff ="print";
+if (!server.hasArg("print") || server.arg("print") == NULL ){
+Serial.println(server.arg("print"));
+
+        server.send(400, "text/plain", "400: Invalid Request");
+        return;
+      }
+
+Serial.println(server.arg("print"));
+server.send(200);
+
+}
+
+void handle404(){
+server.send(404, "text/plain", "404: Not found");
+}

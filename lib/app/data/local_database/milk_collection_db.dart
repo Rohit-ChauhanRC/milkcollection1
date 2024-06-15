@@ -140,7 +140,7 @@ class MilkCollectionDB {
   }
 
   Future<int> update({
-    required int calculationsID,
+    int? calculationsID,
     int? farmerId,
     String? farmerName,
     String? bankName,
@@ -184,9 +184,9 @@ class MilkCollectionDB {
         if (centerID != null) 'CenterID': centerID,
         if (FUploaded != null) 'FUploaded': FUploaded,
       },
-      where: 'Key_id = ?',
+      where: 'FarmerId = ?',
       conflictAlgorithm: ConflictAlgorithm.rollback,
-      whereArgs: [calculationsID],
+      whereArgs: [farmerId],
     );
   }
 

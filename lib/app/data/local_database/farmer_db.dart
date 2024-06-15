@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:sqflite/sqflite.dart';
 

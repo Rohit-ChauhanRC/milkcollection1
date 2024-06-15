@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
@@ -511,27 +512,41 @@ class HomeView extends GetView<HomeController> {
             children: [
               InkWell(
                 onTap: () async {
+                  bool result = await InternetConnection().hasInternetAccess;
+
                   await controller.getShiftDetails().then((value) {
                     if (controller.cansModel.isNotEmpty) {
-                      controller
-                          .printShiftDetails()
-                          .then((value) => Get.back());
+                      controller.printDetails = true;
+
+                      if (result) {
+                        controller
+                            .printShiftDetails()
+                            .then((value) => Get.back());
+                      } else {
+                        Get.back();
+                      }
                     } else {
                       controller.showDialogManualPin(onTap: () async {
-                        await controller.cansDB
-                            .create(
-                          FUploaded: 1,
-                          bufCans: controller.bufCans,
-                          cowCans: controller.cowCans,
-                          date:
-                              DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-                          shift: controller.radio == 1 ? "Am" : "Pm",
-                        )
-                            .then((value) {
-                          controller
-                              .printShiftDetails()
-                              .then((value) => Get.back());
-                        });
+                        if (controller.cowCans.isNotEmpty &&
+                            controller.bufCans.isNotEmpty) {
+                          await controller.cansDB.create(
+                            FUploaded: 1,
+                            bufCans: controller.bufCans,
+                            cowCans: controller.cowCans,
+                            date: DateFormat("dd-MMM-yyyy")
+                                .format(DateTime.now()),
+                            shift: controller.radio == 1 ? "Am" : "Pm",
+                          );
+                          controller.printDetails = true;
+
+                          if (result) {
+                            controller
+                                .printShiftDetails()
+                                .then((value) => Get.back());
+                          } else {
+                            Get.back();
+                          }
+                        }
                       });
                     }
                   });
@@ -578,8 +593,9 @@ class HomeView extends GetView<HomeController> {
                 width: 10.w,
               ),
               InkWell(
-                onTap: () {
-                  Get.toNamed(Routes.PAYMENT_SUMMARY);
+                onTap: () async {
+                  // Get.toNamed(Routes.PAYMENT_SUMMARY);
+                  await controller.Santram();
                 },
                 child: SizedBox(
                   width: Get.width * 0.16,
@@ -620,30 +636,37 @@ class HomeView extends GetView<HomeController> {
               ),
               InkWell(
                 onTap: () async {
+                  bool result = await InternetConnection().hasInternetAccess;
+
                   await controller.getShiftDetails().then((value) async {
                     if (controller.cansModel.isEmpty) {
                       controller.showDialogManualPin(onTap: () async {
-                        await controller.cansDB
-                            .create(
+                        await controller.cansDB.create(
                           FUploaded: 1,
                           bufCans: controller.bufCans,
                           cowCans: controller.cowCans,
                           date:
                               DateFormat("dd-MMM-yyyy").format(DateTime.now()),
                           shift: controller.radio == 1 ? "Am" : "Pm",
-                        )
-                            .then((value) async {
-                          controller.printSummary = true;
+                        );
+                        controller.printSummary = true;
 
-                          await controller.checkSmsFlag();
-                        }).then((value) => Get.back());
+                        if (result) {
+                          Get.back();
+                          await controller
+                              .checkSmsFlag()
+                              .then((value) => Get.back());
+                        } else {
+                          Get.back();
+                        }
                       });
                     } else {
                       // await controller.getShiftDetails().then((value) async {
                       // controller.;
                       controller.printSummary = true;
-
-                      await controller.checkSmsFlag();
+                      if (result) {
+                        await controller.checkSmsFlag();
+                      }
                       // });
                     }
                   });

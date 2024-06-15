@@ -38,7 +38,7 @@ class PinverifyView extends GetView<PinverifyController> {
                   ),
                 ),
                 SizedBox(
-                  height: 20.h,
+                  height: 30.h,
                 ),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 35),
@@ -50,8 +50,8 @@ class PinverifyView extends GetView<PinverifyController> {
                       overflow: TextOverflow.visible,
                       style: Theme.of(context)
                           .textTheme
-                          .bodyMedium!
-                          .apply(fontSizeDelta: 2),
+                          .bodySmall!
+                          .apply(fontSizeDelta: 4),
                     ),
                   ),
                 ),

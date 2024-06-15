@@ -20,3 +20,5 @@ const String canReceived = "CanReceived";
 const String getcenterMobile = "getcenter_mobile";
 const String getFatmerPaymentSummaryConst = "GetFatmerPaymentSummary";
 const String getFarmerPaymentDetialsConst = "GetFarmerPaymentDetials";
+const String rateChartBM = "rateChartBM";
+const String rateChartCM = "rateChartCM";

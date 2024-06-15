@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/data/local_database/farmer_db.dart';
 import 'package:milkcollection/app/data/local_database/milk_collection_db.dart';
+import 'package:milkcollection/app/data/local_database/rateChartCM_db.dart';
 import 'package:milkcollection/app/data/local_database/ratechart_db.dart';
 import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:milkcollection/app/data/models/ratechart_model.dart';
@@ -37,6 +38,7 @@ class CollectmilkController extends GetxController {
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
 
   final RateChartDB rateChartDB = RateChartDB();
+  final RateChartCMDB rateChartCMDB = RateChartCMDB();
 
   ProgressDialog pd = ProgressDialog(context: Get.context);
 
@@ -53,7 +55,7 @@ class CollectmilkController extends GetxController {
   late Socket weightsocket;
   late Socket printersocket;
 
-  final RxInt _radio = 0.obs;
+  final RxInt _radio = 3.obs;
   int get radio => _radio.value;
   set radio(int i) => _radio.value = i;
 
@@ -122,9 +124,15 @@ class CollectmilkController extends GetxController {
   String get quantityDC => _quantityDC.value;
   set quantityDC(String mob) => _quantityDC.value = mob;
 
-  final RxList<RatechartModel> _rateChartData = RxList<RatechartModel>();
-  List<RatechartModel> get rateChartData => _rateChartData;
-  set rateChartData(List<RatechartModel> lst) => _rateChartData.assignAll(lst);
+  final RxList<RatechartModel> _rateBMChartData = RxList<RatechartModel>();
+  List<RatechartModel> get rateBMChartData => _rateBMChartData;
+  set rateBMChartData(List<RatechartModel> lst) =>
+      _rateBMChartData.assignAll(lst);
+
+  final RxList<RatechartModel> _rateCMChartData = RxList<RatechartModel>();
+  List<RatechartModel> get rateCMChartData => _rateCMChartData;
+  set rateCMChartData(List<RatechartModel> lst) =>
+      _rateCMChartData.assignAll(lst);
 
   final RxInt _shiftTime = 1.obs;
   int get shiftTime => _shiftTime.value;
@@ -163,7 +171,9 @@ class CollectmilkController extends GetxController {
 
     // WidgetsBinding.instance.initInstances();
     // await getCollectionThirtyDaysData();
-    await getRateChart();
+    // await getRateChart();
+    await getRateCMChart();
+    await getRateBMChart();
   }
 
   @override
@@ -184,7 +194,8 @@ class CollectmilkController extends GetxController {
     _pinManual.clear();
     _printD.close();
     _radio.close();
-    _rateChartData.clear();
+    _rateCMChartData.clear();
+    _rateBMChartData.clear();
     _restoreData.clear();
     _shift.close();
     _shiftTime.close();
@@ -195,34 +206,60 @@ class CollectmilkController extends GetxController {
     quantity.clear();
   }
 
-  Future<void> getRateChart() async {
-    rateChartData
-        .assignAll(await rateChartDB.fetchByMilkType(radio == 0 ? "C" : "B"));
+  Future<void> getRateBMChart() async {
+    rateBMChartData.assignAll(await rateChartDB.fetchAll());
+  }
 
-    print(
-        "await rateChartDB.fetchAll(): ${await rateChartDB.fetchByMilkType(radio == 0 ? "C" : "B")}");
+  Future<void> getRateCMChart() async {
+    rateCMChartData.assignAll(await rateChartCMDB.fetchAll());
   }
 
   String getPriceData() {
     late String priceP = "0.0";
-    for (var i = 0; i < rateChartData.length; i++) {
-      if (!check) {
-        if (fatDC.isNotEmpty &&
-            snfDC.isNotEmpty &&
-            double.parse(fatDC) == double.parse(rateChartData[i].fat) &&
-            double.parse(snfDC) == double.parse(rateChartData[i].snf)) {
-          priceP = (rateChartData[i].price.toPrecision(2)).toString();
-          // print(price);
-          print("price:$priceP");
+
+    if (radio == 0) {
+      for (var i = 0; i < (rateCMChartData.length); i++) {
+        if (!check) {
+          if (fatDC.isNotEmpty &&
+              snfDC.isNotEmpty &&
+              double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
+              double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
+            priceP = rateCMChartData[i].price.toPrecision(2).toString();
+            // print(price);
+            print("price:$priceP");
+          }
+        } else {
+          // homeController.
+
+          if (double.parse(homeController.fat) ==
+                  double.parse(rateCMChartData[i].fat) &&
+              double.parse(homeController.snf) ==
+                  double.parse(rateCMChartData[i].snf)) {
+            priceP = rateCMChartData[i].price.toPrecision(2).toString();
+            print("price:$priceP");
+          }
         }
-      } else {
-        // homeController.
-        if (double.parse(homeController.fat) ==
-                double.parse(rateChartData[i].fat) &&
-            double.parse(homeController.snf) ==
-                double.parse(rateChartData[i].snf)) {
-          priceP = (rateChartData[i].price.toPrecision(2)).toString();
-          print("price:$priceP");
+      }
+    } else if (radio == 1) {
+      for (var i = 0; i < (rateBMChartData.length); i++) {
+        if (!check) {
+          if (fatDC.isNotEmpty &&
+              snfDC.isNotEmpty &&
+              double.parse(fatDC) == double.parse(rateBMChartData[i].fat) &&
+              double.parse(snfDC) == double.parse(rateBMChartData[i].snf)) {
+            priceP = rateBMChartData[i].price.toPrecision(2).toString();
+            // print(price);
+            print("price:$priceP");
+          }
+        } else {
+          // homeController.
+          if (double.parse(homeController.fat) ==
+                  double.parse(rateBMChartData[i].fat) &&
+              double.parse(homeController.snf) ==
+                  double.parse(rateBMChartData[i].snf)) {
+            priceP = rateBMChartData[i].price.toPrecision(2).toString();
+            print("price:$priceP");
+          }
         }
       }
     }
@@ -232,34 +269,69 @@ class CollectmilkController extends GetxController {
 
   String getTotalAmount() {
     late String totalAmountP = "0.0";
-    for (var i = 0; i < rateChartData.length; i++) {
-      if (!check) {
-        if (fatDC.isNotEmpty &&
-            snfDC.isNotEmpty &&
-            quantityDC.isNotEmpty &&
-            double.parse(quantityDC) > 0) {
-          if (double.parse(fatDC) == double.parse(rateChartData[i].fat) &&
-              double.parse(snfDC) == double.parse(rateChartData[i].snf)) {
-            totalAmountP =
-                ((rateChartData[i].price * (double.parse(quantityDC)))
-                        .toPrecision(2))
-                    .toString();
-            print("totalAmount:$totalAmountP");
+    if (radio == 0) {
+      for (var i = 0; i < (rateCMChartData.length); i++) {
+        if (!check) {
+          if (fatDC.isNotEmpty &&
+              snfDC.isNotEmpty &&
+              quantityDC.isNotEmpty &&
+              double.parse(quantityDC) > 0) {
+            if (double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
+                double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
+              totalAmountP =
+                  (((rateCMChartData[i].price) * (double.parse(quantityDC)))
+                          .toPrecision(2))
+                      .toString();
+              print("totalAmount:$totalAmountP");
+            }
+          }
+        } else {
+          if (homeController.fat.isNotEmpty && homeController.snf.isNotEmpty) {
+            if (double.parse(homeController.fat) ==
+                    double.parse(rateCMChartData[i].fat) &&
+                double.parse(homeController.snf) ==
+                    double.parse(rateCMChartData[i].snf) &&
+                homeController.quantity.isNotEmpty &&
+                double.parse(homeController.quantity) > 0) {
+              totalAmountP = (((rateCMChartData[i].price) *
+                          double.parse(homeController.quantity))
+                      .toPrecision(2))
+                  .toString();
+              print("totalAmount:$totalAmountP");
+            }
           }
         }
-      } else {
-        if (homeController.fat.isNotEmpty && homeController.snf.isNotEmpty) {
-          if (double.parse(homeController.fat) ==
-                  double.parse(rateChartData[i].fat) &&
-              double.parse(homeController.snf) ==
-                  double.parse(rateChartData[i].snf) &&
-              homeController.quantity.isNotEmpty &&
-              double.parse(homeController.quantity) > 0) {
-            totalAmountP = ((rateChartData[i].price *
-                        double.parse(homeController.quantity))
-                    .toPrecision(2))
-                .toString();
-            print("totalAmount:$totalAmountP");
+      }
+    } else if (radio == 1) {
+      for (var i = 0; i < rateBMChartData.length; i++) {
+        if (!check) {
+          if (fatDC.isNotEmpty &&
+              snfDC.isNotEmpty &&
+              quantityDC.isNotEmpty &&
+              double.parse(quantityDC) > 0) {
+            if (double.parse(fatDC) == double.parse(rateBMChartData[i].fat) &&
+                double.parse(snfDC) == double.parse(rateBMChartData[i].snf)) {
+              totalAmountP =
+                  (((rateBMChartData[i].price) * (double.parse(quantityDC)))
+                          .toPrecision(2))
+                      .toString();
+              print("totalAmount:$totalAmountP");
+            }
+          }
+        } else {
+          if (homeController.fat.isNotEmpty && homeController.snf.isNotEmpty) {
+            if (double.parse(homeController.fat) ==
+                    double.parse(rateBMChartData[i].fat) &&
+                double.parse(homeController.snf) ==
+                    double.parse(rateBMChartData[i].snf) &&
+                homeController.quantity.isNotEmpty &&
+                double.parse(homeController.quantity) > 0) {
+              totalAmountP = (((rateBMChartData[i].price) *
+                          double.parse(homeController.quantity))
+                      .toPrecision(2))
+                  .toString();
+              print("totalAmount:$totalAmountP");
+            }
           }
         }
       }
@@ -290,6 +362,7 @@ class CollectmilkController extends GetxController {
               valueFontSize: 10,
               msgTextAlign: TextAlign.left,
               msg: 'Recover data!...');
+          milkCollectionDB.deleteTable();
           for (var e in restoreData) {
             milkCollectionDB.create(
               Added_Water: e.addedWater,
@@ -443,8 +516,12 @@ class CollectmilkController extends GetxController {
             Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
           }
         }
-      } else {}
-    } catch (e) {}
+      } else {
+        Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
+      }
+    } catch (e) {
+      Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
+    }
   }
 
   void showDialogManualPin({
@@ -868,7 +945,7 @@ class CollectmilkController extends GetxController {
     quantity.clear();
 
     farmerData = FarmerListModel();
-    radio = 0;
+    // radio = 0;
     homeController.fat = "";
     homeController.snf = "";
     homeController.water = "";

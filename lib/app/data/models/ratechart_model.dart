@@ -16,7 +16,7 @@ class RatechartModel {
   String snf;
   double price;
   String milkType;
-  DateTime insertedDate;
+  String insertedDate;
   String counters;
 
   RatechartModel({
@@ -33,7 +33,7 @@ class RatechartModel {
         snf: json["Snf"].toString(),
         price: json["Price"] as double,
         milkType: json["MilkType"],
-        insertedDate: DateTime.parse(json["InsertedDate"]),
+        insertedDate: json["InsertedDate"],
         counters: json["Counters"],
       );
 
@@ -42,8 +42,8 @@ class RatechartModel {
         "Snf": snf,
         "Price": price,
         "MilkType": milkType,
-        "InsertedDate":
-            "${insertedDate.year.toString().padLeft(4, '0')}-${insertedDate.month.toString().padLeft(2, '0')}-${insertedDate.day.toString().padLeft(2, '0')}",
+        "InsertedDate": insertedDate,
+        // "${insertedDate.year.toString().padLeft(4, '0')}-${insertedDate.month.toString().padLeft(2, '0')}-${insertedDate.day.toString().padLeft(2, '0')}",
         "Counters": counters,
       };
 }

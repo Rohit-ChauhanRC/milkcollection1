@@ -172,6 +172,8 @@ class PinverifyController extends GetxController {
             });
 
             if (res.statusCode == 200) {
+              await milkCollectionDB.update(
+                  farmerId: e.farmerId!, FUploaded: 1);
               print(jsonDecode(res.body));
             }
           } catch (e) {

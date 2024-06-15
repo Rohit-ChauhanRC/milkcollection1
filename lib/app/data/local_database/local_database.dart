@@ -1,3 +1,4 @@
+import 'package:milkcollection/app/data/local_database/rateChartCM_db.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -42,6 +43,7 @@ class DataBaseService {
     await RateChartDB().createTable(database);
     await MilkCollectionDB().createTable(database);
     await CansDB().createTable(database);
+    await RateChartCMDB().createTable(database);
     // await ReceivingDB().createTable(database);
     // await SellDB().createTable(database);
     // await ProfileDB().createTable(database);
