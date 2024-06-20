@@ -595,7 +595,8 @@ class HomeView extends GetView<HomeController> {
               InkWell(
                 onTap: () async {
                   // Get.toNamed(Routes.PAYMENT_SUMMARY);
-                  await controller.Santram();
+                  // controller.ipvCheck = true;
+                  controller.printStatus = true;
                 },
                 child: SizedBox(
                   width: Get.width * 0.16,

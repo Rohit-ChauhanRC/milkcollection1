@@ -260,6 +260,10 @@ class HomeController extends GetxController {
   set printDetailsPaymentFarmer(String str) =>
       _printDetailsPaymentFarmer.value = str;
 
+  final RxBool _ipvCheck = false.obs;
+  bool get ipvCheck => _ipvCheck.value;
+  set ipvCheck(bool b) => _ipvCheck.value = b;
+
   // final RxInt _count = 0.obs;
   // int get count => _count.value;
   // set count(int i) => _count.value = i;
@@ -274,6 +278,8 @@ class HomeController extends GetxController {
     } else {
       radio = 2;
     }
+
+    await getGatewayIp();
 
     if (result) {
       await getRateChartBM("B");
@@ -293,6 +299,13 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  Future<void> getGatewayIp() async {
+    await Permission.locationWhenInUse.request();
+    final info = NetworkInfo();
+    final gatewayIp = await info.getWifiGatewayIP();
+    print("gatewayIp: $gatewayIp");
   }
 
   Future<void> getShiftDetails() async {
@@ -522,10 +535,9 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> Santram() async {
+  Future<void> Santram(String ip) async {
     try {
-      Socket socket =
-          await Socket.connect("2402:3a80:43a2:6141:dabf:c0ff:fef5:5341", 23);
+      Socket socket = await Socket.connect(ip, 23);
       print(
           'Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
 
@@ -534,8 +546,12 @@ class HomeController extends GetxController {
 
       socket.listen(
         (Uint8List data) {
+          if (ipvCheck) {
+            socket.write(1234);
+          }
+          ipvCheck = false;
           print('Received: ${String.fromCharCodes(data)}');
-          socket.write("pulkit");
+          socket.write(1234);
         },
         onError: (error) {
           print('Socket error: $error');
@@ -565,12 +581,17 @@ class HomeController extends GetxController {
       // print(interface);
       // print(interface.addresses);
       for (var addr in interface.addresses) {
+        print("addr.address: ${interface}");
         if (addr.type == InternetAddressType.IPv4 &&
             addr.address.startsWith('192') &&
             (interface.name.startsWith("swlan") ||
                 interface.name.startsWith("ap") ||
                 interface.name.startsWith("'en0'"))) {
           ip = addr.address.split(".").getRange(0, 3).join(".");
+          // if (interface.name.startsWith("bridge100")) {
+          //   print("addr.address: ${interface.addresses[0].address}");
+          //   printerConnection(interface.addresses[0].address);
+          // }
           for (var i = 0; i < 255; i++) {
             anaylzerConnection("$ip.$i");
 
@@ -591,111 +612,44 @@ class HomeController extends GetxController {
         } else if (addr.type == InternetAddressType.IPv6) {
           var li = addr.address.split(":");
 
-          // interface
-          final ipv = await info.getWifiIPv6();
+          String subIp =
+              "${li[0]}:${addr.address.split(":")[1]}:${li[2]}:${li[3]}";
 
-          // try {
-          //   await http.post(
-          //       Uri.parse(
-          //           "http://2402:3a80:4380:820a:5ecf:7fff:fe55:a878/status"),
-          //       body: {
-          //         "print": """Pullow""",
-          //       }).then((res) {
-          //     print(res);
-          //     if (res.statusCode == 200) {
-          //       // setStatus("http://$ip.$i/status");
-          //     } else {
-          //       print(res.body);
+          // while (ipvCheck) {
+          if (interface.name.startsWith("bridge100")) {
+            print("addr.address: ${interface.addresses[0].address}");
+            printerConnection(interface.addresses[0].address);
+          }
+          // Future.delayed(const Duration(milliseconds: 500), () {
+
+          // print("ipv6Address: $ipv6Address");
+
+          // Santram("fe80::b08c:75ff:fe4c:6c64");
+
+          // printerConnection("2402:3a80:438a:a3db:5ecf:7fff:fe55:a878");
+
+          // while (ipvCheck) {
+          //   String ipv6Address =
+          //       generateRandomIPv6Address("2402:3a80:4398:903f");
+          //   await Future.delayed(const Duration(seconds: 1), () {
+          //     if ("2402:3a80:4398:903f:dabf:c0ff:fef5:5341" == ipv6Address) {
+          //       ipvCheck = false;
+          //       print(ipv6Address);
+
+          //       printerConnection(ipv6Address);
           //     }
           //   });
-          // } catch (e) {
-          //   // apiLopp(i);
-          //   print("e: ${e.toString()}");
-          // }
-          // await info.getWifiBSSID().then((value) async {
-          // print(wifiBSSID);
-          // print(await info.getWifiIPv6());
-          // print(await info.getWifiGatewayIP());
-          // print(await info.getWifiIP());
-          // printerConnection(ipv.toString());
-          // await ServerSocket.bind(
-          //         "2402:3a80:4380:820a:5ecf:7fff:fe55:a878", 8883,
-          //         shared: true, v6Only: true)
-          //     .then((value) {
-          //   value.listen((event) {
-          //     event.write("object");
-          //     event.add([44556566]);
-          //     print(event);
-          //   });
-          // });
-
-          // final socket = await Socket.connect(
-          //     InternetAddress(
-          //       "2402:3a80:4380:820a:5ecf:7fff:fe55:a878",
-          //       type: InternetAddressType.IPv6,
-          //     ),
-          //     8883,
-          //     sourcePort: 8883,
-          //     sourceAddress: InternetAddress(
-          //       "2402:3a80:4380:820a:5ecf:7fff:fe55:a878",
-          //       type: InternetAddressType.IPv6,
-          //     ),
-          //     timeout: Duration(seconds: 160));
-          // socket.writeln('Hello, server!');
-
-          // RawDatagramSocket.bind(InternetAddress.anyIPv6, 8883).then((value) {
-          //   print(value.address);
-          // });
-
-          // final ESPTouchTask task = ESPTouchTask(
-          //     ssid: 'Admin',
-          //     bssid: wifiBSSID.toString(),
-          //     password: '12345678',
-          //     taskParameter: const ESPTouchTaskParameter(
-          //       portTarget: 8883,
-          //     ));
-          // final Stream<ESPTouchResult> stream = task.execute();
-          // printResult(ESPTouchResult result) {
-          //   print('IP: ${result.ip} MAC: ${result.bssid}');
-          // }
-
-          // final StreamController<int> _controller = StreamController<int>();
-          // // _controller.stream = task.execute();
-
-          // StreamSubscription<ESPTouchResult> streamSubscription =
-          //     stream.listen(printResult);
-          // }); // 11:22:33:44:55:66
-
-// Somewhere in your widget...
-
-          // Future.delayed((Duration(seconds: 5)), () async {
-          // var multicastEndpoint = Endpoint.multicast(
-          //     InternetAddress(
-          //       "2402:3a80:43a9:9ce9:5ecf:7fff:fe55:a878",
-          //       type: InternetAddressType.IPv6,
-          //     ),
-          //     port: Port(8883));
-
-          // if (li.length >= 8) {
-          //   var lst = [
-          //     li[li.length - 2].toString().substring(0, 2),
-          //     li[li.length - 2].toString().substring(2, 4),
-          //     li[li.length - 1].toString().substring(0, 2),
-          //     li[li.length - 1].toString().substring(2, 4),
-          //   ];
-          //   print(lst);
-          //   Convert convert = Convert();
-          //   final abc = convert.hexToDecimal(hexString: lst);
-          //   // print(abc.join("."));
-          //   print(addr.host);
-          //   // weighingConnection(addr.address);
-          //   // RawServerSocket.bind(addr.address, 8883).then((value) {
-          //   //   print(value.address);
-          //   // });
           // }
         }
       }
     }
+  }
+
+  String generateRandomIPv6Address(String prefix) {
+    final random = Random();
+    final segments = List.generate(
+        4, (_) => random.nextInt(0xFFFF).toRadixString(16).padLeft(4, '0'));
+    return '$prefix:${segments.join(':')}';
   }
 
   Future<void> weighingConnection(
@@ -725,12 +679,13 @@ class HomeController extends GetxController {
 
   Future<void> printerConnection(String ip) async {
     // final ip = InternetAddress.anyIPv4;
+    final platform = Platform.isIOS;
     try {
-      final server = await ServerSocket.bind(ip, 8883);
+      final server = await ServerSocket.bind(ip, 8883, shared: true);
       server.listen((event) {
         // socket = event;
 
-        printerSocketConnection(event);
+        printerSocketConnection(event, ip);
       });
     } catch (e) {
       print(e);
@@ -772,9 +727,19 @@ class HomeController extends GetxController {
     );
   }
 
-  void printerSocketConnection(Socket client) {
+  void printerSocketConnection(Socket client, String ip) {
     client.listen(
       (Uint8List data) {
+        print("ip: $ip");
+
+        ipvCheck = true;
+
+        // client.write("Santram");
+        // client.write('\n');
+        // client.write("Santram");
+        // client.write(1234);
+        // client.write("Pulkit\n");
+
         final message = String.fromCharCodes(data);
 
         print(" printer $message");
@@ -783,7 +748,8 @@ class HomeController extends GetxController {
         // client.write("pulkit");
 
         if (printStatus) {
-          client.write(printSummaryData);
+          client.write("printSummaryData");
+          // client.write(printSummaryData);
           printStatus = false;
         }
 
