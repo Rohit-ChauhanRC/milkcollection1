@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'package:udp/udp.dart';
+import 'package:milkcollection/app/utils/network_check.dart';
+import 'package:milkcollection/app/utils/utils.dart';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sms_android/flutter_sms.dart';
 import 'package:get/get.dart';
@@ -29,14 +28,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 import 'package:milkcollection/app/data/models/ratechart_model.dart';
 import 'package:flutter/material.dart';
-// import 'package:sms_advanced/sms_advanced.dart';
-// import 'package:telephony_sms/telephony_sms.dart';
 import 'dart:math';
-
-import 'package:conversion/conversion.dart';
-
-import 'package:network_info_plus/network_info_plus.dart';
-import 'package:esptouch_flutter/esptouch_flutter.dart';
 
 class HomeController extends GetxController {
   //
@@ -279,16 +271,18 @@ class HomeController extends GetxController {
       radio = 2;
     }
 
-    await getGatewayIp();
+    // await getGatewayIp();
 
-    if (result) {
-      await getRateChartBM("B");
-      await getRateChartCM("C");
+    await getRateChartBM("B");
+    await getRateChartCM("C");
+
+    if (Platform.isIOS) {
+      await getNetworkType();
     }
-
     await checkIp();
 
     await fetchMilkCollectionDateWise();
+    print("pulkit : ${DateFormat("HH:mm:ss").format(DateTime.now())}");
   }
 
   @override
@@ -301,11 +295,17 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  Future<void> getGatewayIp() async {
-    await Permission.locationWhenInUse.request();
-    final info = NetworkInfo();
-    final gatewayIp = await info.getWifiGatewayIP();
-    print("gatewayIp: $gatewayIp");
+  Future<void> getNetworkType() async {
+    String? networkType1;
+    try {
+      networkType1 = await NetworkCheck.getNetworkType();
+    } on PlatformException {
+      networkType1 = 'Failed to get network type.';
+    }
+    if (networkType1 != "5G") {
+      Utils.showDialog(
+          "Please upgrade your sim 3G/4G to 5G for printer, analyzer,weighing machine support!");
+    }
   }
 
   Future<void> getShiftDetails() async {
@@ -328,18 +328,6 @@ class HomeController extends GetxController {
   Future entryPoint(SendPort sendPort) async {
     var response = await checkIp();
     // sendPort.send(response);
-  }
-
-  Future<void> callApi() async {
-    var recievePort = ReceivePort();
-    await Isolate.spawn(entryPoint, recievePort.sendPort);
-    final completer = Completer<Iterable<MilkCollectionModel>>();
-    recievePort.listen((data) {
-      print(data);
-      completer.complete(data);
-      recievePort.close();
-    });
-    // return completer.future;
   }
 
   void ccConvert() {
@@ -571,37 +559,17 @@ class HomeController extends GetxController {
   }
 
   Future<void> checkIp() async {
-    final info = NetworkInfo();
     await Permission.locationWhenInUse.request();
 
-    final wifiBSSID = await info.getWifiBSSID(); // 11:22:33:44:55:66
-
-    // var ip;
     for (var interface in await NetworkInterface.list()) {
-      // print(interface);
-      // print(interface.addresses);
       for (var addr in interface.addresses) {
-        print("addr.address: ${interface}");
         if (addr.type == InternetAddressType.IPv4 &&
             addr.address.startsWith('192') &&
             (interface.name.startsWith("swlan") ||
                 interface.name.startsWith("ap") ||
                 interface.name.startsWith("'en0'"))) {
           ip = addr.address.split(".").getRange(0, 3).join(".");
-          // if (interface.name.startsWith("bridge100")) {
-          //   print("addr.address: ${interface.addresses[0].address}");
-          //   printerConnection(interface.addresses[0].address);
-          // }
-          for (var i = 0; i < 255; i++) {
-            anaylzerConnection("$ip.$i");
 
-            weighingConnection("$ip.$i");
-
-            printerConnection("$ip.$i");
-          }
-        } else if (addr.type == InternetAddressType.IPv4 &&
-            addr.address.startsWith('172')) {
-          addr.address.split(".").getRange(0, 3).join(".");
           for (var i = 0; i < 255; i++) {
             anaylzerConnection("$ip.$i");
 
@@ -610,36 +578,13 @@ class HomeController extends GetxController {
             printerConnection("$ip.$i");
           }
         } else if (addr.type == InternetAddressType.IPv6) {
-          var li = addr.address.split(":");
-
-          String subIp =
-              "${li[0]}:${addr.address.split(":")[1]}:${li[2]}:${li[3]}";
-
-          // while (ipvCheck) {
           if (interface.name.startsWith("bridge100")) {
             print("addr.address: ${interface.addresses[0].address}");
             printerConnection(interface.addresses[0].address);
+            anaylzerConnection(interface.addresses[0].address);
+
+            weighingConnection(interface.addresses[0].address);
           }
-          // Future.delayed(const Duration(milliseconds: 500), () {
-
-          // print("ipv6Address: $ipv6Address");
-
-          // Santram("fe80::b08c:75ff:fe4c:6c64");
-
-          // printerConnection("2402:3a80:438a:a3db:5ecf:7fff:fe55:a878");
-
-          // while (ipvCheck) {
-          //   String ipv6Address =
-          //       generateRandomIPv6Address("2402:3a80:4398:903f");
-          //   await Future.delayed(const Duration(seconds: 1), () {
-          //     if ("2402:3a80:4398:903f:dabf:c0ff:fef5:5341" == ipv6Address) {
-          //       ipvCheck = false;
-          //       print(ipv6Address);
-
-          //       printerConnection(ipv6Address);
-          //     }
-          //   });
-          // }
         }
       }
     }
@@ -748,8 +693,8 @@ class HomeController extends GetxController {
         // client.write("pulkit");
 
         if (printStatus) {
-          client.write("printSummaryData");
-          // client.write(printSummaryData);
+          // client.write("printSummaryData");
+          client.write(printSummaryData);
           printStatus = false;
         }
 
@@ -818,6 +763,7 @@ class HomeController extends GetxController {
   }
 
   // fetchByDate
+
   Future<void> fetchMilkCollectionDateWise() async {
     totalAmt = 0.0;
     totalFat = 0.0;

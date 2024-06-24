@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
@@ -20,11 +20,6 @@ class FarmerController extends GetxController {
   final FarmerlistController farmerlistController = FarmerlistController();
 
   final FarmerDB farmerDB = FarmerDB();
-
-  final RxList<ConnectivityResult> _connectionStatus =
-      [ConnectivityResult.none].obs;
-  final Connectivity _connectivity = Connectivity();
-  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   final box = GetStorage();
 
@@ -106,11 +101,6 @@ class FarmerController extends GetxController {
       title = "Add Farmer";
       progressBar = false;
     }
-
-    _connectivitySubscription = _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> result) async {
-      _connectionStatus.value = result;
-    });
   }
 
   @override
@@ -134,7 +124,6 @@ class FarmerController extends GetxController {
     _bankName.close();
     _branchName.close();
     _circularProgress.close();
-    _connectionStatus.close();
     _farmerData.close();
     _farmerName.close();
     _ifscCode.close();

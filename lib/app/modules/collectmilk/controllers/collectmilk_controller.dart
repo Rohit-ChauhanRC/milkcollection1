@@ -864,7 +864,7 @@ class CollectmilkController extends GetxController {
     Map<String, dynamic> _body = {
       "Collection_Date":
           DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
-      "Inserted_Time": DateFormat("hh:mm:ss").format(DateTime.now()).toString(),
+      "Inserted_Time": DateFormat("HH:mm:ss").format(DateTime.now()).toString(),
       "Calculations_ID": (box.read(calculationsId) ?? 0 + 1).toString(),
       "FarmerId": getFarmerIdFinal(),
       "Farmer_Name": farmerData.farmerName,
@@ -919,7 +919,7 @@ class CollectmilkController extends GetxController {
         Collection_Mode: !check ? manualConst : autoConst,
         FAT: !check ? double.parse(fat.text) : double.parse(homeController.fat),
         Farmer_Name: farmerData.farmerName,
-        Inserted_Time: DateFormat("hh:mm:ss").format(DateTime.now()),
+        Inserted_Time: DateFormat("HH:mm:ss").format(DateTime.now()),
         Milk_Status: "Accepted",
         Milk_Type: radio == 0 ? "CM" : "BM",
         Qty: !check
