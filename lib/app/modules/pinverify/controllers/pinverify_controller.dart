@@ -13,6 +13,7 @@ import 'package:milkcollection/app/data/models/farmer_list_model.dart';
 import 'package:milkcollection/app/data/models/milk_collection_model.dart';
 import 'package:milkcollection/app/routes/app_pages.dart';
 import 'package:milkcollection/app/utils/utils.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class PinverifyController extends GetxController {
   //
@@ -46,11 +47,16 @@ class PinverifyController extends GetxController {
   List<MilkCollectionModel> get restoreData => _restoreData;
   set restoreData(List<MilkCollectionModel> lst) => _restoreData.assignAll(lst);
 
+  final RxString _version = "".obs;
+  String get version => _version.value;
+  set version(String str) => _version.value = str;
+
   @override
   void onInit() async {
     super.onInit();
     farmerData.assignAll(await farmerDB.fetchAll());
     restoreData.assignAll(await milkCollectionDB.fetchAll());
+    await findVersion();
   }
 
   @override
@@ -65,6 +71,12 @@ class PinverifyController extends GetxController {
     _circularProgress.close();
     _pin.close();
     // _initialized.close();
+  }
+
+  Future<void> findVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    version = packageInfo.version;
   }
 
   Future<dynamic> login() async {

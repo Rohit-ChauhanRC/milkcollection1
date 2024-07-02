@@ -30,6 +30,8 @@ import 'package:milkcollection/app/data/models/ratechart_model.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:package_info_plus/package_info_plus.dart';
+
 class HomeController extends GetxController {
   //
   final box = GetStorage();
@@ -256,10 +258,6 @@ class HomeController extends GetxController {
   bool get ipvCheck => _ipvCheck.value;
   set ipvCheck(bool b) => _ipvCheck.value = b;
 
-  // final RxInt _count = 0.obs;
-  // int get count => _count.value;
-  // set count(int i) => _count.value = i;
-
   @override
   void onInit() async {
     super.onInit();
@@ -270,7 +268,7 @@ class HomeController extends GetxController {
     } else {
       radio = 2;
     }
-
+    _fetchData();
     // await getGatewayIp();
 
     await getRateChartBM("B");
@@ -763,6 +761,25 @@ class HomeController extends GetxController {
   }
 
   // fetchByDate
+
+  void dbTask(List<dynamic> args) async {
+    SendPort sendPort = args[0];
+    final db = await milkCollectionDB.fetchByDate(
+        DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
+        radio == 1 ? "Am" : "Pm");
+    sendPort.send(db);
+  }
+
+  void _fetchData() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(dbTask, [receivePort.sendPort]);
+
+    receivePort.listen((message) {
+      print("message: $message");
+
+      receivePort.close();
+    });
+  }
 
   Future<void> fetchMilkCollectionDateWise() async {
     totalAmt = 0.0;
