@@ -868,24 +868,24 @@ Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
 Total qty..........$totalQtyCow
-Avg Fat............${(totalFatCow / totalMilkCow).toPrecision(2)}
-Avg Snf............${(totalSnfCow / totalMilkCow).toPrecision(2)}
-Avg Rate...........${(totalPriceCow / totalQtyCow.toDouble()).toPrecision(2)}
-Total Amt..........${totalAmtCow.toPrecision(2)}
+Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow.toDouble()).toPrecision(2) : 0.0}
+Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
         
     Buffallo Milk
 Total qty..........$totalQtyBuffallo
-Avg Fat............${(totalFatBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Snf............${(totalSnfBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Rate...........${(totalPriceBuffallo / totalQtyBuffallo.toDouble()).toPrecision(2)}
-Total Amt..........${totalAmtBuffallo.toPrecision(2)}
+Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo.toDouble()).toPrecision(2) : 0.0}
+Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
 
     Total milk
 Total qty..........$totalQty
-Avg Fat............${(totalFat / totalMilk).toPrecision(2)}
-Avg Snf............${(totalSnf / totalMilk).toPrecision(2)}
-Avg Rate...........${(totalPrice / totalQty.toDouble()).toPrecision(2)}
-Total Amt..........${totalAmt.toPrecision(2)}
+Avg Fat............${totalQty > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
+Avg Snf............${totalQty > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
+Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty.toDouble()).toPrecision(2) : 0.0}
+Total Amt..........${totalQty > 0 ? totalAmt.toPrecision(2) : 0.0}
 --------------------------------
 Pro Milk Qty FAT SNF Rate Amnt
 --------------------------------
@@ -1032,24 +1032,24 @@ Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
 Total qty..........$totalQtyCow
-Avg Fat............${(totalFatCow / totalMilkCow).toPrecision(2)}
-Avg Snf............${(totalSnfCow / totalMilkCow).toPrecision(2)}
-Avg Rate...........${(totalPriceCow / totalQtyCow).toPrecision(2)}
-Total Amt..........${totalAmtCow.toPrecision(2)}
+Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
+Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
         
     Buffallo Milk
 Total qty..........$totalQtyBuffallo
-Avg Fat............${(totalFatBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Snf............${(totalSnfBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Rate...........${(totalPriceBuffallo / totalQtyBuffallo).toPrecision(2)}
-Total Amt..........${totalAmtBuffallo.toPrecision(2)}
+Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
+Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
 
     Total milk
 Total qty..........$totalQty
-Avg Fat............${(totalFat / totalMilk).toPrecision(2)}
-Avg Snf............${(totalSnf / totalMilk).toPrecision(2)}
-Avg Rate...........${(totalPrice / totalQty).toPrecision(2)}
-Total Amt..........${totalAmt.toPrecision(2)}
+Avg Fat............${totalQty > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
+Avg Snf............${totalQty > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
+Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty).toPrecision(2) : 0.0}
+Total Amt..........${totalQty > 0 ? totalAmt.toPrecision(2) : 0.0}
 
 Cow Cans       ${cowCans.isNotEmpty ? cowCans : '0'}
 Buf Cans       ${bufCans.isNotEmpty ? bufCans : "0"}
@@ -1095,16 +1095,16 @@ Date        : ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift       : ${radio == 1 ? "Am" : "Pm"}
 CM
 Total qty   : $totalQtyCow
-Avg Fat     : ${(totalFatCow / totalMilkCow).toPrecision(2)}
-Avg Snf     : ${(totalSnfCow / totalMilkCow).toPrecision(2)}
-Avg Rate    : ${(totalPriceCow / totalQtyCow).toPrecision(2)}
-Total Amt   : ${totalAmtCow.toPrecision(2)}
+Avg Fat     : ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Snf     : ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Rate    : ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
+Total Amt   : ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
 BM
 Total qty   : $totalQtyBuffallo
-Avg Fat     : ${(totalFatBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Snf     : ${(totalSnfBuffallo / totalMilkBuffallo).toPrecision(2)}
-Avg Rate    : ${(totalPriceBuffallo / totalQtyBuffallo).toPrecision(2)}
-Total Amt   : ${totalAmtBuffallo.toPrecision(2)}
+Avg Fat     : ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Snf     : ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Rate    : ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
+Total Amt   : ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
 Total Ltrs  : $totalQty
 Total Amt   : ${totalAmt.toPrecision(2)}
 """;
