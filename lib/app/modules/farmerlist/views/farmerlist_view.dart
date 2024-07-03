@@ -69,7 +69,7 @@ class FarmerlistView extends GetView<FarmerlistController> {
                       itemBuilder: (ctx, i) {
                         return Container(
                           decoration: BoxDecoration(
-                              color: AppColors.card,
+                              color: AppColors.card.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(10)),
                           padding: const EdgeInsets.all(5),
                           margin: const EdgeInsets.symmetric(vertical: 10),

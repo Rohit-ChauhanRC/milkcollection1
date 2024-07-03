@@ -137,7 +137,7 @@ class PinverifyView extends GetView<PinverifyController> {
                 const SizedBox(
                   height: 10,
                 ),
-                Obx(() => Text(controller.version ?? "")),
+                Obx(() => Text("Version: " + controller.version ?? "")),
               ],
             ),
           ),

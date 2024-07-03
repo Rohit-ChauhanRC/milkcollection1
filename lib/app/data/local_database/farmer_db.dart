@@ -10,11 +10,11 @@ class FarmerDB {
   Future<void> createTable(Database database) async {
     await database.execute("""
   CREATE TABLE IF NOT EXISTS $tableName (
-    "FarmerID" INTEGER NOT NULL,
+    "FarmerID" INTEGER,
     "Key_id" INTEGER ,
     "FarmerName" TEXT NOT NULL,
-    "BankName" TEXT NOT NULL,
-    "BranchName" TEXT NOT NULL,
+    "BankName" TEXT,
+    "BranchName" TEXT,
     "AccountName" TEXT,
     "IFSCCode" TEXT,
     "AadharCardNo" TEXT,

@@ -268,7 +268,7 @@ class HomeController extends GetxController {
     } else {
       radio = 2;
     }
-    _fetchData();
+    // _fetchData();
     // await getGatewayIp();
 
     await getRateChartBM("B");
@@ -577,11 +577,24 @@ class HomeController extends GetxController {
           }
         } else if (addr.type == InternetAddressType.IPv6) {
           if (interface.name.startsWith("bridge100")) {
-            print("addr.address: ${interface.addresses[0].address}");
-            printerConnection(interface.addresses[0].address);
-            anaylzerConnection(interface.addresses[0].address);
+            // print("addr.address: ${interface.addresses[0].address}");
+            // printerConnection(interface.addresses[0].address);
+            // anaylzerConnection(interface.addresses[0].address);
 
-            weighingConnection(interface.addresses[0].address);
+            // weighingConnection(interface.addresses[0].address);
+            ip = interface.addresses[0].address
+                .split(".")
+                .getRange(0, 3)
+                .join(".");
+
+            for (var i = 0; i < 255; i++) {
+              anaylzerConnection("$ip.$i");
+
+              weighingConnection("$ip.$i");
+
+              printerConnection("$ip.$i");
+              print("printer ip6 :$ip");
+            }
           }
         }
       }
@@ -762,24 +775,24 @@ class HomeController extends GetxController {
 
   // fetchByDate
 
-  void dbTask(List<dynamic> args) async {
-    SendPort sendPort = args[0];
-    final db = await milkCollectionDB.fetchByDate(
-        DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
-        radio == 1 ? "Am" : "Pm");
-    sendPort.send(db);
-  }
+  // void dbTask(List<dynamic> args) async {
+  //   SendPort sendPort = args[0];
+  //   final db = await milkCollectionDB.fetchByDate(
+  //       DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
+  //       radio == 1 ? "Am" : "Pm");
+  //   sendPort.send(db);
+  // }
 
-  void _fetchData() async {
-    final receivePort = ReceivePort();
-    await Isolate.spawn(dbTask, [receivePort.sendPort]);
+  // void _fetchData() async {
+  //   final receivePort = ReceivePort();
+  //   await Isolate.spawn(dbTask, [receivePort.sendPort]);
 
-    receivePort.listen((message) {
-      print("message: $message");
+  //   receivePort.listen((message) {
+  //     print("message: $message");
 
-      receivePort.close();
-    });
-  }
+  //     receivePort.close();
+  //   });
+  // }
 
   Future<void> fetchMilkCollectionDateWise() async {
     totalAmt = 0.0;

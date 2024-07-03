@@ -89,9 +89,9 @@ class FarmerView extends GetView<FarmerController> {
                                     initialValue: controller.bankName,
                                     onChanged: (p0) => controller.bankName = p0,
                                     keyboardType: TextInputType.text,
-                                    validator: (val) => val!.length < 3
-                                        ? "Field is required!"
-                                        : null,
+                                    // validator: (val) => val!.length < 3
+                                    //     ? "Field is required!"
+                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -132,9 +132,9 @@ class FarmerView extends GetView<FarmerController> {
                                         controller.branchName = p0,
                                     keyboardType: TextInputType.text,
                                     // maxLength: 10,
-                                    validator: (val) => val!.length < 3
-                                        ? "Field is required!"
-                                        : null,
+                                    // validator: (val) => val!.length < 3
+                                    //     ? "Field is required!"
+                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -178,9 +178,9 @@ class FarmerView extends GetView<FarmerController> {
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
-                                    validator: (val) => val!.length < 12
-                                        ? "Field is required!"
-                                        : null,
+                                    // validator: (val) => val!.length < 12
+                                    //     ? "Field is required!"
+                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -220,9 +220,9 @@ class FarmerView extends GetView<FarmerController> {
                                     onChanged: (p0) => controller.ifscCode = p0,
                                     keyboardType: TextInputType.text,
                                     // maxLength: 10,
-                                    validator: (val) => val!.length < 3
-                                        ? "Field is required!"
-                                        : null,
+                                    // validator: (val) => val!.length < 3
+                                    //     ? "Field is required!"
+                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
