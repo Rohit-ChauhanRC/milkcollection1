@@ -46,12 +46,12 @@ class PinverifyView extends GetView<PinverifyController> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Mak Life Producer Company Limited",
+                      "Mak Life Dairy Producer Company Limited",
                       overflow: TextOverflow.visible,
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
-                          .apply(fontSizeDelta: 4),
+                          .copyWith(fontSize: 14),
                     ),
                   ),
                 ),
@@ -137,7 +137,7 @@ class PinverifyView extends GetView<PinverifyController> {
                 const SizedBox(
                   height: 10,
                 ),
-                Obx(() => Text("Version: " + controller.version ?? "")),
+                Obx(() => Text("Version: ${controller.version}" ?? "")),
               ],
             ),
           ),

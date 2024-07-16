@@ -49,7 +49,8 @@ class FarmerlistController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    farmerData.assignAll(await farmerDB.fetchAll());
+    // farmerData.assignAll(await farmerDB.fetchAll());
+    await getFarmerListLocal();
     restoreData.assignAll(await milkCollectionDB.fetchAll());
   }
 
@@ -63,6 +64,11 @@ class FarmerlistController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+    _farmerData.clear();
+  }
+
+  getFarmerListLocal() async {
+    farmerData.assignAll(await farmerDB.fetchAll());
   }
 
   Future<void> getFarmerList() async {

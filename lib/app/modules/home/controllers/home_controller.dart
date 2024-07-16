@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'package:milkcollection/app/utils/network_check.dart';
@@ -261,6 +262,9 @@ class HomeController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    await Permission.sms.request();
+
     bool result = await InternetConnection().hasInternetAccess;
 
     if (DateTime.now().hour < 12) {
@@ -271,15 +275,20 @@ class HomeController extends GetxController {
     // _fetchData();
     // await getGatewayIp();
 
-    await getRateChartBM("B");
-    await getRateChartCM("C");
+    if (box.read(
+          centerName,
+        ) !=
+        "admin") {
+      await getRateChartBM("B");
+      await getRateChartCM("C");
+      if (Platform.isIOS) {
+        await getNetworkType();
+      }
+      await checkIp();
 
-    if (Platform.isIOS) {
-      await getNetworkType();
+      await fetchMilkCollectionDateWise();
     }
-    await checkIp();
 
-    await fetchMilkCollectionDateWise();
     print("pulkit : ${DateFormat("HH:mm:ss").format(DateTime.now())}");
   }
 
@@ -773,27 +782,6 @@ class HomeController extends GetxController {
     // homeController.socket!.write("collectionPrint");
   }
 
-  // fetchByDate
-
-  // void dbTask(List<dynamic> args) async {
-  //   SendPort sendPort = args[0];
-  //   final db = await milkCollectionDB.fetchByDate(
-  //       DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
-  //       radio == 1 ? "Am" : "Pm");
-  //   sendPort.send(db);
-  // }
-
-  // void _fetchData() async {
-  //   final receivePort = ReceivePort();
-  //   await Isolate.spawn(dbTask, [receivePort.sendPort]);
-
-  //   receivePort.listen((message) {
-  //     print("message: $message");
-
-  //     receivePort.close();
-  //   });
-  // }
-
   Future<void> fetchMilkCollectionDateWise() async {
     totalAmt = 0.0;
     totalFat = 0.0;
@@ -1074,8 +1062,34 @@ Total cans     ${int.parse("${cowCans.isNotEmpty ? cowCans : 0}") + int.parse("$
       //     .assignAll(centerMobileSmsModelFromMap(jsonDecode(res.body)));
       final ctx = centerMobileSmsModelFromMap(res.body);
       if (ctx.isNotEmpty) {
-        sendMessage(ctx.first.mobile1.toString(), ctx.first.mobile2.toString(),
+        sendMessage1(ctx.first.mobile1.toString(), ctx.first.mobile2.toString(),
             ctx.first.mobile3.toString());
+      }
+    }
+  }
+
+  Future<void> sendMessage1(String mob1, String mob2, String mob3) async {
+    List<String> recipents = [];
+    if (mob1.isNotEmpty) {
+      recipents.add(mob1);
+    }
+    if (mob2.isNotEmpty) {
+      recipents.add(mob2);
+    }
+    if (mob3.isNotEmpty) {
+      recipents.add(mob3);
+    }
+
+    for (var num1 in recipents) {
+      try {
+        var res = await http.post(Uri.parse(
+            //
+            "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=$num1&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${radio == 1 ? "Am" : "Pm"}%0D%0ACM%0D%0ATotal qty: $totalQtyCow%0D%0AAvg Fat: ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}%0D%0AAvg Snf: ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}%0D%0AAvg Rate: ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}%0D%0ATotal Amt: ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}%0D%0BM%0D%0ATotal qty: $totalQtyBuffallo%0D%0Avg Fat.: ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}%0D%0Avg Snf: ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}%0D%0Avg Rate: ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}%0D%0Total Amt: ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}%0D%0Total Ltrs  : $totalQty%0D%0Total Amt: ${totalAmt.toPrecision(2)}"));
+        if (res.statusCode == 200) {
+          Utils.showSnackbar(jsonDecode(res.body)["message"]);
+        } else {}
+      } catch (e) {
+        print(e.toString());
       }
     }
   }

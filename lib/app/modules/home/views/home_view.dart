@@ -407,7 +407,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -449,7 +449,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -490,7 +490,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -573,7 +573,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -619,7 +619,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -673,7 +673,7 @@ class HomeView extends GetView<HomeController> {
                   });
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  // width: Get.width * 0.192
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -693,7 +693,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
