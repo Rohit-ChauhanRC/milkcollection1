@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:flutter/foundation.dart';
 import 'package:milkcollection/app/utils/network_check.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 
@@ -153,6 +154,10 @@ class HomeController extends GetxController {
   double get totalFatCow => _totalFatCow.value;
   set totalFatCow(double i) => _totalFatCow.value = i;
 
+  final RxDouble _totalWeightCow = 0.0.obs;
+  double get totalWeightCow => _totalWeightCow.value;
+  set totalWeightCow(double i) => _totalWeightCow.value = i;
+
   final RxDouble _totalWaterCow = 0.0.obs;
   double get totalWaterCow => _totalWaterCow.value;
   set totalWaterCow(double i) => _totalWaterCow.value = i;
@@ -275,26 +280,20 @@ class HomeController extends GetxController {
     // _fetchData();
     // await getGatewayIp();
 
-    if (box.read(
-          centerName,
-        ) !=
-        "admin") {
-      await getRateChartBM("B");
-      await getRateChartCM("C");
-      if (Platform.isIOS) {
-        await getNetworkType();
-      }
-      await checkIp();
+    await getRateChartBM("B");
+    await getRateChartCM("C");
 
-      await fetchMilkCollectionDateWise();
+    if (Platform.isIOS) {
+      await getNetworkType();
     }
-
-    print("pulkit : ${DateFormat("HH:mm:ss").format(DateTime.now())}");
   }
 
   @override
-  void onReady() {
+  void onReady() async {
     super.onReady();
+    await checkIp();
+
+    await fetchMilkCollectionDateWise();
   }
 
   @override
@@ -319,8 +318,6 @@ class HomeController extends GetxController {
     cansModel.assignAll(await cansDB.fetchCans(
         DateFormat("dd-MMM-yyyy").format(DateTime.now()),
         radio == 1 ? "Am" : "Pm"));
-    print(
-        "${await cansDB.fetchCans(DateFormat("dd-MMM-yyyy").format(DateTime.now()), radio == 1 ? "Am" : "Pm")}");
     if (cansModel.isNotEmpty) {
       cowCans = cansModel.first.cowCans != null
           ? cansModel.first.cowCans.toString()
@@ -332,28 +329,22 @@ class HomeController extends GetxController {
     // printSummary = true;
   }
 
-  Future entryPoint(SendPort sendPort) async {
-    var response = await checkIp();
-    // sendPort.send(response);
-  }
-
-  void ccConvert() {
-    // var lst = [2402, 8100, 7652, "c722", "7cc5", "6ff4", "30b7", "8ebb"];
-    // lst[6].toString().substring(0, 1);
-    // var li = ["fc", "cc", "a9", "e1"];
-    // Convert convert = Convert();
-    // final abc = convert.hexToDecimal(hexString: li);
-    // print(abc);
-    // RawServerSocket.bind(address, port);
-  }
-
   Future<void> getRateChartBM(
     String milkType,
   ) async {
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9019/api/GetRateChart?CollectionCenterId=${box.read("centerId")}&MilkType=$milkType"),
+            "$baseUrlConst/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
+        headers: {
+          "Access-Control-Allow-Origin":
+              "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials":
+              "true", // Required for cookies, authorization headers with HTTPS
+          "Access-Control-Allow-Headers":
+              "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+          "Access-Control-Allow-Methods": "POST, OPTIONS, GET"
+        },
       );
 
       if (res.statusCode == 200) {
@@ -361,15 +352,11 @@ class HomeController extends GetxController {
 
         rateChartData.assignAll(ratechartModelFromMap(res.body));
         if (rateChartData.isNotEmpty) {
-          final abc = box.read(rateChartBM);
-
           final counter = rateChartData.map((e) {
             final List lst = [];
             lst.add(int.parse(e.counters));
             return lst.reduce((curr, next) => curr > next ? curr : next);
           });
-          print(abc);
-          print(counter);
 
           if (box.read(rateChartBM) == null) {
             int count = 0;
@@ -442,7 +429,7 @@ class HomeController extends GetxController {
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9019/api/GetRateChart?CollectionCenterId=${box.read("centerId")}&MilkType=$milkType"),
+            "$baseUrlConst/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
       );
 
       if (res.statusCode == 200) {
@@ -450,16 +437,11 @@ class HomeController extends GetxController {
 
         rateChartData.assignAll(ratechartModelFromMap(res.body));
         if (rateChartData.isNotEmpty) {
-          final abc = box.read(rateChartCM);
           final counter = rateChartData.map((e) {
-            late String counter = '';
             final List lst = [];
             lst.add(int.parse(e.counters));
             return lst.reduce((curr, next) => curr > next ? curr : next);
           });
-
-          print(abc);
-          print(counter);
 
           if (box.read(rateChartCM) == null) {
             int count = 0;
@@ -530,41 +512,6 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> Santram(String ip) async {
-    try {
-      Socket socket = await Socket.connect(ip, 23);
-      print(
-          'Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
-
-      // Handle socket communication
-      socket.write('Hello from Flutter');
-
-      socket.listen(
-        (Uint8List data) {
-          if (ipvCheck) {
-            socket.write(1234);
-          }
-          ipvCheck = false;
-          print('Received: ${String.fromCharCodes(data)}');
-          socket.write(1234);
-        },
-        onError: (error) {
-          print('Socket error: $error');
-          // socket.destroy();
-        },
-        onDone: () {
-          print('Socket closed');
-          // socket.destroy();
-        },
-      );
-
-      // Close the socket
-      // socket.close();
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
   Future<void> checkIp() async {
     await Permission.locationWhenInUse.request();
 
@@ -586,11 +533,6 @@ class HomeController extends GetxController {
           }
         } else if (addr.type == InternetAddressType.IPv6) {
           if (interface.name.startsWith("bridge100")) {
-            // print("addr.address: ${interface.addresses[0].address}");
-            // printerConnection(interface.addresses[0].address);
-            // anaylzerConnection(interface.addresses[0].address);
-
-            // weighingConnection(interface.addresses[0].address);
             ip = interface.addresses[0].address
                 .split(".")
                 .getRange(0, 3)
@@ -602,7 +544,6 @@ class HomeController extends GetxController {
               weighingConnection("$ip.$i");
 
               printerConnection("$ip.$i");
-              print("printer ip6 :$ip");
             }
           }
         }
@@ -626,9 +567,7 @@ class HomeController extends GetxController {
       server.listen((event) {
         weighingSocketConnection(event);
       });
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
   }
 
   Future<void> anaylzerConnection(String ip) async {
@@ -637,14 +576,11 @@ class HomeController extends GetxController {
       server.listen((event) {
         analyzerSocketConnection(event);
       });
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
   }
 
   Future<void> printerConnection(String ip) async {
     // final ip = InternetAddress.anyIPv4;
-    final platform = Platform.isIOS;
     try {
       final server = await ServerSocket.bind(ip, 8883, shared: true);
       server.listen((event) {
@@ -652,9 +588,7 @@ class HomeController extends GetxController {
 
         printerSocketConnection(event, ip);
       });
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
   }
 
   void analyzerSocketConnection(Socket client) {
@@ -662,12 +596,7 @@ class HomeController extends GetxController {
       (Uint8List data) {
         final message = String.fromCharCodes(data);
 
-        print(" annalyzer $message");
-
-        // if(message.split(" "))
-
         if (message.split(" ")[1].split("@").length < 4) {
-          print("tata: $message");
         } else {
           fat =
               "${message.split(" ")[1].split("@")[1]}.${message.split(" ")[1].split("@")[2]}";
@@ -683,7 +612,6 @@ class HomeController extends GetxController {
         update();
       },
       onError: (error) {
-        print("error: $error");
         // client.destroy();
       },
       onDone: () {
@@ -695,25 +623,14 @@ class HomeController extends GetxController {
   void printerSocketConnection(Socket client, String ip) {
     client.listen(
       (Uint8List data) {
-        print("ip: $ip");
-
         ipvCheck = true;
 
-        // client.write("Santram");
-        // client.write('\n');
-        // client.write("Santram");
-        // client.write(1234);
-        // client.write("Pulkit\n");
-
         final message = String.fromCharCodes(data);
-
-        print(" printer $message");
-        print(" printer ${client.remoteAddress}: ${client.port}");
-        // GET Hex@2@7@4@2@8@6@1@6@@
-        // client.write("pulkit");
+        if (kDebugMode) {
+          print("printer :$message");
+        }
 
         if (printStatus) {
-          // client.write("printSummaryData");
           client.write(printSummaryData);
           printStatus = false;
         }
@@ -736,7 +653,6 @@ class HomeController extends GetxController {
         }
       },
       onError: (error) {
-        print("error: $error");
         // client.destroy();
       },
       onDone: () {
@@ -752,11 +668,8 @@ class HomeController extends GetxController {
 
         quantity = message.replaceAll("N", "").toString().replaceAll("n", "");
         // collectmilkController.quantity = message.replaceAll("N", "");
-        print(message);
-        print(quantity);
       },
       onError: (error) {
-        print("error: $error");
         // client.destroy();
       },
       onDone: () {
@@ -794,10 +707,12 @@ class HomeController extends GetxController {
     milkCollectionData.assignAll(await milkCollectionDB.fetchByDate(
         DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate)).toString(),
         radio == 1 ? "Am" : "Pm"));
-    print(milkCollectionData);
     if (milkCollectionData.isNotEmpty) {
       // totalMilk = 0.0;
       totalQty = milkCollectionData.length;
+      totalAmtCow = 0.0;
+      totalAmtBuffallo = 0.0;
+
       for (var i = 0; i < milkCollectionData.length; i++) {
         //
         totalMilk += milkCollectionData[i].qty ?? 1.0;
@@ -812,6 +727,7 @@ class HomeController extends GetxController {
         // "${milkCollectionData[i].farmerId.toString().substring(milkCollectionData[i].farmerId.toString().length - 3, milkCollectionData[i].farmerId.toString().length)} ${milkCollectionData[i].milkType} ${milkCollectionData[i].qty} ${milkCollectionData[i].fat} ${milkCollectionData[i].snf} ${milkCollectionData[i].ratePerLiter} ${milkCollectionData[i].totalAmt}");
         if (milkCollectionData[i].milkType == "CM") {
           totalQtyCow += 1;
+          // totalWeightCow += milkCollectionData[i].qty!;
           totalMilkCow += milkCollectionData[i].qty!;
           totalFatCow += milkCollectionData[i].fat!.toDouble() *
               milkCollectionData[i].qty!;
@@ -855,21 +771,21 @@ Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
-Total qty..........$totalQtyCow
+Total qty..........$totalMilkCow
 Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow.toDouble()).toPrecision(2) : 0.0}
 Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
         
     Buffallo Milk
-Total qty..........$totalQtyBuffallo
+Total qty..........$totalMilkBuffallo
 Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo.toDouble()).toPrecision(2) : 0.0}
 Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
 
     Total milk
-Total qty..........$totalQty
+Total qty..........${totalMilkBuffallo + totalMilkCow}
 Avg Fat............${totalQty > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
 Avg Snf............${totalQty > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
 Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty.toDouble()).toPrecision(2) : 0.0}
@@ -937,7 +853,6 @@ Total cans     ${int.parse("${bufCans.isNotEmpty ? bufCans : 0}") + int.parse("$
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
-              maxLength: 10,
             ),
             Align(
               alignment: Alignment.centerLeft,
@@ -964,7 +879,6 @@ Total cans     ${int.parse("${bufCans.isNotEmpty ? bufCans : 0}") + int.parse("$
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
-              maxLength: 10,
             ),
           ],
         ),
@@ -1019,21 +933,21 @@ Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
-Total qty..........$totalQtyCow
+Total qty..........$totalMilkCow
 Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
 Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
         
     Buffallo Milk
-Total qty..........$totalQtyBuffallo
+Total qty..........$totalMilkBuffallo
 Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
 Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
 
     Total milk
-Total qty..........$totalQty
+Total qty..........${totalMilkBuffallo + totalMilkCow}
 Avg Fat............${totalQty > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
 Avg Snf............${totalQty > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
 Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty).toPrecision(2) : 0.0}
@@ -1062,7 +976,7 @@ Total cans     ${int.parse("${cowCans.isNotEmpty ? cowCans : 0}") + int.parse("$
       //     .assignAll(centerMobileSmsModelFromMap(jsonDecode(res.body)));
       final ctx = centerMobileSmsModelFromMap(res.body);
       if (ctx.isNotEmpty) {
-        sendMessage1(ctx.first.mobile1.toString(), ctx.first.mobile2.toString(),
+        sendMessage(ctx.first.mobile1.toString(), ctx.first.mobile2.toString(),
             ctx.first.mobile3.toString());
       }
     }
@@ -1080,17 +994,15 @@ Total cans     ${int.parse("${cowCans.isNotEmpty ? cowCans : 0}") + int.parse("$
       recipents.add(mob3);
     }
 
-    for (var num1 in recipents) {
+    for (var num in recipents) {
       try {
         var res = await http.post(Uri.parse(
             //
-            "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=$num1&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${radio == 1 ? "Am" : "Pm"}%0D%0ACM%0D%0ATotal qty: $totalQtyCow%0D%0AAvg Fat: ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}%0D%0AAvg Snf: ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}%0D%0AAvg Rate: ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}%0D%0ATotal Amt: ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}%0D%0BM%0D%0ATotal qty: $totalQtyBuffallo%0D%0Avg Fat.: ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}%0D%0Avg Snf: ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}%0D%0Avg Rate: ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}%0D%0Total Amt: ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}%0D%0Total Ltrs  : $totalQty%0D%0Total Amt: ${totalAmt.toPrecision(2)}"));
+            "http://sms.autobysms.com/app/smsapi/index.php?key=36365EF4C86D67&campaign=0&routeid=9&type=text&contacts=$num&senderid=MAKLIF&msg=MAK LIFE%0D%0AColl. Ctr ID: ${box.read(centerIdConst)}%0D%0AFarmer Id: %0D%0ADate: ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}_${radio == 1 ? "Am" : "Pm"}%0D%0AMilk Type: %0D%0AQty: ${(totalMilkCow + totalMilkBuffallo).toPrecision(2)}%0D%0AFAT: ${((totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0) + (totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0)).toPrecision(2)}%0D%0ASNF: ${((totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0) + (totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0)).toPrecision(2)}%0D%0AWATER %: %0D%0ARATE: ${((totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0) + (totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0)).toPrecision(2)}%0D%0ATot Amt.: Rs.${((totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0) + (totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0)).toPrecision(2)}%0D%0A&template_id=1207165769139334975"));
         if (res.statusCode == 200) {
           Utils.showSnackbar(jsonDecode(res.body)["message"]);
         } else {}
-      } catch (e) {
-        print(e.toString());
-      }
+      } catch (e) {}
     }
   }
 
@@ -1107,20 +1019,23 @@ Centre ID : ${box.read(centerIdConst)}
 (${box.read(centerName)})
 Date        : ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift       : ${radio == 1 ? "Am" : "Pm"}
+- - - - - - - - - - - - - -
 CM
-Total qty   : $totalQtyCow
+Total qty   : $totalMilkCow
 Avg Fat     : ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Snf     : ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Rate    : ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
 Total Amt   : ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
 BM
-Total qty   : $totalQtyBuffallo
+- - - - - - - - - - - - - -
+Total qty   : $totalMilkBuffallo
 Avg Fat     : ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Snf     : ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Rate    : ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
 Total Amt   : ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
-Total Ltrs  : $totalQty
-Total Amt   : ${totalAmt.toPrecision(2)}
+- - - - - - - - - - -
+Total Ltrs  : ${totalMilkCow + totalMilkBuffallo}
+Total Amt   : ${(totalAmtCow + totalAmtBuffallo).toPrecision(2)}
 """;
       List<String> recipents = [];
       if (mob1.isNotEmpty) {
@@ -1133,11 +1048,10 @@ Total Amt   : ${totalAmt.toPrecision(2)}
         recipents.add(mob3);
       }
 
-      await sendSMS(message: message, recipients: recipents, sendDirect: true);
+      await sendSMS(
+          message: message, recipients: ["9711784343"], sendDirect: true);
       // print(_result);
-    } catch (e) {
-      print(e.toString());
-    }
+    } catch (e) {}
   }
 
   Future<void> canReceivedPost() async {
@@ -1154,9 +1068,7 @@ Total Amt   : ${totalAmt.toPrecision(2)}
       });
       if (res.statusCode == 200) {
       } else {}
-    } catch (e) {
-      print(e.toString());
-    }
+    } catch (e) {}
   }
 
   String printPaymentsFarmerList() {
@@ -1215,19 +1127,4 @@ Total Amount   : $totalAmt
     printPaymentDetails = true;
     // return prin;
   }
-}
-
-class SimpleWifiInfo {
-  static const platform =
-      MethodChannel('eng.smaho.com/esptouch_plugin/example');
-
-  /// Get WiFi SSID using platform channels.
-  ///
-  /// Can return null if BSSID information is not available.
-  static Future<String?> get ssid => platform.invokeMethod('ssid');
-
-  /// Get WiFi BSSID using platform channels.
-  ///
-  /// Can return null if BSSID information is not available.
-  static Future<String?> get bssid => platform.invokeMethod('bssid');
 }

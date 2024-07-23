@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
@@ -53,12 +55,19 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 }
               } else if (i == "Manual Collection") {
                 controller.pin = "";
-                controller.showDialogManualPin(
-                  initialValue: controller.pin,
-                  onTap: () async {
-                    await controller.getVerifyPin();
-                  },
-                );
+                if (controller.box.read(manualpinConst) ==
+                    DateFormat("yyyy-mm-dd")
+                        .format(DateTime.now())
+                        .toString()) {
+                  controller.check = false;
+                } else {
+                  controller.showDialogManualPin(
+                    initialValue: controller.pin,
+                    onTap: () async {
+                      await controller.getVerifyPin();
+                    },
+                  );
+                }
                 // await controller.getVerifyPin();
               } else {
                 await controller.exportExcel();
@@ -312,7 +321,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   DecimalTextInputFormatter(decimalRange: 1),
                                   LengthLimitingTextInputFormatter(3),
                                 ],
-                                maxLength: 3,
                               ),
                             )),
                     ],
@@ -360,7 +368,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   DecimalTextInputFormatter(decimalRange: 1),
                                   LengthLimitingTextInputFormatter(3),
                                 ],
-                                maxLength: 10,
                               ),
                             )),
                     ],
@@ -409,7 +416,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                   DecimalTextInputFormatter(decimalRange: 1),
                                   // LengthLimitingTextInputFormatter(4),
                                 ],
-                                maxLength: 10,
                               ),
                             )),
                     ],
@@ -624,11 +630,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       controller.progress = true;
                                       await controller.accept();
                                       await controller.printData();
+                                      await controller.homeController
+                                          .fetchMilkCollectionDateWise();
+
                                       if (result) {
                                         await controller.sendCollection();
                                         await controller.checkSmsFlag();
-                                        await controller.homeController
-                                            .fetchMilkCollectionDateWise();
                                       }
 
                                       controller.emptyData();
@@ -807,7 +814,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged1,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
                   ),
                 )),
           ],
@@ -835,7 +841,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged2,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
                   ),
                 )),
           ],
@@ -863,7 +868,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged3,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
                   ),
                 )),
           ],

@@ -88,7 +88,6 @@ class PinverifyView extends GetView<PinverifyController> {
                                     const TextInputType.numberWithOptions(
                                   signed: true,
                                 ),
-                                maxLength: 10,
                                 validator: (val) => val!.length < 3
                                     ? "Field is required!"
                                     : null,

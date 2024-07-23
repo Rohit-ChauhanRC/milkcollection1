@@ -100,7 +100,6 @@ class Utils {
           keyboardType: const TextInputType.numberWithOptions(
             signed: true,
           ),
-          maxLength: 10,
         ),
         // cancel: ,
         confirm: Row(

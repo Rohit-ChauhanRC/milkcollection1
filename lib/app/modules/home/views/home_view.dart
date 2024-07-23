@@ -375,12 +375,10 @@ class HomeView extends GetView<HomeController> {
 
   Widget cardWidget() {
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         IntrinsicHeight(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               InkWell(
                 onTap: () async {
@@ -389,7 +387,7 @@ class HomeView extends GetView<HomeController> {
                   );
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.25,
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -407,7 +405,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -416,22 +414,16 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               const VerticalDivider(
                 color: AppColors.white,
                 thickness: 2,
-              ),
-              SizedBox(
-                width: 10.w,
               ),
               InkWell(
                 onTap: () {
                   Get.toNamed(Routes.FARMERLIST);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.15,
+                  width: Get.width * 0.25,
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -449,7 +441,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -462,15 +454,12 @@ class HomeView extends GetView<HomeController> {
                 color: AppColors.white,
                 thickness: 2,
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               InkWell(
                 onTap: () {
                   // Get.toNamed(Routes.);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.25,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -490,7 +479,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -508,10 +497,11 @@ class HomeView extends GetView<HomeController> {
         ),
         IntrinsicHeight(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               InkWell(
                 onTap: () async {
+                  // controller.printDetails = true;
                   bool result = await InternetConnection().hasInternetAccess;
 
                   await controller.getShiftDetails().then((value) {
@@ -552,7 +542,9 @@ class HomeView extends GetView<HomeController> {
                   });
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  // width: Get.width * 0.19,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -573,7 +565,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -582,15 +574,9 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               const VerticalDivider(
                 color: AppColors.white,
                 thickness: 2,
-              ),
-              SizedBox(
-                width: 10.w,
               ),
               InkWell(
                 onTap: () async {
@@ -599,7 +585,9 @@ class HomeView extends GetView<HomeController> {
                   // controller.printStatus = true;
                 },
                 child: SizedBox(
-                  width: Get.width * 0.16,
+                  // width: Get.width * 0.16,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -619,7 +607,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -631,9 +619,6 @@ class HomeView extends GetView<HomeController> {
               const VerticalDivider(
                 color: AppColors.white,
                 thickness: 2,
-              ),
-              SizedBox(
-                width: 17.w,
               ),
               InkWell(
                 onTap: () async {
@@ -653,7 +638,7 @@ class HomeView extends GetView<HomeController> {
                         controller.printSummary = true;
 
                         if (result) {
-                          Get.back();
+                          // Get.back();
                           await controller
                               .checkSmsFlag()
                               .then((value) => Get.back());
@@ -673,7 +658,9 @@ class HomeView extends GetView<HomeController> {
                   });
                 },
                 child: SizedBox(
-                  // width: Get.width * 0.192
+                  // width: Get.width * 0.19,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -693,7 +680,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 12,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
