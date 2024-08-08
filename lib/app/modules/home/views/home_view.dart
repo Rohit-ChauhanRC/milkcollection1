@@ -509,21 +509,10 @@ class HomeView extends GetView<HomeController> {
             children: [
               InkWell(
                 onTap: () async {
-                  // controller.printDetails = true;
                   bool result = await InternetConnection().hasInternetAccess;
 
-                  await controller.getShiftDetails().then((value) {
-                    if (controller.cansModel.isNotEmpty) {
-                      controller.printDetails = true;
-
-                      if (result) {
-                        controller
-                            .printShiftDetails()
-                            .then((value) => Get.back());
-                      } else {
-                        Get.back();
-                      }
-                    } else {
+                  await controller.getShiftDetails().then((value) async {
+                    if (controller.cansModel.isEmpty) {
                       controller.showDialogManualPin(onTap: () async {
                         if (controller.cowCans.isNotEmpty &&
                             controller.bufCans.isNotEmpty) {
@@ -535,17 +524,26 @@ class HomeView extends GetView<HomeController> {
                                 .format(DateTime.now()),
                             shift: controller.radio == 1 ? "Am" : "Pm",
                           );
-                          controller.printDetails = true;
+                        }
+                        controller.printDetails = true;
 
-                          if (result) {
-                            controller
-                                .printShiftDetails()
-                                .then((value) => Get.back());
-                          } else {
-                            Get.back();
-                          }
+                        if (result) {
+                          // Get.back();
+                          await controller
+                              .printShiftDetails()
+                              .then((value) => Get.back());
+                        } else {
+                          Get.back();
                         }
                       });
+                    } else {
+                      // await controller.getShiftDetails().then((value) async {
+                      // controller.;
+                      controller.printDetails = true;
+                      if (result) {
+                        await controller.printShiftDetails();
+                      }
+                      // });
                     }
                   });
                 },

@@ -504,7 +504,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> checkIp() async {
-    await Permission.locationWhenInUse.request();
+    // await Permission.locationWhenInUse.request();
 
     for (var interface in await NetworkInterface.list()) {
       for (var addr in interface.addresses) {
@@ -1010,23 +1010,23 @@ MAK LIFE
 Centre ID : ${box.read(centerIdConst)}
 (${box.read(centerName)})
 Date        : ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
-Shift       : ${radio == 1 ? "Am" : "Pm"}
+Shift        : ${radio == 1 ? "Am" : "Pm"}
 - - - - - - - - - - - - - -
 CM
-Total qty   : ${totalMilkCow.toPrecision(2)}
-Avg Fat     : ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Snf     : ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
+Total qty    : ${totalMilkCow.toPrecision(2)}
+Avg Fat      : ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
+Avg Snf      : ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
 Avg Rate    : ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
 Total Amt   : ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
 BM
-- - - - - - - - - - - - - -
-Total qty   : ${totalMilkBuffallo.toPrecision(2)}
-Avg Fat     : ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Snf     : ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+- - - - - - - - - - - - - - - - - -
+Total qty    : ${totalMilkBuffallo.toPrecision(2)}
+Avg Fat      : ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
+Avg Snf      : ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
 Avg Rate    : ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
 Total Amt   : ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
-- - - - - - - - - - -
-Total Ltrs  : ${(totalMilkCow + totalMilkBuffallo).toPrecision(2)}
+- - - - - - - - - - - - - - - - - -
+Total Ltrs   : ${(totalMilkCow + totalMilkBuffallo).toPrecision(2)}
 Total Amt   : ${(totalAmtCow + totalAmtBuffallo).toPrecision(2)}
 """;
       List<String> recipents = [];

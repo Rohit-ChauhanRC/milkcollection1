@@ -12,8 +12,8 @@ String farmerListModelToMap(List<FarmerListModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
 
 class FarmerListModel {
-  int? farmerId;
-  int? calculationsId;
+  String? farmerId;
+  String? calculationsId;
   String? farmerName;
   String? bankName;
   String? branchName;
@@ -57,8 +57,8 @@ class FarmerListModel {
   });
 
   factory FarmerListModel.fromMap(Map<String, dynamic> json) => FarmerListModel(
-        farmerId: json["FarmerID"] ?? 0,
-        calculationsId: json["CalculationsID"] ?? 0,
+        farmerId: json["FarmerID"] ?? "0",
+        calculationsId: json["CalculationsID"] ?? "0",
         farmerName: json["FarmerName"] ?? "",
         bankName: json["BankName"] ?? "",
         branchName: json["BranchName"] ?? "",

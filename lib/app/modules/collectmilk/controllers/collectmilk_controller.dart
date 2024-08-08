@@ -225,7 +225,6 @@ class CollectmilkController extends GetxController {
               double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
               double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
             priceP = rateCMChartData[i].price.toPrecision(2).toString();
-            print("price:$priceP");
           }
         } else {
           if (double.parse(homeController.fat) ==
@@ -950,7 +949,11 @@ class CollectmilkController extends GetxController {
         Analyze_Mode: !check ? manualConst : autoConst,
         CollectionCenterId: box.read(centerIdConst),
         CollectionCenterName: box.read(centerName),
-        Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+        Collection_Date: fromDate.isNotEmpty
+            ? DateFormat("dd-MMM-yyyy")
+                .format(DateTime.parse(fromDate))
+                .toString()
+            : DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
         Collection_Mode: !check ? manualConst : autoConst,
         FAT: !check ? double.parse(fat.text) : double.parse(homeController.fat),
         Farmer_Name: farmerData.farmerName,

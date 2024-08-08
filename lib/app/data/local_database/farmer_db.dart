@@ -38,7 +38,7 @@ class FarmerDB {
   //
 
   Future<int> create({
-    required int farmerId,
+    required String farmerId,
     required String farmerName,
     required String bankName,
     required String branchName,
@@ -126,8 +126,8 @@ class FarmerDB {
   }
 
   Future<int> update({
-    int? calculationsID,
-    required int farmerId,
+    required String calculationsID,
+    required String farmerId,
     String? farmerName,
     String? bankName,
     String? branchName,

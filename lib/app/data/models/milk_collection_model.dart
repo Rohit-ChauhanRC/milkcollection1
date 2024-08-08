@@ -14,7 +14,7 @@ String milkCollectionModelToMap(List<MilkCollectionModel> data) =>
 class MilkCollectionModel {
   String? collectionDate;
   String? insertedTime;
-  int? calculationsId;
+  String? calculationsId;
   int? farmerId;
   String? farmerName;
   String? collectionMode;
