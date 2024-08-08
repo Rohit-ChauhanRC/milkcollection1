@@ -45,16 +45,9 @@ class FarmerlistController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    // bool result = await InternetConnection().hasInternetAccess;
 
-    // if (result) {
-    //   await getFarmerList();
-    // } else {
     await getFarmerListLocal();
-    // }
-
-    // farmerData.assignAll(await farmerDB.fetchAll());
-    restoreData.assignAll(await milkCollectionDB.fetchAll());
+    // restoreData.assignAll(await milkCollectionDB.fetchAll());
   }
 
   @override

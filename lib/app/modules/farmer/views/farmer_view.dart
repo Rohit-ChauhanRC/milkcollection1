@@ -23,7 +23,6 @@ class FarmerView extends GetView<FarmerController> {
       body: BackgroundContainer(
         child: Obx(() => !controller.progressBar
             ? Form(
-                // autovalidateMode: AutovalidateMode.,
                 key: controller.farmerFormKey,
                 child: Container(
                   margin: const EdgeInsets.all(10),
@@ -90,9 +89,6 @@ class FarmerView extends GetView<FarmerController> {
                                     initialValue: controller.bankName,
                                     onChanged: (p0) => controller.bankName = p0,
                                     keyboardType: TextInputType.text,
-                                    // validator: (val) => val!.length < 3
-                                    //     ? "Field is required!"
-                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -127,15 +123,10 @@ class FarmerView extends GetView<FarmerController> {
                             child: !controller.type
                                 ? TextFormWidget(
                                     readOnly: controller.type,
-
                                     initialValue: controller.branchName,
                                     onChanged: (p0) =>
                                         controller.branchName = p0,
                                     keyboardType: TextInputType.text,
-                                    // maxLength: 10,
-                                    // validator: (val) => val!.length < 3
-                                    //     ? "Field is required!"
-                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -180,9 +171,6 @@ class FarmerView extends GetView<FarmerController> {
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
                                     maxLength: 17,
-                                    // validator: (val) => val!.length < 12
-                                    //     ? "Field is required!"
-                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -217,15 +205,10 @@ class FarmerView extends GetView<FarmerController> {
                             child: !controller.type
                                 ? TextFormWidget(
                                     readOnly: controller.type,
-
                                     initialValue: controller.ifscCode,
                                     onChanged: (p0) => controller.ifscCode = p0,
                                     keyboardType: TextInputType.text,
                                     maxLength: 11,
-                                    // maxLength: 10,
-                                    // validator: (val) => val!.length < 3
-                                    //     ? "Field is required!"
-                                    //     : null,
                                   )
                                 : Container(
                                     decoration: BoxDecoration(
@@ -406,8 +389,6 @@ class FarmerView extends GetView<FarmerController> {
                                               value: 0,
                                               groupValue: controller.radio,
                                               onChanged: (int? i) {
-                                                // print(i);
-
                                                 controller.radio = i!;
                                               },
                                             ),
@@ -455,9 +436,6 @@ class FarmerView extends GetView<FarmerController> {
                                       value: 1,
                                       groupValue: controller.radio,
                                       onChanged: (int? i) {
-                                        // if (controller.type) {
-                                        //   controller.radio = i!;
-                                        // }
                                         controller.radio = i!;
                                       },
                                     ),

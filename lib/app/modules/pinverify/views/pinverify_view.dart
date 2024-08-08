@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:upgrader/upgrader.dart';
 
-import '../../../routes/app_pages.dart';
 import '../../../widgets/backdround_container.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/text_form_widget.dart';

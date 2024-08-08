@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -93,12 +91,12 @@ class PinverifyController extends GetxController {
         await getFamerDataDB().then((v) async {
           await getFarmerList().then((value) async {
             await postMilkCollectionDataDB().then((value) async {
-              await geMilkCollectionList().then((v) {
-                box.write(verifyConst, true).then((value) => {
-                      circularProgress = false,
-                      Get.offNamed(Routes.HOME),
-                    });
-              });
+              // await geMilkCollectionList().then((v) {
+              box.write(verifyConst, true).then((value) => {
+                    circularProgress = false,
+                    Get.offNamed(Routes.HOME),
+                  });
+              // });
             });
           });
         });
@@ -165,6 +163,7 @@ class PinverifyController extends GetxController {
             var res = await http.post(
               Uri.parse("$baseUrlConst/$addFarmerConst"),
               body: {
+                "CalculationsID": e.calculationsId.toString(),
                 "FarmerName": e.farmerName,
                 "BankName": e.bankName!.isNotEmpty ? e.bankName : "NA",
                 "BranchName": e.branchName!.isNotEmpty ? e.branchName : "NA",
@@ -218,7 +217,7 @@ class PinverifyController extends GetxController {
               body: {
                 "Collection_Date": e.collectionDate.toString(),
                 "Inserted_Time": e.insertedTime.toString(),
-                "Calculations_ID": "",
+                "Calculations_ID": e.farmerId.toString(),
                 "FarmerId": e.farmerId.toString(),
                 "Farmer_Name": e.farmerName.toString(),
                 "Collection_Mode": e.collectionMode.toString(),
@@ -250,7 +249,7 @@ class PinverifyController extends GetxController {
 
             if (res.statusCode == 200) {
               await milkCollectionDB.update(
-                  farmerId: e.farmerId!, FUploaded: 1);
+                  farmerId: e.calculationsId!.toString(), FUploaded: 1);
             }
           } catch (e) {}
         }
@@ -269,6 +268,8 @@ class PinverifyController extends GetxController {
         farmerData.assignAll(farmerListModelFromMap(res.body));
 
         if (farmerData.isNotEmpty) {
+          farmerDB.deleteTable();
+
           for (var e in farmerData) {
             farmerDB.create(
               farmerId: e.farmerId!,
@@ -289,6 +290,7 @@ class PinverifyController extends GetxController {
               noOfBuffalos: e.noOfBuffalos,
               noOfCows: e.noOfCows,
               rFID: e.rfId,
+              FUploaded: 1,
             );
           }
         }

@@ -49,7 +49,10 @@ class CollectmilkView extends GetView<CollectmilkController> {
 
               if (i == "Recover Data") {
                 if (result) {
-                  await controller.getRestoreData();
+                  await controller.getRestoreData().then((onValue) async {
+                    await controller.homeController
+                        .fetchMilkCollectionDateWise();
+                  });
                 } else {
                   Utils.showDialog("No Internet Connection available!");
                 }
@@ -68,7 +71,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     },
                   );
                 }
-                // await controller.getVerifyPin();
               } else {
                 await controller.exportExcel();
               }
@@ -169,7 +171,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               onChanged: (int? i) {
                                 controller.radio = 1;
                                 controller.getRateBMChart();
-                                // controller.getPriceData();
                                 if (double.parse(controller.homeController
                                                 .quantity.isNotEmpty
                                             ? controller.homeController.quantity
@@ -237,10 +238,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                 height: 10.h,
               ),
               SizedBox(
-                // width: Get.width * 0.7,
-                // height: 65.h,
                 child: TextFormWidget(
-                  // readOnly: controller.check,
                   prefix: InkWell(
                     onTap: () {
                       if (controller.farmerId.trim().isNotEmpty) {
@@ -252,7 +250,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                       size: 30,
                     ),
                   ),
-                  // initialValue: controller.farmerId,
                   label: "Please enter FarmerId...",
                   keyboardType: TextInputType.number,
                   inputFormatters: [
@@ -319,7 +316,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                         decimal: true),
                                 inputFormatters: [
                                   DecimalTextInputFormatter(decimalRange: 1),
-                                  LengthLimitingTextInputFormatter(3),
+                                  LengthLimitingTextInputFormatter(4),
                                 ],
                               ),
                             )),
@@ -366,7 +363,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                         decimal: true),
                                 inputFormatters: [
                                   DecimalTextInputFormatter(decimalRange: 1),
-                                  LengthLimitingTextInputFormatter(3),
+                                  LengthLimitingTextInputFormatter(4),
                                 ],
                               ),
                             )),
@@ -397,7 +394,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                               width: Get.width * .3,
                               padding: const EdgeInsets.all(10),
                               child: Text(
-                                controller.homeController.water ?? "",
+                                controller.homeController.water.isNotEmpty
+                                    ? controller.homeController.water ?? ""
+                                    : "",
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               ),
@@ -414,7 +413,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                         decimal: true),
                                 inputFormatters: [
                                   DecimalTextInputFormatter(decimalRange: 1),
-                                  // LengthLimitingTextInputFormatter(4),
                                 ],
                               ),
                             )),
@@ -512,7 +510,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                               .homeController.snf.isNotEmpty &&
                                           (controller.radio == 1 ||
                                               controller.radio == 0)
-                                      ? controller.getPriceData()
+                                      ? controller.getPriceData() ?? ""
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
@@ -535,7 +533,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                           controller.snfDC.isNotEmpty &&
                                           (controller.radio == 1 ||
                                               controller.radio == 0)
-                                      ? controller.getPriceData()
+                                      ? controller.getPriceData() ?? ""
                                       : "",
                                   style:
                                       Theme.of(context).textTheme.labelMedium,
@@ -623,13 +621,15 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       (controller.radio == 1 ||
                                           controller.radio == 0) &&
                                       (double.parse(controller.getPriceData()) >
-                                          0)) {
+                                          0.0)) {
                                     if (double.parse(controller
                                             .homeController.quantity) >
-                                        0) {
+                                        0.0) {
                                       controller.progress = true;
                                       await controller.accept();
                                       await controller.printData();
+                                      controller.progress = false;
+
                                       await controller.homeController
                                           .fetchMilkCollectionDateWise();
 
@@ -639,7 +639,6 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       }
 
                                       controller.emptyData();
-                                      controller.progress = false;
                                     }
                                   }
                                 },
@@ -658,10 +657,10 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                               controller.radio == 0) &&
                                           (double.parse(
                                                   controller.getPriceData()) >
-                                              0)
+                                              0.0)
                                       ? double.parse(controller
                                                   .homeController.quantity) >
-                                              0
+                                              0.0
                                           ? AppColors.green
                                           : const Color.fromARGB(
                                               255, 211, 240, 212)
@@ -690,20 +689,20 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                     (controller.radio == 1 ||
                                         controller.radio == 0) &&
                                     (double.parse(controller.getPriceData()) >
-                                        0)) {
-                                  if (double.parse(controller.quantityDC) > 0) {
+                                        0.0)) {
+                                  if (double.parse(controller.quantityDC) >
+                                      0.0) {
                                     controller.progress = true;
                                     await controller.accept();
                                     await controller.printData();
-
+                                    controller.progress = false;
+                                    await controller.homeController
+                                        .fetchMilkCollectionDateWise();
                                     if (result) {
                                       await controller.sendCollection();
                                       await controller.checkSmsFlag();
-                                      await controller.homeController
-                                          .fetchMilkCollectionDateWise();
                                     }
                                     controller.emptyData();
-                                    controller.progress = false;
                                   }
                                 }
                               },
@@ -721,8 +720,9 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                             controller.radio == 0) &&
                                         (double.parse(
                                                 controller.getPriceData()) >
-                                            0)
-                                    ? double.parse(controller.quantityDC) > 0 &&
+                                            0.0)
+                                    ? double.parse(controller.quantityDC) >
+                                                0.0 &&
                                             controller.farmerIdC.text.isNotEmpty
                                         ? AppColors.green
                                         : const Color.fromARGB(
@@ -747,17 +747,11 @@ class CollectmilkView extends GetView<CollectmilkController> {
               Obx(() => !controller.progress
                   ? Container(
                       width: Get.width,
-                      // padding: const EdgeInsets.all(20),
                       margin:
                           EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
                       child: ElevatedButton(
                         onPressed: () {
-                          // if (controller.farmerId.isNotEmpty &&
-                          //     (controller.fat.text.isNotEmpty ||
-                          //         controller.homeController.fat.isNotEmpty) &&
-                          //     controller.farmerData.farmerName != "Unknown") {
                           controller.emptyData();
-                          // }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.red,

@@ -40,7 +40,6 @@ class HomeView extends GetView<HomeController> {
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
                         ).then((selectedDate) async {
                           controller.fromDate = selectedDate!.toIso8601String();
-                          print(controller.fromDate);
 
                           await controller.fetchMilkCollectionDateWise();
                         });
@@ -69,7 +68,6 @@ class HomeView extends GetView<HomeController> {
                                 value: 1,
                                 groupValue: controller.radio,
                                 onChanged: (int? i) {
-                                  print(i);
                                   controller.radio = i!;
                                   controller.fetchMilkCollectionDateWise();
                                 },
@@ -96,7 +94,6 @@ class HomeView extends GetView<HomeController> {
                                 value: 2,
                                 groupValue: controller.radio,
                                 onChanged: (int? i) {
-                                  print(i);
                                   controller.radio = i!;
                                   controller.fetchMilkCollectionDateWise();
                                 },
@@ -118,7 +115,6 @@ class HomeView extends GetView<HomeController> {
               ),
               Container(
                 decoration: BoxDecoration(
-                    // color: AppColors.brown,
                     border: Border.all(
                   color: AppColors.white,
                   width: 2,
@@ -126,7 +122,6 @@ class HomeView extends GetView<HomeController> {
                 child: Column(
                   children: [
                     Obx(() => Container(
-                          // margin: const EdgeInsets.all(15),
                           alignment: Alignment.center,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +129,9 @@ class HomeView extends GetView<HomeController> {
                               intrinsicWidget(
                                   title1: "Tot. Milk",
                                   value1: controller.totalMilk >= 1.0
-                                      ? controller.totalMilk.toString()
+                                      ? controller.totalMilk
+                                          .toPrecision(2)
+                                          .toString()
                                       : "0.0",
                                   title2: "Avg Fat",
                                   value2: controller.totalFat >= 1.0 &&
@@ -218,28 +215,39 @@ class HomeView extends GetView<HomeController> {
                           itemCount: controller.milkCollectionData.length,
                           itemBuilder: (ctx, i) {
                             return collectionTable(
-                              amtV: controller.milkCollectionData[i].totalAmt
-                                  .toString(),
+                              amtV:
+                                  (controller.milkCollectionData[i].totalAmt ??
+                                          0.0)
+                                      .toPrecision(2)
+                                      .toString(),
                               fId: controller.milkCollectionData[i].farmerId
                                   .toString(),
                               fNmae: controller.milkCollectionData[i].farmerName
                                   .toString(),
-                              fatV: controller.milkCollectionData[i].fat
-                                  .toString(),
+                              fatV:
+                                  (controller.milkCollectionData[i].fat ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
                               miltType: controller
                                   .milkCollectionData[i].milkType
                                   .toString(),
-                              priceV: controller
-                                  .milkCollectionData[i].ratePerLiter
+                              priceV: (controller
+                                          .milkCollectionData[i].ratePerLiter ??
+                                      0.0)
+                                  .toPrecision(2)
                                   .toString(),
                               qtyV: controller.milkCollectionData[i].qty!
                                   .toDouble()
-                                  .ceil()
+                                  .toPrecision(2)
                                   .toString(),
-                              snfV: controller.milkCollectionData[i].snf
-                                  .toString(),
-                              waterV: controller
-                                  .milkCollectionData[i].addedWater
+                              snfV:
+                                  (controller.milkCollectionData[i].snf ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
+                              waterV: (controller
+                                          .milkCollectionData[i].addedWater ??
+                                      0.0)
+                                  .toPrecision(2)
                                   .toString(),
                             );
                           }),

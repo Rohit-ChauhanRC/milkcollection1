@@ -25,3 +25,4 @@ const String getFarmerPaymentDetialsConst = "GetFarmerPaymentDetials";
 const String rateChartBM = "rateChartBM";
 const String rateChartCM = "rateChartCM";
 const String manualpinConst = "manualpin";
+const String backupCollectionConst = "backupCollectionConst";
