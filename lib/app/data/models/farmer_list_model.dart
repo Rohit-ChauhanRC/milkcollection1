@@ -57,15 +57,15 @@ class FarmerListModel {
   });
 
   factory FarmerListModel.fromMap(Map<String, dynamic> json) => FarmerListModel(
-        farmerId: json["FarmerID"] ?? "0",
-        calculationsId: json["CalculationsID"] ?? "0",
+        farmerId: json["FarmerID"].toString() ?? "0",
+        calculationsId: json["CalculationsID"].toString() ?? "0",
         farmerName: json["FarmerName"] ?? "",
         bankName: json["BankName"] ?? "",
         branchName: json["BranchName"] ?? "",
         accountName: json["AccountName"] ?? "",
         ifscCode: json["IFSCCode"] ?? "",
-        aadharCardNo: json["AadharCardNo"] ?? "",
-        mobileNumber: json["MobileNumber"] ?? "",
+        aadharCardNo: json["AadharCardNo"].toString() ?? "",
+        mobileNumber: json["MobileNumber"].toString() ?? "",
         noOfCows: json["NoOfCows"] ?? 0,
         noOfBuffalos: json["NoOfBuffalos"] ?? 0,
         modeOfPay: json["ModeOfPay"] ?? 0,

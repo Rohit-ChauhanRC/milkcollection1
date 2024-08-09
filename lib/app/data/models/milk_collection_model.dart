@@ -13,6 +13,7 @@ String milkCollectionModelToMap(List<MilkCollectionModel> data) =>
 
 class MilkCollectionModel {
   String? collectionDate;
+  String? id;
   String? insertedTime;
   String? calculationsId;
   int? farmerId;
@@ -56,13 +57,14 @@ class MilkCollectionModel {
     this.collectionCenterName,
     this.shift,
     this.FUploaded,
+    this.id,
   });
 
   factory MilkCollectionModel.fromMap(Map<String, dynamic> json) =>
       MilkCollectionModel(
         collectionDate: json["Collection_Date"],
         insertedTime: json["Inserted_Time"],
-        calculationsId: json["Calculations_ID"],
+        calculationsId: json["Calculations_ID"].toString(),
         farmerId: json["FarmerId"],
         farmerName: json["Farmer_Name"],
         collectionMode: json["Collection_Mode"],

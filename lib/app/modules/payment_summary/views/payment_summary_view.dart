@@ -171,7 +171,7 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
               Obx(() => controller.homeController.farmerPaymentList.isNotEmpty
                   ? Container(
                       margin: const EdgeInsets.symmetric(horizontal: 10),
-                      height: Get.height * 0.7,
+                      height: Get.height * 0.63,
                       child: ListView.builder(
                           itemCount: controller.homeController.searchActive
                               ? controller
