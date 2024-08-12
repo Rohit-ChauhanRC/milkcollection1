@@ -210,7 +210,7 @@ class FarmerController extends GetxController {
 
   Future<void> createFarmerLocal(int fupload) async {
     await farmerlistController.farmerDB.create(
-      farmerId: getFarmerIdFinal(),
+      farmerId: int.tryParse(getFarmerIdFinal())!,
       farmerName: farmerName,
       bankName: bankName,
       branchName: branchName,
@@ -235,8 +235,7 @@ class FarmerController extends GetxController {
   Future<void> localFarmerUpdate(bool result) async {
     await farmerDB
         .update(
-            calculationsID: fId,
-            farmerId: fId,
+            farmerId: int.parse(fId),
             address: address,
             aadharCardNo: aadharCard,
             mobileNumber: mobileNumber,
@@ -247,6 +246,7 @@ class FarmerController extends GetxController {
       Utils.showSnackbar("Farmer details updated..");
     });
     if (result) {
+      Get.back();
       await updateFarmerApi().then((onValue) => Get.back());
     } else {
       Get.back();

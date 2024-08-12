@@ -8,7 +8,6 @@ const String baseUrlConst = "http://Payment.maklife.in:9019/api";
 const String loginConst = "ValidateUser";
 const String addFarmerConst = "FarmerRegistration";
 const String updateFarmerDetailsConst = "UpdateFarmerDetails";
-
 const String getFarmerConst = "GetFarmerList";
 const String restoreDataConst = "RestoreCollectionData";
 const String pinForManualConst = "GetPinForManualTesting";

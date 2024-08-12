@@ -115,6 +115,7 @@ class HomeView extends GetView<HomeController> {
               ),
               Container(
                 decoration: BoxDecoration(
+                    // color: AppColors.brown,
                     border: Border.all(
                   color: AppColors.white,
                   width: 2,
@@ -127,28 +128,29 @@ class HomeView extends GetView<HomeController> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               intrinsicWidget(
-                                  title1: "Tot. Milk",
-                                  value1: controller.totalMilk >= 1.0
-                                      ? controller.totalMilk
-                                          .toPrecision(2)
-                                          .toString()
-                                      : "0.0",
-                                  title2: "Avg Fat",
-                                  value2: controller.totalFat >= 1.0 &&
-                                          controller.totalQty >= 1
-                                      ? (controller.totalFat /
-                                              controller.totalMilk)
-                                          .toPrecision(2)
-                                          .toString()
-                                      : "0.0",
-                                  title3: "Avg SNF",
-                                  value3: controller.totalQty >= 1 &&
-                                          controller.totalSnf >= 1.0
-                                      ? (controller.totalSnf /
-                                              controller.totalMilk)
-                                          .toPrecision(2)
-                                          .toString()
-                                      : "0.0"),
+                                title1: "Tot. Milk",
+                                value1: controller.totalMilk >= 1.0
+                                    ? controller.totalMilk
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                                title2: "Avg Fat",
+                                value2: controller.totalFat >= 1.0 &&
+                                        controller.totalQty >= 1
+                                    ? (controller.totalFat /
+                                            controller.totalMilk)
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                                title3: "Avg SNF",
+                                value3: controller.totalQty >= 1 &&
+                                        controller.totalSnf >= 1.0
+                                    ? (controller.totalSnf /
+                                            controller.totalMilk)
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                              ),
                             ],
                           ),
                         )),
@@ -236,10 +238,10 @@ class HomeView extends GetView<HomeController> {
                                       0.0)
                                   .toPrecision(2)
                                   .toString(),
-                              qtyV: controller.milkCollectionData[i].qty!
-                                  .toDouble()
-                                  .toPrecision(2)
-                                  .toString(),
+                              qtyV:
+                                  (controller.milkCollectionData[i].qty ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
                               snfV:
                                   (controller.milkCollectionData[i].snf ?? 0.0)
                                       .toPrecision(2)
@@ -390,6 +392,7 @@ class HomeView extends GetView<HomeController> {
             children: [
               InkWell(
                 onTap: () async {
+                  // controller.printShift();
                   Get.toNamed(
                     Routes.COLLECTMILK,
                   );
@@ -546,6 +549,9 @@ class HomeView extends GetView<HomeController> {
                       // });
                     }
                   });
+
+                  // controller.printDetails = true;
+                  // bool result = await InternetConnection().hasInternetAccess;
                 },
                 child: SizedBox(
                   // width: Get.width * 0.19,
@@ -633,14 +639,17 @@ class HomeView extends GetView<HomeController> {
                   await controller.getShiftDetails().then((value) async {
                     if (controller.cansModel.isEmpty) {
                       controller.showDialogManualPin(onTap: () async {
-                        await controller.cansDB.create(
-                          FUploaded: 1,
-                          bufCans: controller.bufCans,
-                          cowCans: controller.cowCans,
-                          date:
-                              DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-                          shift: controller.radio == 1 ? "Am" : "Pm",
-                        );
+                        if (controller.cowCans.isNotEmpty &&
+                            controller.bufCans.isNotEmpty) {
+                          await controller.cansDB.create(
+                            FUploaded: 1,
+                            bufCans: controller.bufCans,
+                            cowCans: controller.cowCans,
+                            date: DateFormat("dd-MMM-yyyy")
+                                .format(DateTime.now()),
+                            shift: controller.radio == 1 ? "Am" : "Pm",
+                          );
+                        }
                         controller.printSummary = true;
 
                         if (result) {

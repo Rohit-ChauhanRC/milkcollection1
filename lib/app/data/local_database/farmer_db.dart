@@ -5,14 +5,14 @@ import 'local_database.dart';
 
 class FarmerDB {
   //
-  final tableName = 'farmer';
+  final tableName = 'gudaaspurfarmer';
 
   Future<void> createTable(Database database) async {
     await database.execute("""
   CREATE TABLE IF NOT EXISTS $tableName (
     "FarmerID" INTEGER,
     "Key_id" INTEGER ,
-    "FarmerName" TEXT NOT NULL,
+    "FarmerName" TEXT,
     "BankName" TEXT,
     "BranchName" TEXT,
     "AccountName" TEXT,
@@ -38,7 +38,7 @@ class FarmerDB {
   //
 
   Future<int> create({
-    required String farmerId,
+    required int farmerId,
     required String farmerName,
     required String bankName,
     required String branchName,
@@ -126,8 +126,8 @@ class FarmerDB {
   }
 
   Future<int> update({
-    required String calculationsID,
-    required String farmerId,
+    int? calculationsID,
+    required int farmerId,
     String? farmerName,
     String? bankName,
     String? branchName,

@@ -5,7 +5,7 @@ import 'local_database.dart';
 
 class RateChartDB {
   //
-  final tableName = 'ratechart';
+  final tableName = 'gudaaspurratechart';
 
   Future<void> createTable(Database database) async {
     await database.execute("""

@@ -5,7 +5,7 @@ import 'local_database.dart';
 
 class MilkCollectionDB {
   //
-  final tableName = 'milkcollection';
+  final tableName = 'gudaaspurmilkcollection';
 
   Future<void> createTable(Database database) async {
     await database.execute("""
@@ -39,10 +39,10 @@ class MilkCollectionDB {
   // PRIMARY KEY("id" AUTOINCREMENT)
   //
 
-  Future<int> create({
-    String? Calculations_ID,
+  Future<void> create({
     int? FarmerId,
     String? Farmer_Name,
+    String? Calculations_ID,
     String? Collection_Date,
     String? Inserted_Time,
     String? Collection_Mode,
@@ -62,37 +62,39 @@ class MilkCollectionDB {
     double? Total_Amt,
     int? FUploaded,
   }) async {
-    final database = await DataBaseService().database;
-    return await database.rawInsert(
-      '''
-
-          
+    try {
+      final database = await DataBaseService().database;
+      await database.rawInsert(
+        '''
         INSERT INTO $tableName (Calculations_ID,Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ''',
-      [
-        Calculations_ID,
-        Collection_Date,
-        Inserted_Time,
-        FarmerId,
-        Farmer_Name,
-        Collection_Mode,
-        Scale_Mode,
-        Analyze_Mode,
-        Milk_Status,
-        Milk_Type,
-        Rate_Chart_Name,
-        Qty,
-        FAT,
-        SNF,
-        Added_Water,
-        Rate_Per_Liter,
-        Total_Amt,
-        CollectionCenterId,
-        CollectionCenterName,
-        Shift,
-        FUploaded
-      ],
-    );
+        [
+          Calculations_ID,
+          Collection_Date,
+          Inserted_Time,
+          FarmerId,
+          Farmer_Name,
+          Collection_Mode,
+          Scale_Mode,
+          Analyze_Mode,
+          Milk_Status,
+          Milk_Type,
+          Rate_Chart_Name,
+          Qty,
+          FAT,
+          SNF,
+          Added_Water,
+          Rate_Per_Liter,
+          Total_Amt,
+          CollectionCenterId,
+          CollectionCenterName,
+          Shift,
+          FUploaded
+        ],
+      );
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Future<List<MilkCollectionModel>> fetchAll() async {

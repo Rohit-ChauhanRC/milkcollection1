@@ -24,7 +24,7 @@ class PinverifyController extends GetxController {
 
   GlobalKey<FormState> loginFormKey = GlobalKey();
 
-  final RxBool _circularProgress = true.obs;
+  final RxBool _circularProgress = false.obs;
   bool get circularProgress => _circularProgress.value;
   set circularProgress(bool v) => _circularProgress.value = v;
 
@@ -108,52 +108,6 @@ class PinverifyController extends GetxController {
     }
   }
 
-  dateFormat(DateTime date) {
-    return DateFormat("dd-MMM-yyyy").format(date);
-  }
-
-  Future<void> geMilkCollectionList() async {
-    try {
-      var res = await http.get(
-          Uri.parse(
-            "$baseUrlConst/$restoreDataConst?CollectionCenterId=${box.read("centerId")}&FromDate=${dateFormat(DateTime.now().subtract(const Duration(days: 90)))}&ToDate=${dateFormat(DateTime.now())}",
-          ),
-          headers: {"Content-Type": "application/json"});
-
-      if (res.statusCode == 200) {
-        restoreData.assignAll([]);
-        restoreData.assignAll(milkCollectionModelFromMap(res.body));
-        if (restoreData.isNotEmpty) {
-          milkCollectionDB.deleteTable();
-          for (var e in restoreData) {
-            milkCollectionDB.create(
-              Added_Water: e.addedWater,
-              Analyze_Mode: e.analyzeMode,
-              CollectionCenterId: e.collectionCenterId.toString(),
-              CollectionCenterName: e.collectionCenterName,
-              Collection_Date: e.collectionDate,
-              Collection_Mode: e.collectionMode,
-              FAT: e.fat,
-              FarmerId: e.farmerId,
-              Farmer_Name: e.farmerName,
-              Inserted_Time: e.insertedTime,
-              Milk_Status: e.milkStatus,
-              Milk_Type: e.milkType,
-              Qty: e.qty,
-              Rate_Chart_Name: e.rateChartName,
-              Rate_Per_Liter: e.ratePerLiter,
-              SNF: e.snf,
-              Scale_Mode: e.scaleMode,
-              Shift: e.shift,
-              Total_Amt: e.totalAmt,
-              FUploaded: 1,
-            );
-          }
-        }
-      } else {}
-    } catch (e) {}
-  }
-
   Future<void> getFamerDataDB() async {
     // print(farmerData.first.farmerId);
     if (farmerData.isNotEmpty) {
@@ -163,6 +117,8 @@ class PinverifyController extends GetxController {
             var res = await http.post(
               Uri.parse("$baseUrlConst/$addFarmerConst"),
               body: {
+                // "FarmerID": e.farmerId.toString(),
+                // "F_ID": e.farmerId.toString(),
                 "CalculationsID": e.calculationsId.toString(),
                 "FarmerName": e.farmerName,
                 "BankName": e.bankName!.isNotEmpty ? e.bankName : "NA",
@@ -180,7 +136,8 @@ class PinverifyController extends GetxController {
                 "ExportParameter2": "0",
                 "ExportParameter3": "0",
                 "CenterID": box.read(centerIdConst).toString(),
-                "MCPGroup": "Maklife"
+                "MCPGroup": "Maklife",
+                // "FUploaded": 1
               },
               headers: {
                 "Access-Control-Allow-Origin":
@@ -249,11 +206,62 @@ class PinverifyController extends GetxController {
 
             if (res.statusCode == 200) {
               await milkCollectionDB.update(
-                  farmerId: e.calculationsId!.toString(), FUploaded: 1);
+                  farmerId: e.calculationsId!, FUploaded: 1);
             }
           } catch (e) {}
         }
       }
+    }
+  }
+
+  dateFormat(DateTime date) {
+    return DateFormat("dd-MMM-yyyy").format(date);
+  }
+
+  Future<void> geMilkCollectionList() async {
+    if (restoreData.isEmpty) {
+      try {
+        var res = await http.get(
+            Uri.parse(
+              "$baseUrlConst/$restoreDataConst?CollectionCenterId=${box.read("centerId")}&FromDate=${dateFormat(DateTime.now().subtract(const Duration(days: 30)))}&ToDate=${dateFormat(DateTime.now())}",
+            ),
+            headers: {"Content-Type": "application/json"});
+
+        if (res.statusCode == 200) {
+          restoreData.assignAll([]);
+          restoreData.assignAll(milkCollectionModelFromMap(res.body));
+          if (restoreData.isNotEmpty) {
+            int count = 0;
+
+            milkCollectionDB.deleteTable();
+            for (var e in restoreData) {
+              milkCollectionDB.create(
+                Calculations_ID: e.calculationsId.toString(),
+                Added_Water: e.addedWater,
+                Analyze_Mode: e.analyzeMode,
+                CollectionCenterId: e.collectionCenterId.toString(),
+                CollectionCenterName: e.collectionCenterName,
+                Collection_Date: e.collectionDate,
+                Collection_Mode: e.collectionMode,
+                FAT: e.fat,
+                FarmerId: e.farmerId,
+                Farmer_Name: e.farmerName,
+                Inserted_Time: e.insertedTime,
+                Milk_Status: e.milkStatus,
+                Milk_Type: e.milkType,
+                Qty: e.qty,
+                Rate_Chart_Name: e.rateChartName,
+                Rate_Per_Liter: e.ratePerLiter,
+                SNF: e.snf,
+                Scale_Mode: e.scaleMode,
+                Shift: e.shift,
+                Total_Amt: e.totalAmt,
+                FUploaded: 1,
+              );
+            }
+          }
+        } else {}
+      } catch (e) {}
     }
   }
 
@@ -269,7 +277,6 @@ class PinverifyController extends GetxController {
 
         if (farmerData.isNotEmpty) {
           farmerDB.deleteTable();
-
           for (var e in farmerData) {
             farmerDB.create(
               farmerId: e.farmerId!,

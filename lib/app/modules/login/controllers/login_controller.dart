@@ -62,7 +62,7 @@ class LoginController extends GetxController {
     if (username == "admin" && password == "admin") {
       box.write(pinConst, "1005");
       box.write(centerIdConst, "5");
-      box.write(centerName, "admin");
+      box.write(centerName, "Head office test");
 
       Get.toNamed(
         Routes.HOME,

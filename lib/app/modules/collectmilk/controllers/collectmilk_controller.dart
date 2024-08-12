@@ -99,7 +99,6 @@ class CollectmilkController extends GetxController {
 
   TextEditingController fat = TextEditingController();
   TextEditingController snf = TextEditingController();
-  TextEditingController density = TextEditingController();
   TextEditingController water = TextEditingController();
   TextEditingController quantity = TextEditingController();
   TextEditingController farmerIdC = TextEditingController();
@@ -266,7 +265,7 @@ class CollectmilkController extends GetxController {
           if (fatDC.isNotEmpty &&
               snfDC.isNotEmpty &&
               quantityDC.isNotEmpty &&
-              double.parse(quantityDC) > 0) {
+              double.parse(quantityDC) > 0.0) {
             if (double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
                 double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
               totalAmountP =
@@ -282,7 +281,7 @@ class CollectmilkController extends GetxController {
                 double.parse(homeController.snf) ==
                     double.parse(rateCMChartData[i].snf) &&
                 homeController.quantity.isNotEmpty &&
-                double.parse(homeController.quantity) > 0) {
+                double.parse(homeController.quantity) > 0.0) {
               totalAmountP = (((rateCMChartData[i].price) *
                           double.parse(homeController.quantity))
                       .toPrecision(2))
@@ -297,7 +296,7 @@ class CollectmilkController extends GetxController {
           if (fatDC.isNotEmpty &&
               snfDC.isNotEmpty &&
               quantityDC.isNotEmpty &&
-              double.parse(quantityDC) > 0) {
+              double.parse(quantityDC) > 0.0) {
             if (double.parse(fatDC) == double.parse(rateBMChartData[i].fat) &&
                 double.parse(snfDC) == double.parse(rateBMChartData[i].snf)) {
               totalAmountP =
@@ -313,7 +312,7 @@ class CollectmilkController extends GetxController {
                 double.parse(homeController.snf) ==
                     double.parse(rateBMChartData[i].snf) &&
                 homeController.quantity.isNotEmpty &&
-                double.parse(homeController.quantity) > 0) {
+                double.parse(homeController.quantity) > 0.0) {
               totalAmountP = (((rateBMChartData[i].price) *
                           double.parse(homeController.quantity))
                       .toPrecision(2))
@@ -344,12 +343,13 @@ class CollectmilkController extends GetxController {
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
           int count = 0;
+
           pd.show(
               max: restoreData.length,
               msgFontSize: 10,
               valueFontSize: 10,
               msgTextAlign: TextAlign.left,
-              msg: 'Recovering data!...');
+              msg: 'Recover data!...');
           milkCollectionDB.deleteTable();
           for (var e in restoreData) {
             pd.update(value: count += 1);
@@ -518,7 +518,6 @@ class CollectmilkController extends GetxController {
           if (pinManual[0].pin == int.parse(pin)) {
             box.write(manualpinConst,
                 DateFormat("yyyy-mm-dd").format(DateTime.now()).toString());
-
             check = false;
             Utils.closeDialog();
             showDialogSelectShift();
@@ -746,6 +745,7 @@ class CollectmilkController extends GetxController {
         ),
       );
 
+  // export excel
   Future<void> exportExcel() async {
     exportData.assignAll(await milkCollectionDB.fetchAll());
 
@@ -938,8 +938,7 @@ class CollectmilkController extends GetxController {
     }
   }
 
-  Future<void> accept() async {
-    bool result = await InternetConnection().hasInternetAccess;
+  Future<void> accept(bool result) async {
     await milkCollectionDB.create(
         Calculations_ID: getFarmerIdFinal(),
         FarmerId: int.parse(getFarmerIdFinal()),
@@ -1025,8 +1024,6 @@ class CollectmilkController extends GetxController {
       if (res.statusCode == 200) {
         Utils.showSnackbar(jsonDecode(res.body)["message"]);
       } else {}
-    } catch (e) {
-      print(e.toString());
-    }
+    } catch (e) {}
   }
 }

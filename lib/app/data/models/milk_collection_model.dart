@@ -13,7 +13,6 @@ String milkCollectionModelToMap(List<MilkCollectionModel> data) =>
 
 class MilkCollectionModel {
   String? collectionDate;
-  String? id;
   String? insertedTime;
   String? calculationsId;
   int? farmerId;
@@ -57,7 +56,6 @@ class MilkCollectionModel {
     this.collectionCenterName,
     this.shift,
     this.FUploaded,
-    this.id,
   });
 
   factory MilkCollectionModel.fromMap(Map<String, dynamic> json) =>

@@ -5,16 +5,16 @@ import 'local_database.dart';
 
 class CansDB {
   //
-  final tableName = 'cansdb';
+  final tableName = 'gudaaspurcansdb';
 
   Future<void> createTable(Database database) async {
     await database.execute("""
   CREATE TABLE IF NOT EXISTS $tableName (
-    "_Date_" TEXT NOT NULL,
+    "_Date_" TEXT ,
     "id" INTEGER ,
-    "shift" TEXT NOT NULL,
-    "cow_cans" TEXT NOT NULL,
-    "buff_cans" TEXT NOT NULL,
+    "shift" TEXT ,
+    "cow_cans" TEXT,
+    "buff_cans" TEXT,
     "FUploaded" INTEGER,
     PRIMARY KEY("id" AUTOINCREMENT)
   );
