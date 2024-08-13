@@ -659,6 +659,10 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                 .isNotEmpty &&
                                             controller.farmerData.farmerName !=
                                                 "Unknown" &&
+                                            controller.farmerData.farmerName !=
+                                                "null" &&
+                                            controller.farmerData.farmerName !=
+                                                null &&
                                             controller.homeController.water
                                                 .isNotEmpty &&
                                             controller.homeController.quantity
@@ -689,12 +693,17 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: (controller.farmerId.isNotEmpty &&
-                                                    (controller.homeController
-                                                        .fat.isNotEmpty) &&
-                                                    controller
-                                                            .farmerData.farmerName !=
+                                        backgroundColor: (controller
+                                                        .farmerId.isNotEmpty &&
+                                                    (controller.homeController.fat
+                                                        .isNotEmpty) &&
+                                                    controller.farmerData.farmerName !=
                                                         "Unknown" &&
+                                                    controller.farmerData.farmerName !=
+                                                        "null" &&
+                                                    controller.farmerData
+                                                            .farmerName !=
+                                                        null &&
                                                     (controller.homeController
                                                         .water.isNotEmpty) &&
                                                     (controller
@@ -705,14 +714,13 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                     controller.radio == 0) &&
                                                 (double.parse(controller.getPriceData()) >
                                                     0.0)
-                                            ? double.parse(controller
-                                                        .homeController
-                                                        .quantity) >
+                                            ? double.parse(controller.homeController.quantity) >
                                                     0
                                                 ? AppColors.green
                                                 : const Color.fromARGB(
                                                     255, 211, 240, 212)
-                                            : const Color.fromARGB(255, 211, 240, 212),
+                                            : const Color.fromARGB(
+                                                255, 211, 240, 212),
                                       ),
                                       child: Text(
                                         "ACCEPT",
@@ -731,6 +739,10 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                           controller.fatDC.isNotEmpty &&
                                           controller.farmerData.farmerName !=
                                               "Unknown" &&
+                                          controller.farmerData.farmerName !=
+                                              "null" &&
+                                          controller.farmerData.farmerName !=
+                                              null &&
                                           controller.waterDC.isNotEmpty &&
                                           controller.quantityDC.isNotEmpty &&
                                           controller.snfDC.isNotEmpty &&
@@ -765,9 +777,14 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                       .farmerId.isNotEmpty &&
                                                   (controller
                                                       .fatDC.isNotEmpty) &&
+                                                  controller.farmerData.farmerName !=
+                                                      "Unknown" &&
                                                   controller.farmerData
                                                           .farmerName !=
-                                                      "Unknown" &&
+                                                      "null" &&
+                                                  controller.farmerData
+                                                          .farmerName !=
+                                                      null &&
                                                   (controller
                                                       .waterDC.isNotEmpty) &&
                                                   (controller
@@ -776,8 +793,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                       .snfDC.isNotEmpty) &&
                                               (controller.radio == 1 ||
                                                   controller.radio == 0) &&
-                                              (double.parse(controller
-                                                      .getPriceData()) >
+                                              (double.parse(controller.getPriceData()) >
                                                   0.0)
                                           ? double.parse(controller.quantityDC) >
                                                       0.0 &&
