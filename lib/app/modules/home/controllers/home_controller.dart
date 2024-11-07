@@ -314,10 +314,11 @@ class HomeController extends GetxController {
   Future<void> getRateChartBM(
     String milkType,
   ) async {
+    debugPrint("center id : ${box.read(centerIdConst)}");
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9021/api/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
+            "$baseUrlConst/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
         headers: {
           "Access-Control-Allow-Origin":
               "*", // Required for CORS support to work
