@@ -317,7 +317,7 @@ class HomeController extends GetxController {
     try {
       var res = await http.get(
         Uri.parse(
-            "http://Payment.maklife.in:9021/api/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
+            "$baseUrlConst/GetRateChart?CollectionCenterId=${box.read(centerIdConst)}&MilkType=$milkType"),
         headers: {
           "Access-Control-Allow-Origin":
               "*", // Required for CORS support to work

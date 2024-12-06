@@ -19,7 +19,7 @@ void main() async {
         splitScreenMode: true,
         builder: (_, child) {
           return GetMaterialApp(
-            title: "Gurdaspur Milk Collector",
+            title: "Milk Collector",
             initialRoute: box.read("verify") != null
                 ? AppPages.INITIAL1
                 : AppPages.INITIAL,
