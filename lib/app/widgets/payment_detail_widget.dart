@@ -161,7 +161,10 @@ class PaymentDetailWidget extends StatelessWidget {
                       fat,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style: Theme.of(Get.context!)
+                          .textTheme
+                          .titleSmall!
+                          .copyWith(fontSize: 9),
                     ),
                   ],
                 ),
@@ -188,7 +191,10 @@ class PaymentDetailWidget extends StatelessWidget {
                       snf,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style: Theme.of(Get.context!)
+                          .textTheme
+                          .titleSmall!
+                          .copyWith(fontSize: 9),
                     ),
                   ],
                 ),
@@ -212,7 +218,10 @@ class PaymentDetailWidget extends StatelessWidget {
                       water,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style: Theme.of(Get.context!)
+                          .textTheme
+                          .titleSmall!
+                          .copyWith(fontSize: 9),
                     ),
                   ],
                 ),
@@ -235,7 +244,10 @@ class PaymentDetailWidget extends StatelessWidget {
                       qty,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style: Theme.of(Get.context!)
+                          .textTheme
+                          .titleSmall!
+                          .copyWith(fontSize: 9),
                     ),
                   ],
                 ),
@@ -259,7 +271,10 @@ class PaymentDetailWidget extends StatelessWidget {
                       price,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style: Theme.of(Get.context!)
+                          .textTheme
+                          .titleSmall!
+                          .copyWith(fontSize: 9),
                     ),
                   ],
                 ),
@@ -283,7 +298,11 @@ class PaymentDetailWidget extends StatelessWidget {
                       amt,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.visible,
-                      style: Theme.of(Get.context!).textTheme.titleSmall,
+                      style:
+                          Theme.of(Get.context!).textTheme.titleSmall!.copyWith(
+                                fontSize: 9,
+                                overflow: TextOverflow.visible,
+                              ),
                     ),
                   ],
                 ),

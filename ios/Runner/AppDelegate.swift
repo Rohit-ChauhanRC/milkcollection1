@@ -2,7 +2,7 @@ import UIKit
 import Flutter
 import CoreTelephony
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
   override func application(
     _ application: UIApplication,
@@ -35,6 +35,26 @@ import CoreTelephony
             return "5G"
         case CTRadioAccessTechnologyLTE:
             return "4G"
+        case CTRadioAccessTechnologyeHRPD:
+            return "3G"
+        case CTRadioAccessTechnologyCDMAEVDORevB:
+            return "3G"
+        case CTRadioAccessTechnologyCDMAEVDORevA:
+            return "3G"
+        case CTRadioAccessTechnologyCDMAEVDORev0:
+            return "3G"
+        case CTRadioAccessTechnologyWCDMA:
+            return "3G"
+        case CTRadioAccessTechnologyHSDPA:
+            return "3G"
+        case CTRadioAccessTechnologyHSUPA:
+            return "3G"
+        case CTRadioAccessTechnologyGPRS:
+            return "2G"
+        case CTRadioAccessTechnologyEdge:
+            return "2G"
+        case CTRadioAccessTechnologyCDMA1x:
+            return "2G"
         default:
             return "Unknown"
         }

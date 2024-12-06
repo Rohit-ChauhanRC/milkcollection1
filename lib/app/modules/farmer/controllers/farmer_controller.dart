@@ -17,7 +17,9 @@ class FarmerController extends GetxController {
   GlobalKey<FormState>? farmerFormKey = GlobalKey<FormState>();
   final FocusNode myFocusNode = FocusNode();
 
-  final FarmerlistController farmerlistController = FarmerlistController();
+  // final FarmerlistController farmerlistController = FarmerlistController();
+  final FarmerlistController farmerlistController =
+      Get.put<FarmerlistController>(FarmerlistController());
 
   final FarmerDB farmerDB = FarmerDB();
 
@@ -89,12 +91,20 @@ class FarmerController extends GetxController {
   FarmerListModel get farmerData => _farmerData.value;
   set farmerData(FarmerListModel lst) => _farmerData.value = lst;
 
+  final RxString _farmerId = ''.obs;
+  String get farmerId => _farmerId.value;
+  set farmerId(String mob) => _farmerId.value = mob;
+
+  final RxString _fId = ''.obs;
+  String get fId => _fId.value;
+  set fId(String mob) => _fId.value = mob;
+
   @override
   void onInit() async {
     super.onInit();
     type = Get.arguments[0];
+    fId = Get.arguments[1].toString();
     if (Get.arguments[0] == true) {
-      // farmerFormKey.currentState!.reset();
       title = "Farmer Detail";
       await getFarmerById();
     } else {
@@ -136,7 +146,7 @@ class FarmerController extends GetxController {
   }
 
   Future<void> getFarmerById() async {
-    await farmerDB.fetchById(Get.arguments[1].toString()).then((value) {
+    await farmerDB.fetchById(fId.toString()).then((value) {
       farmerName = value.farmerName.toString();
       bankName = value.bankName.toString();
       branchName = value.branchName.toString();
@@ -148,22 +158,31 @@ class FarmerController extends GetxController {
       numberOfBuffalo = value.noOfBuffalos.toString();
       address = value.address.toString();
       radio = value.modeOfPay!;
-      // address1.text = value.address.toString();
     }).then((value) {
       progressBar = false;
     });
   }
 
+  String getFarmerIdFinal() {
+    var farmerfinalId = "";
+    if (int.parse(fId) == 0) {
+      farmerfinalId = "${box.read(centerIdConst)}0001";
+    } else {
+      farmerfinalId = "${int.parse(fId) + 1}";
+    }
+
+    return farmerfinalId;
+  }
+
   Future<void> addFarmer() async {
     try {
-      var res =
-          await http.post(Uri.parse("$baseUrlConst/$addFarmerConst"), body: {
-        "CalculationsID": "${Get.arguments[1] + 1}",
+      final _body = <String, String>{
+        "CalculationsID": getFarmerIdFinal().toString(),
         "FarmerName": farmerName,
-        "BankName": bankName,
-        "BranchName": branchName,
-        "AccountName": accountNumber,
-        "IFSCCode": ifscCode,
+        "BankName": bankName.isNotEmpty ? bankName : "NA",
+        "BranchName": branchName.isNotEmpty ? branchName : "NA",
+        "AccountName": accountNumber.isNotEmpty ? accountNumber : "NA",
+        "IFSCCode": ifscCode.isNotEmpty ? ifscCode : "NA",
         "AadharCardNo": aadharCard,
         "MobileNumber": mobileNumber,
         "NoOfCows": numberOfCows,
@@ -175,81 +194,48 @@ class FarmerController extends GetxController {
         "ExportParameter2": "0",
         "ExportParameter3": "0",
         "CenterID": box.read("centerId").toString(),
-        "MCPGroup": "Maklife"
-      });
-      print(jsonDecode(res.body));
+        "MCPGroup": "Maklife",
+      };
+      var res = await http.post(Uri.parse("$baseUrlConst/$addFarmerConst"),
+          body: _body);
 
       if (res.statusCode == 200 && jsonDecode(res.body) == "Added succes..") {
         Utils.showSnackbar("Add Successfully!");
-        await farmerlistController.getFarmerList();
-      } else {
-        //
-        await farmerlistController.farmerDB.create(
-          farmerId: int.tryParse("${Get.arguments[1] + 1}")!,
-          farmerName: farmerName,
-          bankName: bankName,
-          branchName: branchName,
-          aadharCardNo: aadharCard,
-          accountName: accountNumber,
-          address: address,
-          centerID: int.tryParse("${box.read("centerId")}")!,
-          exportParameter1: "0",
-          exportParameter2: "0",
-          exportParameter3: "0",
-          iFSCCode: ifscCode,
-          mCPGroup: "Maklife",
-          mobileNumber: mobileNumber,
-          modeOfPay: radio,
-          noOfBuffalos: int.tryParse(numberOfBuffalo),
-          noOfCows: int.tryParse(numberOfCows),
-          rFID: "null",
-          FUploaded: 0,
-        );
-        // await farmerlistController.pinverifyController.getFarmerList();
-        farmerlistController.farmerData
-            .assignAll(await farmerlistController.farmerDB.fetchAll());
-
-        Utils.showDialog(json.decode(res.body));
       }
       circularProgress = true;
     } catch (e) {
-      // apiLopp(i);
-      print(e);
       circularProgress = true;
-      await farmerlistController.farmerDB
-          .create(
-        farmerId: int.tryParse("${Get.arguments[1] + 1}")!,
-        farmerName: farmerName,
-        bankName: bankName,
-        branchName: branchName,
-        aadharCardNo: aadharCard,
-        accountName: accountNumber,
-        address: address,
-        centerID: int.tryParse("${box.read("centerId")}")!,
-        exportParameter1: "0",
-        exportParameter2: "0",
-        exportParameter3: "0",
-        iFSCCode: ifscCode,
-        mCPGroup: "Maklife",
-        mobileNumber: mobileNumber,
-        modeOfPay: radio,
-        noOfBuffalos: int.tryParse(numberOfBuffalo),
-        noOfCows: int.tryParse(numberOfCows),
-        rFID: "null",
-        FUploaded: 0,
-      )
-          .then((value) async {
-        farmerlistController.farmerData
-            .assignAll(await farmerlistController.farmerDB.fetchAll());
-      });
     }
-    Get.back();
   }
 
-  Future<void> localFarmerUpdate() async {
+  Future<void> createFarmerLocal(int fupload) async {
+    await farmerlistController.farmerDB.create(
+      farmerId: int.tryParse(getFarmerIdFinal())!,
+      farmerName: farmerName,
+      bankName: bankName,
+      branchName: branchName,
+      aadharCardNo: aadharCard,
+      accountName: accountNumber,
+      address: address,
+      centerID: int.tryParse("${box.read("centerId")}")!,
+      exportParameter1: "0",
+      exportParameter2: "0",
+      exportParameter3: "0",
+      iFSCCode: ifscCode,
+      mCPGroup: "Maklife",
+      mobileNumber: mobileNumber,
+      modeOfPay: radio,
+      noOfBuffalos: int.tryParse(numberOfBuffalo),
+      noOfCows: int.tryParse(numberOfCows),
+      rFID: "null",
+      FUploaded: fupload,
+    );
+  }
+
+  Future<void> localFarmerUpdate(bool result) async {
     await farmerDB
         .update(
-            farmerId: Get.arguments[1],
+            farmerId: int.parse(fId),
             address: address,
             aadharCardNo: aadharCard,
             mobileNumber: mobileNumber,
@@ -257,8 +243,57 @@ class FarmerController extends GetxController {
             noOfCows: int.parse(numberOfCows),
             modeOfPay: radio)
         .then((value) {
-      Utils.showSnackbar("Farmer details saved..");
-      Get.back();
+      Utils.showSnackbar("Farmer details updated..");
     });
+    if (result) {
+      Get.back();
+      await updateFarmerApi().then((onValue) => Get.back());
+    } else {
+      Get.back();
+    }
+  }
+
+  Future<void> updateFarmerApi() async {
+    try {
+      var res = await http.post(
+        Uri.parse("$baseUrlConst/$updateFarmerDetailsConst"),
+        body: {
+          "FarmerID": fId.toString(),
+          "CalculationsID": fId.toString(),
+          "FarmerName": farmerName,
+          "BankName": bankName.isNotEmpty ? bankName : "null",
+          "BranchName": branchName.isNotEmpty ? branchName : "null",
+          "AccountName": accountNumber.isNotEmpty ? accountNumber : "null",
+          "IFSCCode": ifscCode.isNotEmpty ? ifscCode : "null",
+          "AadharCardNo": aadharCard,
+          "MobileNumber": mobileNumber,
+          "NoOfCows": numberOfCows,
+          "NoOfBuffalos": numberOfBuffalo,
+          "ModeOfPay": radio.toString(),
+          "RF_ID": "null",
+          "Address": address,
+          "ExportParameter1": "0",
+          "ExportParameter2": "0",
+          "ExportParameter3": "0",
+          "CenterID": box.read("centerId").toString(),
+          "MCPGroup": "Maklife"
+        },
+        headers: {
+          "Access-Control-Allow-Origin":
+              "*", // Required for CORS support to work
+          "Access-Control-Allow-Credentials":
+              "true", // Required for cookies, authorization headers with HTTPS
+          "Access-Control-Allow-Headers":
+              "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+          "Access-Control-Allow-Methods": "POST, OPTIONS, GET"
+        },
+      );
+
+      if (res.statusCode == 200) {}
+      circularProgress = true;
+    } catch (e) {
+      // apiLopp(i);
+      circularProgress = true;
+    }
   }
 }

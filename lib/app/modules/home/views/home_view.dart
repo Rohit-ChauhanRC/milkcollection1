@@ -40,7 +40,6 @@ class HomeView extends GetView<HomeController> {
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
                         ).then((selectedDate) async {
                           controller.fromDate = selectedDate!.toIso8601String();
-                          print(controller.fromDate);
 
                           await controller.fetchMilkCollectionDateWise();
                         });
@@ -69,7 +68,6 @@ class HomeView extends GetView<HomeController> {
                                 value: 1,
                                 groupValue: controller.radio,
                                 onChanged: (int? i) {
-                                  print(i);
                                   controller.radio = i!;
                                   controller.fetchMilkCollectionDateWise();
                                 },
@@ -96,7 +94,6 @@ class HomeView extends GetView<HomeController> {
                                 value: 2,
                                 groupValue: controller.radio,
                                 onChanged: (int? i) {
-                                  print(i);
                                   controller.radio = i!;
                                   controller.fetchMilkCollectionDateWise();
                                 },
@@ -126,32 +123,34 @@ class HomeView extends GetView<HomeController> {
                 child: Column(
                   children: [
                     Obx(() => Container(
-                          // margin: const EdgeInsets.all(15),
                           alignment: Alignment.center,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               intrinsicWidget(
-                                  title1: "Tot. Milk",
-                                  value1: controller.totalMilk >= 1.0
-                                      ? controller.totalMilk.toString()
-                                      : "0.0",
-                                  title2: "Avg Fat",
-                                  value2: controller.totalFat >= 1.0 &&
-                                          controller.totalQty >= 1
-                                      ? (controller.totalFat /
-                                              controller.totalMilk)
-                                          .toPrecision(2)
-                                          .toString()
-                                      : "0.0",
-                                  title3: "Avg SNF",
-                                  value3: controller.totalQty >= 1 &&
-                                          controller.totalSnf >= 1.0
-                                      ? (controller.totalSnf /
-                                              controller.totalMilk)
-                                          .toPrecision(2)
-                                          .toString()
-                                      : "0.0"),
+                                title1: "Tot. Milk",
+                                value1: controller.totalMilk >= 1.0
+                                    ? controller.totalMilk
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                                title2: "Avg Fat",
+                                value2: controller.totalFat >= 1.0 &&
+                                        controller.totalQty >= 1
+                                    ? (controller.totalFat /
+                                            controller.totalMilk)
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                                title3: "Avg SNF",
+                                value3: controller.totalQty >= 1 &&
+                                        controller.totalSnf >= 1.0
+                                    ? (controller.totalSnf /
+                                            controller.totalMilk)
+                                        .toPrecision(2)
+                                        .toString()
+                                    : "0.0",
+                              ),
                             ],
                           ),
                         )),
@@ -218,28 +217,39 @@ class HomeView extends GetView<HomeController> {
                           itemCount: controller.milkCollectionData.length,
                           itemBuilder: (ctx, i) {
                             return collectionTable(
-                              amtV: controller.milkCollectionData[i].totalAmt
-                                  .toString(),
+                              amtV:
+                                  (controller.milkCollectionData[i].totalAmt ??
+                                          0.0)
+                                      .toPrecision(2)
+                                      .toString(),
                               fId: controller.milkCollectionData[i].farmerId
                                   .toString(),
                               fNmae: controller.milkCollectionData[i].farmerName
                                   .toString(),
-                              fatV: controller.milkCollectionData[i].fat
-                                  .toString(),
+                              fatV:
+                                  (controller.milkCollectionData[i].fat ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
                               miltType: controller
                                   .milkCollectionData[i].milkType
                                   .toString(),
-                              priceV: controller
-                                  .milkCollectionData[i].ratePerLiter
+                              priceV: (controller
+                                          .milkCollectionData[i].ratePerLiter ??
+                                      0.0)
+                                  .toPrecision(2)
                                   .toString(),
-                              qtyV: controller.milkCollectionData[i].qty!
-                                  .toDouble()
-                                  .ceil()
-                                  .toString(),
-                              snfV: controller.milkCollectionData[i].snf
-                                  .toString(),
-                              waterV: controller
-                                  .milkCollectionData[i].addedWater
+                              qtyV:
+                                  (controller.milkCollectionData[i].qty ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
+                              snfV:
+                                  (controller.milkCollectionData[i].snf ?? 0.0)
+                                      .toPrecision(2)
+                                      .toString(),
+                              waterV: (controller
+                                          .milkCollectionData[i].addedWater ??
+                                      0.0)
+                                  .toPrecision(2)
                                   .toString(),
                             );
                           }),
@@ -375,21 +385,20 @@ class HomeView extends GetView<HomeController> {
 
   Widget cardWidget() {
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.start,
-      // crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         IntrinsicHeight(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               InkWell(
                 onTap: () async {
+                  // controller.printShift();
                   Get.toNamed(
                     Routes.COLLECTMILK,
                   );
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.25,
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -407,7 +416,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -416,22 +425,16 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               const VerticalDivider(
                 color: AppColors.white,
                 thickness: 2,
-              ),
-              SizedBox(
-                width: 10.w,
               ),
               InkWell(
                 onTap: () {
                   Get.toNamed(Routes.FARMERLIST);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.15,
+                  width: Get.width * 0.25,
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -449,7 +452,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -462,15 +465,12 @@ class HomeView extends GetView<HomeController> {
                 color: AppColors.white,
                 thickness: 2,
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               InkWell(
                 onTap: () {
                   // Get.toNamed(Routes.);
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  width: Get.width * 0.25,
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -490,7 +490,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -508,24 +508,14 @@ class HomeView extends GetView<HomeController> {
         ),
         IntrinsicHeight(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               InkWell(
                 onTap: () async {
                   bool result = await InternetConnection().hasInternetAccess;
 
-                  await controller.getShiftDetails().then((value) {
-                    if (controller.cansModel.isNotEmpty) {
-                      controller.printDetails = true;
-
-                      if (result) {
-                        controller
-                            .printShiftDetails()
-                            .then((value) => Get.back());
-                      } else {
-                        Get.back();
-                      }
-                    } else {
+                  await controller.getShiftDetails().then((value) async {
+                    if (controller.cansModel.isEmpty) {
                       controller.showDialogManualPin(onTap: () async {
                         if (controller.cowCans.isNotEmpty &&
                             controller.bufCans.isNotEmpty) {
@@ -537,22 +527,36 @@ class HomeView extends GetView<HomeController> {
                                 .format(DateTime.now()),
                             shift: controller.radio == 1 ? "Am" : "Pm",
                           );
-                          controller.printDetails = true;
+                        }
+                        controller.printDetails = true;
 
-                          if (result) {
-                            controller
-                                .printShiftDetails()
-                                .then((value) => Get.back());
-                          } else {
-                            Get.back();
-                          }
+                        if (result) {
+                          // Get.back();
+                          await controller
+                              .printShiftDetails()
+                              .then((value) => Get.back());
+                        } else {
+                          Get.back();
                         }
                       });
+                    } else {
+                      // await controller.getShiftDetails().then((value) async {
+                      // controller.;
+                      controller.printDetails = true;
+                      if (result) {
+                        await controller.printShiftDetails();
+                      }
+                      // });
                     }
                   });
+
+                  // controller.printDetails = true;
+                  // bool result = await InternetConnection().hasInternetAccess;
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  // width: Get.width * 0.19,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     children: [
                       CircleAvatar(
@@ -573,7 +577,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -582,15 +586,9 @@ class HomeView extends GetView<HomeController> {
                   ),
                 ),
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               const VerticalDivider(
                 color: AppColors.white,
                 thickness: 2,
-              ),
-              SizedBox(
-                width: 10.w,
               ),
               InkWell(
                 onTap: () async {
@@ -599,7 +597,9 @@ class HomeView extends GetView<HomeController> {
                   // controller.printStatus = true;
                 },
                 child: SizedBox(
-                  width: Get.width * 0.16,
+                  // width: Get.width * 0.16,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -619,7 +619,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -632,9 +632,6 @@ class HomeView extends GetView<HomeController> {
                 color: AppColors.white,
                 thickness: 2,
               ),
-              SizedBox(
-                width: 17.w,
-              ),
               InkWell(
                 onTap: () async {
                   bool result = await InternetConnection().hasInternetAccess;
@@ -642,18 +639,21 @@ class HomeView extends GetView<HomeController> {
                   await controller.getShiftDetails().then((value) async {
                     if (controller.cansModel.isEmpty) {
                       controller.showDialogManualPin(onTap: () async {
-                        await controller.cansDB.create(
-                          FUploaded: 1,
-                          bufCans: controller.bufCans,
-                          cowCans: controller.cowCans,
-                          date:
-                              DateFormat("dd-MMM-yyyy").format(DateTime.now()),
-                          shift: controller.radio == 1 ? "Am" : "Pm",
-                        );
+                        if (controller.cowCans.isNotEmpty &&
+                            controller.bufCans.isNotEmpty) {
+                          await controller.cansDB.create(
+                            FUploaded: 1,
+                            bufCans: controller.bufCans,
+                            cowCans: controller.cowCans,
+                            date: DateFormat("dd-MMM-yyyy")
+                                .format(DateTime.now()),
+                            shift: controller.radio == 1 ? "Am" : "Pm",
+                          );
+                        }
                         controller.printSummary = true;
 
                         if (result) {
-                          Get.back();
+                          // Get.back();
                           await controller
                               .checkSmsFlag()
                               .then((value) => Get.back());
@@ -673,7 +673,9 @@ class HomeView extends GetView<HomeController> {
                   });
                 },
                 child: SizedBox(
-                  width: Get.width * 0.19,
+                  // width: Get.width * 0.19,
+                  width: Get.width * 0.25,
+
                   child: Column(
                     // mainAxisAlignment: MainAxisAlignment.center,
                     // crossAxisAlignment: CrossAxisAlignment.center,
@@ -693,7 +695,7 @@ class HomeView extends GetView<HomeController> {
                               .textTheme
                               .titleSmall!
                               .copyWith(
-                                fontSize: 13,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.bold,
                               ),
                         ),

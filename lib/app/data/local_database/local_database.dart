@@ -21,7 +21,7 @@ class DataBaseService {
   }
 
   Future<String> get fullPath async {
-    const name = 'milkcollector.db';
+    const name = 'gudaaspurmilkcollector.db';
     final path = await getDatabasesPath();
     return join(path, name);
   }
@@ -30,7 +30,7 @@ class DataBaseService {
     final path = await fullPath;
     var database = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: create,
       singleInstance: true,
       onUpgrade: onUpgrade,
@@ -50,7 +50,7 @@ class DataBaseService {
   }
 
   void onUpgrade(Database database, int oldVersion, int newVersion) async {
-    // MilkCollectionDB().onUpgrade(database, oldVersion, newVersion);
+    MilkCollectionDB().onUpgrade(database, oldVersion, newVersion);
     // VendorDB().onUpgrade(database, oldVersion, newVersion);
     // ReceivingDB().onUpgrade(database, oldVersion, newVersion);
     // SellDB().onUpgrade(database, oldVersion, newVersion);

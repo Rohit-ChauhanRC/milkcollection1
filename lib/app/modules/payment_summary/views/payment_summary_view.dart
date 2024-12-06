@@ -163,7 +163,7 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
                         }
                       },
                       keyboardType: TextInputType.text,
-                      maxLength: 10,
+                      // maxLength: 10,
                     ),
                   )),
               const SizedBox(
@@ -172,7 +172,7 @@ class PaymentSummaryView extends GetView<PaymentSummaryController> {
               Obx(() => controller.homeController.farmerPaymentList.isNotEmpty
                   ? Container(
                       margin: const EdgeInsets.symmetric(horizontal: 10),
-                      height: Get.height * 0.7,
+                      height: Get.height * 0.6,
                       child: ListView.builder(
                           itemCount: controller.homeController.searchActive
                               ? controller

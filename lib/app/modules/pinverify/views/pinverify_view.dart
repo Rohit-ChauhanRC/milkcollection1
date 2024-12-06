@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:upgrader/upgrader.dart';
 
-import '../../../routes/app_pages.dart';
 import '../../../widgets/backdround_container.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../widgets/text_form_widget.dart';
@@ -46,12 +45,12 @@ class PinverifyView extends GetView<PinverifyController> {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Mak Life Producer Company Limited",
+                      "Mak Life Dairy Producer Company Limited",
                       overflow: TextOverflow.visible,
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall!
-                          .apply(fontSizeDelta: 4),
+                          .copyWith(fontSize: 14),
                     ),
                   ),
                 ),
@@ -88,7 +87,7 @@ class PinverifyView extends GetView<PinverifyController> {
                                     const TextInputType.numberWithOptions(
                                   signed: true,
                                 ),
-                                maxLength: 10,
+                                // maxLength: 4,
                                 validator: (val) => val!.length < 3
                                     ? "Field is required!"
                                     : null,
@@ -102,7 +101,10 @@ class PinverifyView extends GetView<PinverifyController> {
                   height: 20.h,
                 ),
                 Obx(() => controller.circularProgress
-                    ? Container(
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Container(
                         width: Get.width,
                         // padding: const EdgeInsets.all(20),
                         margin:
@@ -116,9 +118,6 @@ class PinverifyView extends GetView<PinverifyController> {
                           },
                           title: "Login",
                         ),
-                      )
-                    : const Center(
-                        child: CircularProgressIndicator(),
                       )),
                 SizedBox(
                   height: 20.h,
@@ -134,6 +133,10 @@ class PinverifyView extends GetView<PinverifyController> {
                     title: "Upload",
                   ),
                 ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Obx(() => Text("Version: ${controller.version}")),
               ],
             ),
           ),

@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:get/get.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:milkcollection/app/constants/contants.dart';
 import 'package:milkcollection/app/theme/app_colors.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 import 'package:milkcollection/app/widgets/backdround_container.dart';
@@ -47,19 +49,29 @@ class CollectmilkView extends GetView<CollectmilkController> {
 
               if (i == "Recover Data") {
                 if (result) {
-                  await controller.getRestoreData();
+                  await controller.getRestoreData().then((onValue) async {
+                    await controller.homeController
+                        .fetchMilkCollectionDateWise();
+                  });
                 } else {
                   Utils.showDialog("No Internet Connection available!");
                 }
               } else if (i == "Manual Collection") {
                 controller.pin = "";
-                controller.showDialogManualPin(
-                  initialValue: controller.pin,
-                  onTap: () async {
-                    await controller.getVerifyPin();
-                  },
-                );
-                // await controller.getVerifyPin();
+
+                if (controller.box.read(manualpinConst) ==
+                    DateFormat("yyyy-mm-dd")
+                        .format(DateTime.now())
+                        .toString()) {
+                  controller.check = false;
+                } else {
+                  controller.showDialogManualPin(
+                    initialValue: controller.pin,
+                    onTap: () async {
+                      await controller.getVerifyPin();
+                    },
+                  );
+                }
               } else {
                 await controller.exportExcel();
               }
@@ -71,44 +83,67 @@ class CollectmilkView extends GetView<CollectmilkController> {
         child: BackgroundContainer(
             child: Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Name:",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 20.w,
-                  ),
-                  Obx(() => Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          controller.farmerId.isNotEmpty
-                              ? controller.farmerData.farmerName.toString()
-                              : "",
-                          style: Theme.of(context).textTheme.bodyMedium,
+          child: Obx(() => !controller.circularProgress
+              ? Column(
+                  children: [
+                    Row(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Name:",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ),
-                      )),
-                ],
-              ),
-              Row(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Obx(() => SizedBox(
-                            width: Get.width * 0.2,
-                            child: Radio(
-                              activeColor: AppColors.yellow,
-                              value: 0,
-                              groupValue: controller.radio,
-                              onChanged: (int? i) {
-                                print(i);
+                        SizedBox(
+                          width: 20.w,
+                        ),
+                        Obx(() => Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                controller.farmerId.isNotEmpty
+                                    ? controller.farmerData.farmerName
+                                        .toString()
+                                    : "",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            )),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Obx(() => SizedBox(
+                                  width: Get.width * 0.2,
+                                  child: Radio(
+                                    activeColor: AppColors.yellow,
+                                    value: 0,
+                                    groupValue: controller.radio,
+                                    onChanged: (int? i) {
+                                      controller.radio = 0;
+                                      controller.getRateCMChart();
+                                      if (double.parse(controller.homeController
+                                                      .quantity.isNotEmpty
+                                                  ? controller
+                                                      .homeController.quantity
+                                                  : "0") >
+                                              0 ||
+                                          double.parse(controller
+                                                      .quantityDC.isNotEmpty
+                                                  ? controller.quantityDC
+                                                  : "0") >
+                                              0) {
+                                        controller.getTotalAmount();
+                                        controller.getPriceData();
+                                      }
+                                    },
+                                  ),
+                                )),
+                            InkWell(
+                              child: const Text("Cow"),
+                              onTap: () {
                                 controller.radio = 0;
                                 controller.getRateCMChart();
                                 if (double.parse(controller.homeController
@@ -126,38 +161,41 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 }
                               },
                             ),
-                          )),
-                      InkWell(
-                        child: const Text("Cow"),
-                        onTap: () {
-                          controller.radio = 0;
-                          controller.getRateCMChart();
-                          if (double.parse(controller
-                                          .homeController.quantity.isNotEmpty
-                                      ? controller.homeController.quantity
-                                      : "0") >
-                                  0 ||
-                              double.parse(controller.quantityDC.isNotEmpty
-                                      ? controller.quantityDC
-                                      : "0") >
-                                  0) {
-                            controller.getTotalAmount();
-                            controller.getPriceData();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Obx(() => SizedBox(
-                            width: Get.width * 0.2,
-                            child: Radio(
-                              activeColor: AppColors.yellow,
-                              value: 1,
-                              groupValue: controller.radio,
-                              onChanged: (int? i) {
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Obx(() => SizedBox(
+                                  width: Get.width * 0.2,
+                                  child: Radio(
+                                    activeColor: AppColors.yellow,
+                                    value: 1,
+                                    groupValue: controller.radio,
+                                    onChanged: (int? i) {
+                                      controller.radio = 1;
+                                      controller.getRateBMChart();
+                                      // controller.getPriceData();
+                                      if (double.parse(controller.homeController
+                                                      .quantity.isNotEmpty
+                                                  ? controller
+                                                      .homeController.quantity
+                                                  : "0") >
+                                              0 ||
+                                          double.parse(controller
+                                                      .quantityDC.isNotEmpty
+                                                  ? controller.quantityDC
+                                                  : "0") >
+                                              0) {
+                                        controller.getTotalAmount();
+                                        controller.getPriceData();
+                                      }
+                                    },
+                                  ),
+                                )),
+                            InkWell(
+                              child: const Text("Buffallo"),
+                              onTap: () {
                                 controller.radio = 1;
                                 controller.getRateBMChart();
                                 // controller.getPriceData();
@@ -176,597 +214,645 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 }
                               },
                             ),
-                          )),
-                      InkWell(
-                        child: const Text("Buffallo"),
-                        onTap: () {
-                          controller.radio = 1;
-                          controller.getRateBMChart();
-                          // controller.getPriceData();
-                          if (double.parse(controller
-                                          .homeController.quantity.isNotEmpty
-                                      ? controller.homeController.quantity
-                                      : "0") >
-                                  0 ||
-                              double.parse(controller.quantityDC.isNotEmpty
-                                      ? controller.quantityDC
-                                      : "0") >
-                                  0) {
-                            controller.getTotalAmount();
-                            controller.getPriceData();
+                          ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "FarmerId:",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 20.w,
+                        ),
+                        Obx(() => Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                controller.farmerId.toString().isNotEmpty
+                                    ? controller.getFarmerIdFinal()
+                                    : "",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            )),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.h,
+                    ),
+                    SizedBox(
+                      // width: Get.width * 0.7,
+                      // height: 65.h,
+                      child: TextFormWidget(
+                        // readOnly: controller.check,
+                        prefix: InkWell(
+                          onTap: () {
+                            if (controller.farmerId.trim().isNotEmpty) {
+                              controller.getFarmerId();
+                            }
+                          },
+                          child: const Icon(
+                            Icons.search,
+                            size: 30,
+                          ),
+                        ),
+                        // initialValue: controller.farmerId,
+                        label: "Please enter FarmerId...",
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        textController: controller.farmerIdC,
+                        onChanged: (val) {
+                          controller.farmerId = val;
+                          if (controller.farmerId.trim().isNotEmpty) {
+                            controller.getFarmerId();
                           }
                         },
+                        // keyboardType:
+                        //     const TextInputType.numberWithOptions(signed: true),
+                        // maxLength: 4,
+                        // validator: (val) =>
+                        //     val!.length < 1 ? "Field is required!" : null,
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "FarmerId:",
-                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                  ),
-                  SizedBox(
-                    width: 20.w,
-                  ),
-                  Obx(() => Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          controller.farmerId.toString().isNotEmpty
-                              ? controller.getFarmerIdFinal()
-                              : "",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      )),
-                ],
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
-              SizedBox(
-                // width: Get.width * 0.7,
-                // height: 65.h,
-                child: TextFormWidget(
-                  // readOnly: controller.check,
-                  prefix: InkWell(
-                    onTap: () {
-                      if (controller.farmerId.trim().isNotEmpty) {
-                        controller.getFarmerId();
-                      }
-                    },
-                    child: const Icon(
-                      Icons.search,
-                      size: 30,
+                    SizedBox(
+                      height: 20.h,
                     ),
-                  ),
-                  // initialValue: controller.farmerId,
-                  label: "Please enter FarmerId...",
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                  ],
-                  textController: controller.farmerIdC,
-                  onChanged: (val) {
-                    controller.farmerId = val;
-                    if (controller.farmerId.trim().isNotEmpty) {
-                      controller.getFarmerId();
-                    }
-                  },
-                  // keyboardType:
-                  //     const TextInputType.numberWithOptions(signed: true),
-                  maxLength: 4,
-                  // validator: (val) =>
-                  //     val!.length < 1 ? "Field is required!" : null,
-                ),
-              ),
-              SizedBox(
-                height: 20.h,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "FAT",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => controller.check
-                          ? Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: AppColors.black,
-                                  // width: 2,
-                                ),
-                                color: AppColors.white,
-                              ),
-                              width: Get.width * .3,
-                              padding: const EdgeInsets.all(10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
                               child: Text(
-                                "${controller.homeController.fat.isNotEmpty ? double.tryParse(controller.homeController.fat)!.toPrecision(1) : ""}",
-                                style: Theme.of(context).textTheme.labelMedium,
-                                textAlign: TextAlign.center,
+                                "FAT",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
                               ),
-                            )
-                          : SizedBox(
-                              width: Get.width * .3,
-                              child: TextFormWidget(
-                                label: "Please enter fat...",
-                                textController: controller.fat,
-                                onChanged: (v) => controller.fatDC = v,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                inputFormatters: [
-                                  DecimalTextInputFormatter(decimalRange: 1),
-                                  LengthLimitingTextInputFormatter(3),
-                                ],
-                                maxLength: 3,
-                              ),
-                            )),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "SNF",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Obx(() => controller.check
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: AppColors.black,
+                                        // width: 2,
+                                      ),
+                                      color: AppColors.white,
+                                    ),
+                                    width: Get.width * .3,
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      "${controller.homeController.fat.isNotEmpty ? double.tryParse(controller.homeController.fat)?.toPrecision(1) ?? "" : ""}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: Get.width * .3,
+                                    child: TextFormWidget(
+                                      label: "Please enter fat...",
+                                      textController: controller.fat,
+                                      onChanged: (v) => controller.fatDC = v,
+                                      // keyboardType: TextInputType.text,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true, signed: false),
+                                      inputFormatters: [
+                                        DecimalTextInputFormatter(
+                                            decimalRange: 1),
+                                        LengthLimitingTextInputFormatter(4),
+                                      ],
+                                      // maxLength: 3,
+                                    ),
+                                  )),
+                          ],
                         ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => controller.check
-                          ? Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: AppColors.black,
-                                  // width: 2,
-                                ),
-                                color: AppColors.white,
-                              ),
-                              width: Get.width * .3,
-                              padding: const EdgeInsets.all(10),
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
                               child: Text(
-                                "${controller.homeController.snf.isNotEmpty ? double.tryParse(controller.homeController.snf)!.toPrecision(1) : ""}",
-                                style: Theme.of(context).textTheme.labelMedium,
-                                textAlign: TextAlign.center,
+                                "SNF",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
                               ),
-                            )
-                          : SizedBox(
-                              width: Get.width * .3,
-                              child: TextFormWidget(
-                                label: "Please enter FarmerId...",
-                                textController: controller.snf,
-                                onChanged: (v) => controller.snfDC = v,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                inputFormatters: [
-                                  DecimalTextInputFormatter(decimalRange: 1),
-                                  LengthLimitingTextInputFormatter(3),
-                                ],
-                                maxLength: 10,
-                              ),
-                            )),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "WATER",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => controller.check
-                          ? Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: AppColors.black,
-                                  // width: 2,
-                                ),
-                                color: AppColors.white,
-                              ),
-                              width: Get.width * .3,
-                              padding: const EdgeInsets.all(10),
-                              child: Text(
-                                controller.homeController.water ?? "",
-                                style: Theme.of(context).textTheme.labelMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                            )
-                          : SizedBox(
-                              width: Get.width * .3,
-                              child: TextFormWidget(
-                                readOnly: controller.check,
-                                label: "Please enter FarmerId...",
-                                textController: controller.water,
-                                onChanged: (v) => controller.waterDC = v,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                inputFormatters: [
-                                  DecimalTextInputFormatter(decimalRange: 1),
-                                  // LengthLimitingTextInputFormatter(4),
-                                ],
-                                maxLength: 10,
-                              ),
-                            )),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 20.h,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "QUANTITY",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(() => controller.check
-                          ? Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: AppColors.black,
-                                ),
-                                color: AppColors.white,
-                              ),
-                              width: Get.width * .3,
-                              padding: const EdgeInsets.all(10),
-                              child: Text(
-                                controller.homeController.fat.isNotEmpty
-                                    ? controller.homeController.quantity
-                                    : "",
-                                style: Theme.of(context).textTheme.labelMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                            )
-                          : SizedBox(
-                              width: Get.width * .3,
-                              child: TextFormWidget(
-                                readOnly: controller.check,
-                                label: "Please enter fat...",
-                                textController: controller.quantity,
-                                onChanged: (v) => controller.quantityDC = v,
-                                inputFormatters: [
-                                  DecimalTextInputFormatter(decimalRange: 4),
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r"[0-9.]")),
-                                  FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d+\.?\d*')),
-                                ],
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true, signed: false),
-                              ),
-                            )),
-                    ],
-                  ),
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Obx(() => controller.check
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: AppColors.black,
+                                        // width: 2,
+                                      ),
+                                      color: AppColors.white,
+                                    ),
+                                    width: Get.width * .3,
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      "${controller.homeController.snf.isNotEmpty ? double.tryParse(controller.homeController.snf)?.toPrecision(1) ?? "" : ""}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: Get.width * .3,
+                                    child: TextFormWidget(
+                                      label: "Please enter FarmerId...",
+                                      textController: controller.snf,
+                                      onChanged: (v) => controller.snfDC = v,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      inputFormatters: [
+                                        DecimalTextInputFormatter(
+                                            decimalRange: 1),
+                                        LengthLimitingTextInputFormatter(4),
 
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "PRICE",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
+                                        // LengthLimitingTextInputFormatter(3),
+                                      ],
+                                      // maxLength: 10,
+                                    ),
+                                  )),
+                          ],
                         ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Obx(
-                        () => controller.check
-                            ? Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
-                                    color: AppColors.black,
-                                    // width: 2,
-                                  ),
-                                  color: AppColors.white,
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "WATER",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Obx(() => controller.check
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: AppColors.black,
+                                        // width: 2,
+                                      ),
+                                      color: AppColors.white,
+                                    ),
+                                    width: Get.width * .3,
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      controller.homeController.water.isNotEmpty
+                                          ? controller.homeController.water ??
+                                              ""
+                                          : "",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: Get.width * .3,
+                                    child: TextFormWidget(
+                                      readOnly: controller.check,
+                                      label: "Please enter FarmerId...",
+                                      textController: controller.water,
+                                      onChanged: (v) => controller.waterDC = v,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true),
+                                      inputFormatters: [
+                                        DecimalTextInputFormatter(
+                                            decimalRange: 1),
+                                        // LengthLimitingTextInputFormatter(4),
+                                      ],
+                                      // maxLength: 10,
+                                    ),
+                                  )),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.h,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "QUANTITY",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Obx(() => controller.check
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      border: Border.all(
+                                        color: AppColors.black,
+                                      ),
+                                      color: AppColors.white,
+                                    ),
+                                    width: Get.width * .3,
+                                    padding: const EdgeInsets.all(10),
+                                    child: Text(
+                                      controller.homeController.fat.isNotEmpty
+                                          ? controller
+                                                  .homeController.quantity ??
+                                              ""
+                                          : "",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                : SizedBox(
+                                    width: Get.width * .3,
+                                    child: TextFormWidget(
+                                      readOnly: controller.check,
+                                      label: "Please enter fat...",
+                                      textController: controller.quantity,
+                                      onChanged: (v) =>
+                                          controller.quantityDC = v,
+                                      inputFormatters: [
+                                        DecimalTextInputFormatter(
+                                            decimalRange: 4),
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r"[0-9.]")),
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp(r'^\d+\.?\d*')),
+                                      ],
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                              decimal: true, signed: false),
+                                    ),
+                                  )),
+                          ],
+                        ),
+
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "PRICE",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Obx(
+                              () => controller.check
+                                  ? Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: AppColors.black,
+                                          // width: 2,
+                                        ),
+                                        color: AppColors.white,
+                                      ),
+                                      width: Get.width * .3,
+                                      padding: const EdgeInsets.all(10),
+                                      child: Text(
+                                        controller.homeController.fat
+                                                    .isNotEmpty &&
+                                                controller.homeController.snf
+                                                    .isNotEmpty &&
+                                                (controller.radio == 1 ||
+                                                    controller.radio == 0)
+                                            ? controller.getPriceData() ?? ""
+                                            : "",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: AppColors.black,
+                                          // width: 2,
+                                        ),
+                                        color: AppColors.white,
+                                      ),
+                                      width: Get.width * .3,
+                                      padding: const EdgeInsets.all(10),
+                                      child: Text(
+                                        controller.fatDC.isNotEmpty &&
+                                                controller.snfDC.isNotEmpty &&
+                                                (controller.radio == 1 ||
+                                                    controller.radio == 0)
+                                            ? controller.getPriceData() ?? ""
+                                            : "",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "AMOUNT",
+                                style:
+                                    Theme.of(Get.context!).textTheme.bodySmall,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: AppColors.black,
+                                  // width: 2,
                                 ),
-                                width: Get.width * .3,
-                                padding: const EdgeInsets.all(10),
-                                child: Text(
-                                  controller.homeController.fat.isNotEmpty &&
-                                          controller
-                                              .homeController.snf.isNotEmpty &&
-                                          (controller.radio == 1 ||
-                                              controller.radio == 0)
-                                      ? controller.getPriceData()
-                                      : "",
-                                  style:
-                                      Theme.of(context).textTheme.labelMedium,
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
-                                    color: AppColors.black,
-                                    // width: 2,
-                                  ),
-                                  color: AppColors.white,
-                                ),
-                                width: Get.width * .3,
-                                padding: const EdgeInsets.all(10),
-                                child: Text(
-                                  controller.fatDC.isNotEmpty &&
+                                color: AppColors.white,
+                              ),
+                              width: Get.width * .3,
+                              padding: const EdgeInsets.all(10),
+                              child: Obx(() => Text(
+                                    (double.parse(controller.homeController
+                                                            .quantity.isNotEmpty
+                                                        ? controller
+                                                            .homeController
+                                                            .quantity
+                                                        : "0") >
+                                                    0 ||
+                                                double.parse(controller
+                                                            .quantityDC
+                                                            .isNotEmpty
+                                                        ? controller.quantityDC
+                                                        : "0") >
+                                                    0) &&
+                                            (controller.radio == 1 ||
+                                                controller.radio == 0)
+                                        ? controller.getTotalAmount()
+                                        : "",
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
+                                    textAlign: TextAlign.center,
+                                  )),
+                            )
+
+                            // ),
+                          ],
+                        ),
+                        // ],
+                        // ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20.h,
+                    ),
+                    Obx(() => !controller.progress
+                        ? Container(
+                            width: Get.width,
+                            margin: EdgeInsets.only(
+                                top: 15.h, left: 35.w, right: 35.w),
+                            child: controller.check
+                                ? Obx(() => ElevatedButton(
+                                      onPressed: () async {
+                                        bool result = await InternetConnection()
+                                            .hasInternetAccess;
+
+                                        if (controller.farmerId.isNotEmpty &&
+                                            controller.homeController.fat
+                                                .isNotEmpty &&
+                                            controller.farmerData.farmerName !=
+                                                "Unknown" &&
+                                            controller.farmerData.farmerName !=
+                                                "null" &&
+                                            controller.farmerData.farmerName !=
+                                                null &&
+                                            controller.homeController.water
+                                                .isNotEmpty &&
+                                            controller.homeController.quantity
+                                                .isNotEmpty &&
+                                            (controller.radio == 1 ||
+                                                controller.radio == 0) &&
+                                            (double.parse(
+                                                    controller.getPriceData()) >
+                                                0.0)) {
+                                          if (double.parse(controller
+                                                  .homeController.quantity) >
+                                              0.0) {
+                                            controller.progress = true;
+                                            await controller.accept(result);
+                                            await controller.printData();
+                                            controller.progress = false;
+
+                                            await controller.homeController
+                                                .fetchMilkCollectionDateWise();
+                                            if (result) {
+                                              await controller.checkSmsFlag();
+
+                                              await controller.sendCollection();
+                                            }
+
+                                            controller.emptyData();
+                                          }
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: (controller
+                                                        .farmerId.isNotEmpty &&
+                                                    (controller.homeController.fat
+                                                        .isNotEmpty) &&
+                                                    controller.farmerData.farmerName !=
+                                                        "Unknown" &&
+                                                    controller.farmerData.farmerName !=
+                                                        "null" &&
+                                                    controller.farmerData
+                                                            .farmerName !=
+                                                        null &&
+                                                    (controller.homeController
+                                                        .water.isNotEmpty) &&
+                                                    (controller
+                                                        .homeController
+                                                        .quantity
+                                                        .isNotEmpty)) &&
+                                                (controller.radio == 1 ||
+                                                    controller.radio == 0) &&
+                                                (double.parse(controller.getPriceData()) >
+                                                    0.0)
+                                            ? double.parse(controller.homeController.quantity) >
+                                                    0
+                                                ? AppColors.green
+                                                : const Color.fromARGB(
+                                                    255, 211, 240, 212)
+                                            : const Color.fromARGB(
+                                                255, 211, 240, 212),
+                                      ),
+                                      child: Text(
+                                        "ACCEPT",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .displaySmall!
+                                            .copyWith(color: AppColors.white),
+                                      ),
+                                    ))
+                                : ElevatedButton(
+                                    onPressed: () async {
+                                      bool result = await InternetConnection()
+                                          .hasInternetAccess;
+
+                                      if (controller.farmerId.isNotEmpty &&
+                                          controller.fatDC.isNotEmpty &&
+                                          controller.farmerData.farmerName !=
+                                              "Unknown" &&
+                                          controller.farmerData.farmerName !=
+                                              "null" &&
+                                          controller.farmerData.farmerName !=
+                                              null &&
+                                          controller.waterDC.isNotEmpty &&
+                                          controller.quantityDC.isNotEmpty &&
                                           controller.snfDC.isNotEmpty &&
-                                          (controller.radio == 1 ||
-                                              controller.radio == 0)
-                                      ? controller.getPriceData()
-                                      : "",
-                                  style:
-                                      Theme.of(context).textTheme.labelMedium,
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "AMOUNT",
-                          style: Theme.of(Get.context!).textTheme.bodySmall,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10.h,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: AppColors.black,
-                            // width: 2,
-                          ),
-                          color: AppColors.white,
-                        ),
-                        width: Get.width * .3,
-                        padding: const EdgeInsets.all(10),
-                        child: Obx(() => Text(
-                              (double.parse(controller.homeController.quantity
-                                                      .isNotEmpty
-                                                  ? controller
-                                                      .homeController.quantity
-                                                  : "0") >
-                                              0 ||
-                                          double.parse(controller
-                                                      .quantityDC.isNotEmpty
-                                                  ? controller.quantityDC
-                                                  : "0") >
-                                              0) &&
-                                      (controller.radio == 1 ||
-                                          controller.radio == 0)
-                                  ? controller.getTotalAmount()
-                                  : "",
-                              style: Theme.of(context).textTheme.labelMedium,
-                              textAlign: TextAlign.center,
-                            )),
-                      )
-
-                      // ),
-                    ],
-                  ),
-                  // ],
-                  // ),
-                ],
-              ),
-              SizedBox(
-                height: 20.h,
-              ),
-              Obx(() => !controller.progress
-                  ? Container(
-                      width: Get.width,
-                      // padding: const EdgeInsets.all(20),
-                      margin:
-                          EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
-                      child: controller.check
-                          ? Obx(() => ElevatedButton(
-                                onPressed: () async {
-                                  bool result = await InternetConnection()
-                                      .hasInternetAccess;
-
-                                  if (controller.farmerId.isNotEmpty &&
-                                      controller
-                                          .homeController.fat.isNotEmpty &&
-                                      controller.farmerData.farmerName !=
-                                          "Unknown" &&
-                                      controller
-                                          .homeController.water.isNotEmpty &&
-                                      controller
-                                          .homeController.quantity.isNotEmpty &&
-                                      (controller.radio == 1 ||
-                                          controller.radio == 0) &&
-                                      (double.parse(controller.getPriceData()) >
-                                          0)) {
-                                    if (double.parse(controller
-                                            .homeController.quantity) >
-                                        0) {
-                                      controller.progress = true;
-                                      await controller.accept();
-                                      await controller.printData();
-                                      if (result) {
-                                        await controller.sendCollection();
-                                        await controller.checkSmsFlag();
-                                        await controller.homeController
-                                            .fetchMilkCollectionDateWise();
-                                      }
-
-                                      controller.emptyData();
-                                      controller.progress = false;
-                                    }
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: (controller
-                                                  .farmerId.isNotEmpty &&
-                                              (controller.homeController.fat
-                                                  .isNotEmpty) &&
-                                              controller.farmerData.farmerName !=
-                                                  "Unknown" &&
-                                              (controller.homeController.water
-                                                  .isNotEmpty) &&
-                                              (controller.homeController
-                                                  .quantity.isNotEmpty)) &&
                                           (controller.radio == 1 ||
                                               controller.radio == 0) &&
                                           (double.parse(
                                                   controller.getPriceData()) >
-                                              0)
-                                      ? double.parse(controller
-                                                  .homeController.quantity) >
-                                              0
-                                          ? AppColors.green
+                                              0.0)) {
+                                        if (double.parse(
+                                                controller.quantityDC) >
+                                            0.0) {
+                                          controller.progress = true;
+                                          await controller.accept(result);
+                                          await controller.printData();
+                                          controller.progress = false;
+
+                                          await controller.homeController
+                                              .fetchMilkCollectionDateWise();
+
+                                          if (result) {
+                                            await controller.checkSmsFlag();
+
+                                            await controller.sendCollection();
+                                          }
+
+                                          controller.emptyData();
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: (controller
+                                                      .farmerId.isNotEmpty &&
+                                                  (controller
+                                                      .fatDC.isNotEmpty) &&
+                                                  controller.farmerData.farmerName !=
+                                                      "Unknown" &&
+                                                  controller.farmerData
+                                                          .farmerName !=
+                                                      "null" &&
+                                                  controller.farmerData
+                                                          .farmerName !=
+                                                      null &&
+                                                  (controller
+                                                      .waterDC.isNotEmpty) &&
+                                                  (controller
+                                                      .quantityDC.isNotEmpty) &&
+                                                  controller
+                                                      .snfDC.isNotEmpty) &&
+                                              (controller.radio == 1 ||
+                                                  controller.radio == 0) &&
+                                              (double.parse(controller.getPriceData()) >
+                                                  0.0)
+                                          ? double.parse(controller.quantityDC) >
+                                                      0.0 &&
+                                                  controller
+                                                      .farmerIdC.text.isNotEmpty
+                                              ? AppColors.green
+                                              : const Color.fromARGB(
+                                                  255, 211, 240, 212)
                                           : const Color.fromARGB(
-                                              255, 211, 240, 212)
-                                      : const Color.fromARGB(255, 211, 240, 212),
-                                ),
-                                child: Text(
-                                  "ACCEPT",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displaySmall!
-                                      .copyWith(color: AppColors.white),
-                                ),
-                              ))
-                          : ElevatedButton(
-                              onPressed: () async {
-                                bool result = await InternetConnection()
-                                    .hasInternetAccess;
-
-                                if (controller.farmerId.isNotEmpty &&
-                                    controller.fatDC.isNotEmpty &&
-                                    controller.farmerData.farmerName !=
-                                        "Unknown" &&
-                                    controller.waterDC.isNotEmpty &&
-                                    controller.quantityDC.isNotEmpty &&
-                                    controller.snfDC.isNotEmpty &&
-                                    (controller.radio == 1 ||
-                                        controller.radio == 0) &&
-                                    (double.parse(controller.getPriceData()) >
-                                        0)) {
-                                  if (double.parse(controller.quantityDC) > 0) {
-                                    controller.progress = true;
-                                    await controller.accept();
-                                    await controller.printData();
-
-                                    if (result) {
-                                      await controller.sendCollection();
-                                      await controller.checkSmsFlag();
-                                      await controller.homeController
-                                          .fetchMilkCollectionDateWise();
-                                    }
-                                    controller.emptyData();
-                                    controller.progress = false;
-                                  }
-                                }
+                                              255, 211, 240, 212),
+                                    ),
+                                    child: Text(
+                                      "ACCEPT",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .displaySmall!
+                                          .copyWith(color: AppColors.white),
+                                    ),
+                                  ),
+                          )
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          )),
+                    SizedBox(
+                      height: 20.h,
+                    ),
+                    Obx(() => !controller.progress
+                        ? Container(
+                            width: Get.width,
+                            // padding: const EdgeInsets.all(20),
+                            margin: EdgeInsets.only(
+                                top: 15.h, left: 35.w, right: 35.w),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // if (controller.farmerId.isNotEmpty &&
+                                //     (controller.fat.text.isNotEmpty ||
+                                //         controller.homeController.fat.isNotEmpty) &&
+                                //     controller.farmerData.farmerName != "Unknown") {
+                                controller.emptyData();
+                                // }
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: (controller
-                                                .farmerId.isNotEmpty &&
-                                            (controller.fatDC.isNotEmpty) &&
-                                            controller.farmerData.farmerName !=
-                                                "Unknown" &&
-                                            (controller.waterDC.isNotEmpty) &&
-                                            (controller
-                                                .quantityDC.isNotEmpty) &&
-                                            controller.snfDC.isNotEmpty) &&
-                                        (controller.radio == 1 ||
-                                            controller.radio == 0) &&
-                                        (double.parse(
-                                                controller.getPriceData()) >
-                                            0)
-                                    ? double.parse(controller.quantityDC) > 0 &&
-                                            controller.farmerIdC.text.isNotEmpty
-                                        ? AppColors.green
-                                        : const Color.fromARGB(
-                                            255, 211, 240, 212)
-                                    : const Color.fromARGB(255, 211, 240, 212),
+                                backgroundColor: AppColors.red,
                               ),
                               child: Text(
-                                "ACCEPT",
+                                "REJECT",
                                 style: Theme.of(context)
                                     .textTheme
                                     .displaySmall!
                                     .copyWith(color: AppColors.white),
                               ),
                             ),
-                    )
-                  : const Center(
-                      child: CircularProgressIndicator(),
-                    )),
-              SizedBox(
-                height: 20.h,
-              ),
-              Obx(() => !controller.progress
-                  ? Container(
-                      width: Get.width,
-                      // padding: const EdgeInsets.all(20),
-                      margin:
-                          EdgeInsets.only(top: 15.h, left: 35.w, right: 35.w),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // if (controller.farmerId.isNotEmpty &&
-                          //     (controller.fat.text.isNotEmpty ||
-                          //         controller.homeController.fat.isNotEmpty) &&
-                          //     controller.farmerData.farmerName != "Unknown") {
-                          controller.emptyData();
-                          // }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.red,
-                        ),
-                        child: Text(
-                          "REJECT",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall!
-                              .copyWith(color: AppColors.white),
-                        ),
-                      ),
-                    )
-                  : const SizedBox()),
-            ],
-          ),
+                          )
+                        : const SizedBox()),
+                  ],
+                )
+              : const Center(
+                  child: CircularProgressIndicator(),
+                )),
         )),
       ),
     );
@@ -807,7 +893,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged1,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
+                    // maxLength: 10,
                   ),
                 )),
           ],
@@ -835,7 +921,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged2,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
+                    // maxLength: 10,
                   ),
                 )),
           ],
@@ -863,7 +949,7 @@ class CollectmilkView extends GetView<CollectmilkController> {
                     label: "Please enter FarmerId...",
                     onChanged: onChanged3,
                     keyboardType: TextInputType.text,
-                    maxLength: 10,
+                    // maxLength: 10,
                   ),
                 )),
           ],

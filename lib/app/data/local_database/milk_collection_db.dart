@@ -5,7 +5,7 @@ import 'local_database.dart';
 
 class MilkCollectionDB {
   //
-  final tableName = 'milkcollection';
+  final tableName = 'gudaaspurmilkcollection';
 
   Future<void> createTable(Database database) async {
     await database.execute("""
@@ -29,6 +29,7 @@ class MilkCollectionDB {
     "Total_Amt" REAL,
     "CollectionCenterId" INTEGER,
     "CollectionCenterName" TEXT,
+    "Calculations_ID" TEXT,
     "Shift" TEXT,
     "FUploaded" INTEGER,
     PRIMARY KEY("id" AUTOINCREMENT)
@@ -38,9 +39,10 @@ class MilkCollectionDB {
   // PRIMARY KEY("id" AUTOINCREMENT)
   //
 
-  Future<int> create({
+  Future<void> create({
     int? FarmerId,
     String? Farmer_Name,
+    String? Calculations_ID,
     String? Collection_Date,
     String? Inserted_Time,
     String? Collection_Mode,
@@ -60,34 +62,39 @@ class MilkCollectionDB {
     double? Total_Amt,
     int? FUploaded,
   }) async {
-    final database = await DataBaseService().database;
-    return await database.rawInsert(
-      '''
-        INSERT INTO $tableName (Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    try {
+      final database = await DataBaseService().database;
+      await database.rawInsert(
+        '''
+        INSERT INTO $tableName (Calculations_ID,Collection_Date,Inserted_Time,FarmerId,Farmer_Name,Collection_Mode,Scale_Mode,Analyze_Mode,Milk_Status,Milk_Type,Rate_Chart_Name,Qty,FAT,SNF,Added_Water,Rate_Per_Liter,Total_Amt,CollectionCenterId,CollectionCenterName,Shift,FUploaded) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
       ''',
-      [
-        Collection_Date,
-        Inserted_Time,
-        FarmerId,
-        Farmer_Name,
-        Collection_Mode,
-        Scale_Mode,
-        Analyze_Mode,
-        Milk_Status,
-        Milk_Type,
-        Rate_Chart_Name,
-        Qty,
-        FAT,
-        SNF,
-        Added_Water,
-        Rate_Per_Liter,
-        Total_Amt,
-        CollectionCenterId,
-        CollectionCenterName,
-        Shift,
-        FUploaded
-      ],
-    );
+        [
+          Calculations_ID,
+          Collection_Date,
+          Inserted_Time,
+          FarmerId,
+          Farmer_Name,
+          Collection_Mode,
+          Scale_Mode,
+          Analyze_Mode,
+          Milk_Status,
+          Milk_Type,
+          Rate_Chart_Name,
+          Qty,
+          FAT,
+          SNF,
+          Added_Water,
+          Rate_Per_Liter,
+          Total_Amt,
+          CollectionCenterId,
+          CollectionCenterName,
+          Shift,
+          FUploaded
+        ],
+      );
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Future<List<MilkCollectionModel>> fetchAll() async {
@@ -140,51 +147,16 @@ class MilkCollectionDB {
   }
 
   Future<int> update({
-    int? calculationsID,
-    int? farmerId,
-    String? farmerName,
-    String? bankName,
-    String? branchName,
-    String? accountName,
-    String? iFSCCode,
-    String? aadharCardNo,
-    String? mobileNumber,
-    int? noOfCows,
-    int? noOfBuffalos,
-    int? modeOfPay,
-    String? rFID,
-    String? address,
-    String? exportParameter1,
-    String? exportParameter2,
-    String? exportParameter3,
-    String? mCPGroup,
-    int? centerID,
+    String? farmerId,
     int? FUploaded,
   }) async {
     final database = await DataBaseService().database;
     return await database.update(
       tableName,
       {
-        if (farmerName != null) 'FarmerName': farmerName,
-        if (bankName != null) 'BankName': bankName,
-        if (branchName != null) 'BranchName': branchName,
-        if (accountName != null) 'AccountName': accountName,
-        if (iFSCCode != null) 'IFSCCode': iFSCCode,
-        if (aadharCardNo != null) 'AadharCardNo': aadharCardNo,
-        if (mobileNumber != null) 'MobileNumber': mobileNumber,
-        if (noOfCows != null) 'NoOfCows': noOfCows,
-        if (noOfBuffalos != null) 'NoOfBuffalos': noOfBuffalos,
-        if (modeOfPay != null) 'ModeOfPay': modeOfPay,
-        if (rFID != null) 'RF_ID': rFID,
-        if (address != null) 'Address': address,
-        if (exportParameter1 != null) 'ExportParameter1': exportParameter1,
-        if (exportParameter2 != null) 'ExportParameter2': exportParameter2,
-        if (exportParameter3 != null) 'ExportParameter3': exportParameter3,
-        if (mCPGroup != null) 'MCPGroup': mCPGroup,
-        if (centerID != null) 'CenterID': centerID,
         if (FUploaded != null) 'FUploaded': FUploaded,
       },
-      where: 'FarmerId = ?',
+      where: 'Calculations_ID = ?',
       conflictAlgorithm: ConflictAlgorithm.rollback,
       whereArgs: [farmerId],
     );
@@ -206,7 +178,7 @@ class MilkCollectionDB {
 
   void onUpgrade(Database db, int oldVersion, int newVersion) {
     if (oldVersion < newVersion) {
-      db.execute("ALTER TABLE $tableName ADD COLUMN FUploaded TEXT;");
+      db.execute("ALTER TABLE $tableName ADD COLUMN Calculations_ID TEXT;");
     }
   }
 }

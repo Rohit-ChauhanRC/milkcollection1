@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -45,7 +46,6 @@ class CollectmilkController extends GetxController {
   final HomeController homeController =
       Get.put<HomeController>(HomeController());
 
-  // final PinverifyController pinverifyController = Get.find();
   final FarmerDB farmerDB = FarmerDB();
 
   late ServerSocket weightServerSocket;
@@ -76,10 +76,6 @@ class CollectmilkController extends GetxController {
   FarmerListModel get farmerData => _farmerData.value;
   set farmerData(FarmerListModel lst) => _farmerData.value = lst;
 
-  // final RxString _fName = ''.obs;
-  // String get fNam => _fName.value;
-  // set fName(String mob) => _fName.value = mob;
-
   final RxList<FarmerListModel> _farmerDataList = RxList<FarmerListModel>();
   List<FarmerListModel> get farmerDataList => _farmerDataList;
   set farmerDataList(List<FarmerListModel> lst) =>
@@ -103,7 +99,6 @@ class CollectmilkController extends GetxController {
 
   TextEditingController fat = TextEditingController();
   TextEditingController snf = TextEditingController();
-  TextEditingController density = TextEditingController();
   TextEditingController water = TextEditingController();
   TextEditingController quantity = TextEditingController();
   TextEditingController farmerIdC = TextEditingController();
@@ -138,8 +133,6 @@ class CollectmilkController extends GetxController {
   int get shiftTime => _shiftTime.value;
   set shiftTime(int i) => _shiftTime.value = i;
 
-  // late Rx<Socket> printer;
-
   final RxBool _printD = false.obs;
   bool get printD => _printD.value;
   set printD(bool v) => _printD.value = v;
@@ -152,13 +145,22 @@ class CollectmilkController extends GetxController {
   bool get circularProgress => _circularProgress.value;
   set circularProgress(bool v) => _circularProgress.value = v;
 
+  final RxString _fromDate = "${DateTime.now()}".obs;
+  String get fromDate => _fromDate.value;
+  set fromDate(String str) => _fromDate.value = str;
+
+  final RxList<MilkCollectionModel> _milkCollectionData =
+      RxList<MilkCollectionModel>();
+  List<MilkCollectionModel> get milkCollectionData => _milkCollectionData;
+  set milkCollectionData(List<MilkCollectionModel> lst) =>
+      _milkCollectionData.assignAll(lst);
+
   @override
   void onInit() async {
     super.onInit();
 
-    // await checkIp();
-
     farmerDataList.assignAll(await farmerDB.fetchAll());
+    milkCollectionData.assignAll(await milkCollectionDB.fetchAll());
 
     if (DateTime.now().hour < 12) {
       shiftTime = 1;
@@ -169,9 +171,6 @@ class CollectmilkController extends GetxController {
     }
     await Permission.storage.request();
 
-    // WidgetsBinding.instance.initInstances();
-    // await getCollectionThirtyDaysData();
-    // await getRateChart();
     await getRateCMChart();
     await getRateBMChart();
   }
@@ -179,7 +178,7 @@ class CollectmilkController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-    // await getRateChart();
+    await checkCollection();
   }
 
   @override
@@ -225,18 +224,13 @@ class CollectmilkController extends GetxController {
               double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
               double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
             priceP = rateCMChartData[i].price.toPrecision(2).toString();
-            // print(price);
-            print("price:$priceP");
           }
         } else {
-          // homeController.
-
           if (double.parse(homeController.fat) ==
                   double.parse(rateCMChartData[i].fat) &&
               double.parse(homeController.snf) ==
                   double.parse(rateCMChartData[i].snf)) {
             priceP = rateCMChartData[i].price.toPrecision(2).toString();
-            print("price:$priceP");
           }
         }
       }
@@ -248,17 +242,13 @@ class CollectmilkController extends GetxController {
               double.parse(fatDC) == double.parse(rateBMChartData[i].fat) &&
               double.parse(snfDC) == double.parse(rateBMChartData[i].snf)) {
             priceP = rateBMChartData[i].price.toPrecision(2).toString();
-            // print(price);
-            print("price:$priceP");
           }
         } else {
-          // homeController.
           if (double.parse(homeController.fat) ==
                   double.parse(rateBMChartData[i].fat) &&
               double.parse(homeController.snf) ==
                   double.parse(rateBMChartData[i].snf)) {
             priceP = rateBMChartData[i].price.toPrecision(2).toString();
-            print("price:$priceP");
           }
         }
       }
@@ -275,14 +265,13 @@ class CollectmilkController extends GetxController {
           if (fatDC.isNotEmpty &&
               snfDC.isNotEmpty &&
               quantityDC.isNotEmpty &&
-              double.parse(quantityDC) > 0) {
+              double.parse(quantityDC) > 0.0) {
             if (double.parse(fatDC) == double.parse(rateCMChartData[i].fat) &&
                 double.parse(snfDC) == double.parse(rateCMChartData[i].snf)) {
               totalAmountP =
                   (((rateCMChartData[i].price) * (double.parse(quantityDC)))
                           .toPrecision(2))
                       .toString();
-              print("totalAmount:$totalAmountP");
             }
           }
         } else {
@@ -292,12 +281,11 @@ class CollectmilkController extends GetxController {
                 double.parse(homeController.snf) ==
                     double.parse(rateCMChartData[i].snf) &&
                 homeController.quantity.isNotEmpty &&
-                double.parse(homeController.quantity) > 0) {
+                double.parse(homeController.quantity) > 0.0) {
               totalAmountP = (((rateCMChartData[i].price) *
                           double.parse(homeController.quantity))
                       .toPrecision(2))
                   .toString();
-              print("totalAmount:$totalAmountP");
             }
           }
         }
@@ -308,14 +296,13 @@ class CollectmilkController extends GetxController {
           if (fatDC.isNotEmpty &&
               snfDC.isNotEmpty &&
               quantityDC.isNotEmpty &&
-              double.parse(quantityDC) > 0) {
+              double.parse(quantityDC) > 0.0) {
             if (double.parse(fatDC) == double.parse(rateBMChartData[i].fat) &&
                 double.parse(snfDC) == double.parse(rateBMChartData[i].snf)) {
               totalAmountP =
                   (((rateBMChartData[i].price) * (double.parse(quantityDC)))
                           .toPrecision(2))
                       .toString();
-              print("totalAmount:$totalAmountP");
             }
           }
         } else {
@@ -325,12 +312,11 @@ class CollectmilkController extends GetxController {
                 double.parse(homeController.snf) ==
                     double.parse(rateBMChartData[i].snf) &&
                 homeController.quantity.isNotEmpty &&
-                double.parse(homeController.quantity) > 0) {
+                double.parse(homeController.quantity) > 0.0) {
               totalAmountP = (((rateBMChartData[i].price) *
                           double.parse(homeController.quantity))
                       .toPrecision(2))
                   .toString();
-              print("totalAmount:$totalAmountP");
             }
           }
         }
@@ -356,6 +342,8 @@ class CollectmilkController extends GetxController {
         restoreData.assignAll([]);
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
+          int count = 0;
+
           pd.show(
               max: restoreData.length,
               msgFontSize: 10,
@@ -364,7 +352,10 @@ class CollectmilkController extends GetxController {
               msg: 'Recover data!...');
           milkCollectionDB.deleteTable();
           for (var e in restoreData) {
+            pd.update(value: count += 1);
+
             milkCollectionDB.create(
+              Calculations_ID: e.calculationsId.toString(),
               Added_Water: e.addedWater,
               Analyze_Mode: e.analyzeMode,
               CollectionCenterId: e.collectionCenterId.toString(),
@@ -390,29 +381,48 @@ class CollectmilkController extends GetxController {
           pd.close();
         }
       } else {}
-    } catch (e) {
-      print(e.toString());
+    } catch (e) {}
+  }
+
+  Future<void> checkCollection() async {
+    bool b = false;
+    circularProgress = true;
+    bool result = await InternetConnection().hasInternetAccess;
+
+    for (var i = 0; i < milkCollectionData.length; i++) {
+      if (milkCollectionData[i].FUploaded == 0) {
+        b = true;
+      }
     }
+    if (box.read(backupCollectionConst) !=
+            DateFormat("dd-MMM-yyyy")
+                .format(DateTime.parse(fromDate))
+                .toString() &&
+        b == false &&
+        result == true) {
+      await getCollectionThirtyDaysData().then((onValue) async {
+        await homeController.fetchMilkCollectionDateWise();
+      });
+    }
+    circularProgress = false;
   }
 
   Future<void> getCollectionThirtyDaysData() async {
     try {
       var res = await http.get(
           Uri.parse(
-            "$baseUrlConst/$restoreDataConst?CollectionCenterId=${box.read("centerId")}&FromDate=${dateFormat(DateTime.now().subtract(const Duration(days: 30)))}&ToDate=${dateFormat(DateTime.now())}",
+            "$baseUrlConst/$restoreDataConst?CollectionCenterId=${box.read("centerId")}&FromDate=${dateFormat(DateTime.now().subtract(const Duration(days: 20)))}&ToDate=${dateFormat(DateTime.now())}",
           ),
           headers: {"Content-Type": "application/json"});
 
       if (res.statusCode == 200) {
         restoreData.assignAll([]);
-        // print("res: ${res}");
-        // print("res: ${jsonDecode(res.body.toString())}");
         restoreData.assignAll(milkCollectionModelFromMap(res.body));
         if (restoreData.isNotEmpty) {
-          // print(restoreData.length.toString());
           await milkCollectionDB.deleteTable().then((value) async {
             for (var e in restoreData) {
               await milkCollectionDB.create(
+                Calculations_ID: e.calculationsId.toString(),
                 Added_Water: e.addedWater,
                 Analyze_Mode: e.analyzeMode,
                 CollectionCenterId: e.collectionCenterId.toString(),
@@ -438,14 +448,14 @@ class CollectmilkController extends GetxController {
           });
 
           box.write(calculationsId, restoreData.last.calculationsId);
+          box.write(
+              backupCollectionConst,
+              DateFormat("dd-MMM-yyyy")
+                  .format(DateTime.parse(fromDate))
+                  .toString());
         }
-        // restoreData.assignAll([]);
-      } else {
-        // print(jsonDecode(res.body));
-      }
-    } catch (e) {
-      // print(e.toString());
-    }
+      } else {}
+    } catch (e) {}
   }
 
   getFarmerId() async {
@@ -465,13 +475,11 @@ class CollectmilkController extends GetxController {
       if (farmerDataList[i].farmerId.toString() !=
           farmerfinalId.toString().trim()) {
         farmerData = FarmerListModel(farmerName: "Unknown");
-        print("farmerData:${farmerData.farmerName}");
       }
 
       if (farmerDataList[i].farmerId.toString() ==
           farmerfinalId.toString().trim()) {
         farmerData = farmerDataList[i];
-        print("farmerData:${farmerData.farmerName}");
 
         break;
       }
@@ -480,19 +488,18 @@ class CollectmilkController extends GetxController {
 
   String getFarmerIdFinal() {
     var farmerfinalId = "";
+
     if (farmerId.length == 1) {
       farmerfinalId = "${box.read(centerIdConst)}000$farmerId";
     } else if (farmerId.length == 2) {
       farmerfinalId = "${box.read(centerIdConst)}00$farmerId";
     } else if (farmerId.length == 3) {
       farmerfinalId = "${box.read(centerIdConst)}0$farmerId";
-    } else if (farmerId.length == 4) {
+    } else {
       farmerfinalId = box.read(centerIdConst).toString() + farmerId;
-      // }
     }
+
     return farmerfinalId;
-    // farmerData =
-    //     await pinverifyController.farmerDB.fetchById(farmerfinalId.toString());
   }
 
   Future<void> getVerifyPin() async {
@@ -509,6 +516,8 @@ class CollectmilkController extends GetxController {
         pinManual.assignAll(pinnmanualModelFromMap(res.body));
         if (pinManual.isNotEmpty) {
           if (pinManual[0].pin == int.parse(pin)) {
+            box.write(manualpinConst,
+                DateFormat("yyyy-mm-dd").format(DateTime.now()).toString());
             check = false;
             Utils.closeDialog();
             showDialogSelectShift();
@@ -519,9 +528,7 @@ class CollectmilkController extends GetxController {
       } else {
         Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
       }
-    } catch (e) {
-      Utils.showSnackbar("Pin Expired Of Your Collection Centre!");
-    }
+    } catch (e) {}
   }
 
   void showDialogManualPin({
@@ -547,12 +554,9 @@ class CollectmilkController extends GetxController {
             signed: false,
           ),
           inputFormatters: [
-            // TextInputFormatter(decimalRange: 1),
             FilteringTextInputFormatter.digitsOnly,
           ],
-          maxLength: 10,
         ),
-        // cancel: ,
         confirm: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -596,30 +600,66 @@ class CollectmilkController extends GetxController {
         backgroundColor: AppColors.white,
         title: "Please Select Shift",
         titleStyle: Theme.of(Get.context!).textTheme.displayMedium,
-        // title: success ? Strings.success : title,
         content: Container(
           margin: const EdgeInsets.all(10),
           child: Row(
             children: [
-              const Icon(
-                Icons.calendar_month_outlined,
-                color: AppColors.darkBrown,
+              InkWell(
+                onTap: () {
+                  showDatePicker(
+                    context: Get.context!,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                    lastDate: DateTime(2101),
+                    initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  ).then((selectedDate) async {
+                    fromDate = selectedDate!.toIso8601String();
+                    if (kDebugMode) {
+                      print(fromDate);
+                    }
+                  });
+                },
+                child: const Icon(
+                  Icons.calendar_month_outlined,
+                  color: AppColors.darkBrown,
+                ),
               ),
-              Text(
-                "${DateTime.now().day}-${DateTime.now().month}-${DateTime.now().year}",
-                style: Theme.of(Get.context!).textTheme.displaySmall,
+              InkWell(
+                onTap: () {
+                  showDatePicker(
+                    context: Get.context!,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                    lastDate: DateTime(2101),
+                    initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  ).then((selectedDate) async {
+                    fromDate = selectedDate!.toIso8601String();
+                    if (kDebugMode) {
+                      print(fromDate);
+                    }
+                  });
+                },
+                child: Obx(() => fromDate.isNotEmpty
+                    ? Text(
+                        DateFormat("dd-MMM-yyyy")
+                            .format(DateTime.parse(fromDate)),
+                        style: Theme.of(Get.context!).textTheme.displaySmall,
+                      )
+                    : Text(
+                        DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+                        style: Theme.of(Get.context!).textTheme.displaySmall,
+                      )),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Obx(() => SizedBox(
-                        width: Get.width * 0.16,
+                        width: Get.width * 0.14,
                         child: Radio(
                           activeColor: AppColors.yellow,
                           value: "AM",
                           groupValue: shift,
                           onChanged: (String? i) {
-                            print(i);
                             shift = i!;
                             shiftTime = 1;
                           },
@@ -641,13 +681,12 @@ class CollectmilkController extends GetxController {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Obx(() => SizedBox(
-                        width: Get.width * 0.16,
+                        width: Get.width * 0.14,
                         child: Radio(
                           activeColor: AppColors.yellow,
                           value: "PM",
                           groupValue: shift,
                           onChanged: (String? i) {
-                            print(i);
                             shift = i!;
                             shiftTime = 2;
                           },
@@ -668,8 +707,6 @@ class CollectmilkController extends GetxController {
             ],
           ),
         ),
-
-        // cancel: ,
         confirm: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -712,8 +749,6 @@ class CollectmilkController extends GetxController {
   Future<void> exportExcel() async {
     exportData.assignAll(await milkCollectionDB.fetchAll());
 
-    // milkCollectionModelToMap(await milkCollectionDB.fetchAll());
-
     if (exportData.isNotEmpty) {
       Excel excel = Excel.createExcel();
       excel.rename(excel.getDefaultSheet()!,
@@ -751,7 +786,6 @@ class CollectmilkController extends GetxController {
           )
           ..cellStyle = CellStyle(
             fontSize: 10,
-            // bold: true,
             backgroundColorHex: ExcelColor.yellow,
             fontColorHex: ExcelColor.black,
           );
@@ -852,20 +886,20 @@ class CollectmilkController extends GetxController {
         ..createSync(recursive: true)
         ..writeAsBytesSync(fileBytes!);
 
-      // OpenFilex.open('${directory.path}/output_file_name2.xlsx');
       await Share.shareXFiles([XFile('${directory.path}/CollectionData.xlsx')],
           text: 'CollectionData.xlsx');
-
-      // }
     }
   }
 
   Future<void> sendCollection() async {
     Map<String, dynamic> _body = {
-      "Collection_Date":
-          DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
+      "Collection_Date": fromDate.isNotEmpty
+          ? DateFormat("dd-MMM-yyyy")
+              .format(DateTime.parse(fromDate))
+              .toString()
+          : DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
       "Inserted_Time": DateFormat("HH:mm:ss").format(DateTime.now()).toString(),
-      "Calculations_ID": (box.read(calculationsId) ?? 0 + 1).toString(),
+      "Calculations_ID": getFarmerIdFinal(),
       "FarmerId": getFarmerIdFinal(),
       "Farmer_Name": farmerData.farmerName,
       "Collection_Mode": !check ? manualConst : autoConst,
@@ -892,22 +926,21 @@ class CollectmilkController extends GetxController {
           ),
           body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
-        // Utils.showSnackbar("accepted!");
         progress = false;
-        //  ;
+        emptyData();
       } else {
         progress = false;
+        emptyData();
       }
     } catch (e) {
-      print(e.toString());
       progress = false;
+      emptyData();
     }
-    // emptyData();
   }
 
-  Future<void> accept() async {
-    bool result = await InternetConnection().hasInternetAccess;
+  Future<void> accept(bool result) async {
     await milkCollectionDB.create(
+        Calculations_ID: getFarmerIdFinal(),
         FarmerId: int.parse(getFarmerIdFinal()),
         Added_Water: !check
             ? double.parse(water.text)
@@ -915,7 +948,11 @@ class CollectmilkController extends GetxController {
         Analyze_Mode: !check ? manualConst : autoConst,
         CollectionCenterId: box.read(centerIdConst),
         CollectionCenterName: box.read(centerName),
-        Collection_Date: DateFormat("dd-MMM-yyyy").format(DateTime.now()),
+        Collection_Date: fromDate.isNotEmpty
+            ? DateFormat("dd-MMM-yyyy")
+                .format(DateTime.parse(fromDate))
+                .toString()
+            : DateFormat("dd-MMM-yyyy").format(DateTime.now()).toString(),
         Collection_Mode: !check ? manualConst : autoConst,
         FAT: !check ? double.parse(fat.text) : double.parse(homeController.fat),
         Farmer_Name: farmerData.farmerName,
@@ -932,11 +969,9 @@ class CollectmilkController extends GetxController {
         Shift: shift.capitalizeFirst,
         Total_Amt: double.parse(getTotalAmount()),
         FUploaded: result ? 1 : 0);
-    await homeController.fetchMilkCollectionDateWise();
   }
 
   void emptyData() {
-    // _farmerId.close();
     farmerId = "";
     printD = true;
     fat.clear();
@@ -945,14 +980,12 @@ class CollectmilkController extends GetxController {
     quantity.clear();
 
     farmerData = FarmerListModel();
-    // radio = 0;
     homeController.fat = "";
     homeController.snf = "";
     homeController.water = "";
     homeController.quantity = "";
     farmerIdC.clear();
     progress = false;
-    // update();
     fatDC = "";
     snfDC = "";
     waterDC = "";
@@ -991,8 +1024,6 @@ class CollectmilkController extends GetxController {
       if (res.statusCode == 200) {
         Utils.showSnackbar(jsonDecode(res.body)["message"]);
       } else {}
-    } catch (e) {
-      print(e.toString());
-    }
+    } catch (e) {}
   }
 }

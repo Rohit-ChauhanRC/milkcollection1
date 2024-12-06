@@ -38,6 +38,8 @@ class TextFormWidget extends StatelessWidget {
     return TextFormField(
         // focusNode: FocusNode(),
         // key: UniqueKey(),
+        maxLength: maxLength,
+        textInputAction: TextInputAction.done,
         maxLengthEnforcement: MaxLengthEnforcement.enforced,
         controller: textController,
         validator: validator,
