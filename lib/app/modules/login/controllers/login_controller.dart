@@ -41,6 +41,7 @@ class LoginController extends GetxController {
     super.onInit();
 
     await Permission.storage.request();
+    await Permission.manageExternalStorage.request();
   }
 
   @override
@@ -101,6 +102,7 @@ class LoginController extends GetxController {
       circularProgress = true;
     } catch (e) {
       // apiLopp(i);
+      print(e.toString());
       circularProgress = true;
     }
   }

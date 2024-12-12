@@ -155,6 +155,10 @@ class CollectmilkController extends GetxController {
   set milkCollectionData(List<MilkCollectionModel> lst) =>
       _milkCollectionData.assignAll(lst);
 
+  final RxInt _counter = 0.obs;
+  int get counter => _counter.value;
+  set counter(int i) => _counter.value = i;
+
   @override
   void onInit() async {
     super.onInit();
@@ -170,6 +174,7 @@ class CollectmilkController extends GetxController {
       shift = "PM";
     }
     await Permission.storage.request();
+    await Permission.manageExternalStorage.request();
 
     await getRateCMChart();
     await getRateBMChart();
@@ -203,6 +208,12 @@ class CollectmilkController extends GetxController {
     water.clear();
     farmerIdC.clear();
     quantity.clear();
+    homeController.fat = "";
+    homeController.snf = "";
+    homeController.quantity = "";
+    homeController.water = "";
+    fatDC = "";
+    snfDC = "";
   }
 
   Future<void> getRateBMChart() async {
@@ -926,14 +937,14 @@ class CollectmilkController extends GetxController {
           ),
           body: _body);
       if (res.statusCode == 200 && jsonDecode(res.body) == "Inserted") {
-        progress = false;
+        // progress = false;
         emptyData();
       } else {
-        progress = false;
+        // progress = false;
         emptyData();
       }
     } catch (e) {
-      progress = false;
+      // progress = false;
       emptyData();
     }
   }
@@ -985,11 +996,11 @@ class CollectmilkController extends GetxController {
     homeController.water = "";
     homeController.quantity = "";
     farmerIdC.clear();
-    progress = false;
     fatDC = "";
     snfDC = "";
     waterDC = "";
     quantityDC = "";
+    progress = false;
   }
 
   Future printData() async {
@@ -1011,7 +1022,7 @@ class CollectmilkController extends GetxController {
       "CenterId": box.read(centerIdConst),
     });
     if (res.statusCode == 200 && jsonDecode(res.body) == "Y") {
-      progress = false;
+      // progress = false;
       await sendMessage();
     }
   }

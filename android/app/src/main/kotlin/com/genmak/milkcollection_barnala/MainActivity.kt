@@ -1,4 +1,4 @@
-package com.genmak.milkcollection
+package com.genmak.milkcollection_barnala
 
 import io.flutter.embedding.android.FlutterActivity
 

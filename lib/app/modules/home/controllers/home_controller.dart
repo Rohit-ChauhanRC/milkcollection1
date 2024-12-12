@@ -4,6 +4,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:milkcollection/app/data/services/connectivity_service.dart';
 import 'package:milkcollection/app/utils/network_check.dart';
 import 'package:milkcollection/app/utils/utils.dart';
 
@@ -32,7 +34,7 @@ import 'package:milkcollection/app/data/models/ratechart_model.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
-class HomeController extends GetxController {
+class HomeController extends GetxController with WidgetsBindingObserver {
   //
   final box = GetStorage();
 
@@ -40,6 +42,7 @@ class HomeController extends GetxController {
   final RateChartCMDB rateChartCMDB = RateChartCMDB();
   final MilkCollectionDB milkCollectionDB = MilkCollectionDB();
   final CansDB cansDB = CansDB();
+  final connectivityService = Get.put(ConnectivityService());
 
   ProgressDialog pd = ProgressDialog(context: Get.context);
 
@@ -264,6 +267,12 @@ class HomeController extends GetxController {
       radio = 2;
     }
 
+    SchedulerBinding.instance.addPostFrameCallback((timestamp) async {
+      if (connectivityService.isConnected.value) {
+      } else {}
+    });
+    WidgetsBinding.instance.addObserver(this);
+
     await getRateChartBM("B");
     await getRateChartCM("C");
   }
@@ -282,6 +291,7 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     super.onClose();
+    WidgetsBinding.instance.removeObserver(this);
   }
 
   Future<void> getNetworkType() async {

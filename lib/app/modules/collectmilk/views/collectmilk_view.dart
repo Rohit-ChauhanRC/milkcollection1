@@ -676,9 +676,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                   .homeController.quantity) >
                                               0.0) {
                                             controller.progress = true;
+                                            SystemChannels.textInput
+                                                .invokeMethod('TextInput.hide');
+
                                             await controller.accept(result);
                                             await controller.printData();
-                                            controller.progress = false;
+                                            // controller.progress = false;
 
                                             await controller.homeController
                                                 .fetchMilkCollectionDateWise();
@@ -755,9 +758,12 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                                 controller.quantityDC) >
                                             0.0) {
                                           controller.progress = true;
+                                          SystemChannels.textInput
+                                              .invokeMethod('TextInput.hide');
+
                                           await controller.accept(result);
                                           await controller.printData();
-                                          controller.progress = false;
+                                          // controller.progress = false;
 
                                           await controller.homeController
                                               .fetchMilkCollectionDateWise();
