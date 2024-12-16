@@ -574,10 +574,20 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   Future<void> printerConnection(String ip) async {
     try {
       final server = await ServerSocket.bind(ip, 8883, shared: true);
-      server.listen((event) {
-        printerSocketConnection(event, ip);
-      });
-    } catch (e) {}
+      server.listen(
+        (event) {
+          printerSocketConnection(event, ip);
+        },
+        onDone: () {
+          // printerConnection(ip);
+        },
+        onError: (error) {
+          // printerConnection(ip);
+        },
+      );
+    } catch (e) {
+      // printerConnection(ip);
+    }
   }
 
   void analyzerSocketConnection(Socket client) {
@@ -658,8 +668,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           printPaymentDetails = false;
         }
       },
-      onError: (error) {},
-      onDone: () {},
+      onError: (error) {
+        printerConnection(ip);
+
+        print(error);
+      },
+      onDone: () {
+        // printerConnection(ip);
+      },
     );
   }
 
@@ -760,8 +776,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           totalSnfCow += milkCollectionData[i].snf!.toDouble() *
               milkCollectionData[i].qty!;
           totalWaterCow += milkCollectionData[i].addedWater!.toDouble();
-          totalPriceCow += milkCollectionData[i].ratePerLiter!;
+          // totalPriceCow += milkCollectionData[i].ratePerLiter!;
           totalAmtCow += milkCollectionData[i].totalAmt!;
+
+          totalPriceCow +=
+              milkCollectionData[i].qty! * milkCollectionData[i].ratePerLiter!;
         }
         if (milkCollectionData[i].milkType == "BM") {
           totalQtyBuffallo += 1;
@@ -771,7 +790,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           totalSnfBuffallo +=
               milkCollectionData[i].snf! * milkCollectionData[i].qty!;
           totalWaterBuffallo += milkCollectionData[i].addedWater!.toDouble();
-          totalPriceBuffallo += milkCollectionData[i].ratePerLiter!.toDouble();
+          totalPriceBuffallo += milkCollectionData[i].qty! *
+              milkCollectionData[i].ratePerLiter!.toDouble();
           totalAmtBuffallo += milkCollectionData[i].totalAmt!.toDouble();
         }
       }
@@ -797,25 +817,25 @@ Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
-Total qty..........${totalMilkCow.toPrecision(2)}
-Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow.toDouble()).toPrecision(2) : 0.0}
-Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
+Total qty..........${(totalMilkCow * 100).truncateToDouble() / 100}
+Avg Fat............${totalQtyCow > 0 ? ((totalFatCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalQtyCow > 0 ? ((totalSnfCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQtyCow > 0 ? ((((totalPriceCow * 100).truncateToDouble() / 100) / totalMilkCow) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQtyCow > 0 ? (totalPriceCow * 100).truncateToDouble() / 100 : 0.0}
         
     Buffallo Milk
-Total qty..........${totalMilkBuffallo.toPrecision(2)}
-Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo.toDouble()).toPrecision(2) : 0.0}
-Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
+Total qty..........${(totalMilkBuffallo * 100).truncateToDouble() / 100}
+Avg Fat............${totalQtyBuffallo > 0 ? ((totalFatBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalQtyBuffallo > 0 ? ((totalSnfBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQtyBuffallo > 0 ? ((((totalPriceBuffallo * 100).truncateToDouble() / 100) / totalMilkBuffallo.toDouble()) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQtyBuffallo > 0 ? (totalPriceBuffallo * 100).truncateToDouble() / 100 : 0.0}
 
     Total milk
-Total qty..........${(totalMilkBuffallo + totalMilkCow).toPrecision(2)}
-Avg Fat............${totalMilk > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
-Avg Snf............${totalMilk > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
-Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty.toDouble()).toPrecision(2) : 0.0}
-Total Amt..........${totalQty > 0 ? totalAmt.toPrecision(2) : 0.0}
+Total qty..........${((totalMilkBuffallo + totalMilkCow) * 100).truncateToDouble() / 100}
+Avg Fat............${totalMilk > 0 ? ((totalFat / totalMilk) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalMilk > 0 ? ((totalSnf / totalMilk) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQty > 0 ? ((((totalPriceBuffallo * 100).truncateToDouble() / 100 + (totalPriceCow * 100).truncateToDouble() / 100) / (totalMilkCow + totalMilkBuffallo)) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQty > 0 ? ((totalPriceBuffallo + totalPriceCow) * 100).truncateToDouble() / 100 : 0.0}
 --------------------------------
 Pro Milk Qty FAT SNF Rte Amt
 --------------------------------
@@ -953,25 +973,25 @@ Date         :   ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift        :   ${radio == 1 ? "Am" : "Pm"}
                 
     Cow Milk
-Total qty..........${totalMilkCow.toPrecision(2)}
-Avg Fat............${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Snf............${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Rate...........${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
-Total Amt..........${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
+Total qty..........${(totalMilkCow * 100).truncateToDouble() / 100}
+Avg Fat............${totalQtyCow > 0 ? ((totalFatCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalQtyCow > 0 ? ((totalSnfCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQtyCow > 0 ? ((((totalPriceCow * 100).truncateToDouble() / 100) / totalMilkCow) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQtyCow > 0 ? (totalPriceCow * 100).truncateToDouble() / 100 : 0.0}
         
     Buffallo Milk
-Total qty..........${totalMilkBuffallo.toPrecision(2)}
-Avg Fat............${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Snf............${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Rate...........${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo.toDouble()).toPrecision(2) : 0.0}
-Total Amt..........${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
+Total qty..........${(totalMilkBuffallo * 100).truncateToDouble() / 100}
+Avg Fat............${totalQtyBuffallo > 0 ? ((totalFatBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalQtyBuffallo > 0 ? ((totalSnfBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQtyBuffallo > 0 ? ((((totalPriceBuffallo * 100).truncateToDouble() / 100) / totalMilkBuffallo.toDouble()) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQtyBuffallo > 0 ? (totalPriceBuffallo * 100).truncateToDouble() / 100 : 0.0}
 
     Total milk
-Total qty..........${(totalMilkBuffallo + totalMilkCow).toPrecision(2)}
-Avg Fat............${totalMilk > 0 ? (totalFat / totalMilk).toPrecision(2) : 0.0}
-Avg Snf............${totalMilk > 0 ? (totalSnf / totalMilk).toPrecision(2) : 0.0}
-Avg Rate...........${totalQty > 0 ? (totalPrice / totalQty.toDouble()).toPrecision(2) : 0.0}
-Total Amt..........${totalQty > 0 ? totalAmt.toPrecision(2) : 0.0}
+Total qty..........${((totalMilkBuffallo + totalMilkCow) * 100).truncateToDouble() / 100}
+Avg Fat............${totalMilk > 0 ? ((totalFat / totalMilk) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf............${totalMilk > 0 ? ((totalSnf / totalMilk) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate...........${totalQty > 0 ? ((((totalPriceBuffallo * 100).truncateToDouble() / 100 + (totalPriceCow * 100).truncateToDouble() / 100) / (totalMilkCow + totalMilkBuffallo)) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt..........${totalQty > 0 ? ((totalPriceBuffallo + totalPriceCow) * 100).truncateToDouble() / 100 : 0.0}
 
 Cow Cans       ${cowCans.isNotEmpty ? cowCans : '0'}
 Buf Cans       ${bufCans.isNotEmpty ? bufCans : "0"}
@@ -1034,21 +1054,21 @@ Date         : ${DateFormat("dd-MMM-yyyy").format(DateTime.parse(fromDate))}
 Shift         : ${radio == 1 ? "Am" : "Pm"}
 - - - - - - - - - - - - - - - - - - - -
 CM
-Total qty     : ${totalMilkCow.toPrecision(2)}
-Avg Fat       : ${totalQtyCow > 0 ? (totalFatCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Snf       : ${totalQtyCow > 0 ? (totalSnfCow / totalMilkCow).toPrecision(2) : 0.0}
-Avg Rate     : ${totalQtyCow > 0 ? (totalPriceCow / totalQtyCow).toPrecision(2) : 0.0}
-Total Amt    : ${totalQtyCow > 0 ? totalAmtCow.toPrecision(2) : 0.0}
+Total qty     : ${(totalMilkCow * 100).truncateToDouble() / 100}
+Avg Fat       : ${totalQtyCow > 0 ? ((totalFatCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf       : ${totalQtyCow > 0 ? ((totalSnfCow / totalMilkCow) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate     : ${totalQtyCow > 0 ? ((((totalPriceCow * 100).truncateToDouble() / 100) / totalMilkCow) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt    : ${totalQtyCow > 0 ? (totalPriceCow * 100).truncateToDouble() / 100 : 0.0}
 - - - - - - - - - - - - - - - - - - - -
 BM
-Total qty      : ${totalMilkBuffallo.toPrecision(2)}
-Avg Fat        : ${totalQtyBuffallo > 0 ? (totalFatBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Snf        : ${totalQtyBuffallo > 0 ? (totalSnfBuffallo / totalMilkBuffallo).toPrecision(2) : 0.0}
-Avg Rate      : ${totalQtyBuffallo > 0 ? (totalPriceBuffallo / totalQtyBuffallo).toPrecision(2) : 0.0}
-Total Amt     : ${totalQtyBuffallo > 0 ? totalAmtBuffallo.toPrecision(2) : 0.0}
+Total qty      : ${(totalMilkBuffallo * 100).truncateToDouble() / 100}
+Avg Fat        : ${totalQtyBuffallo > 0 ? ((totalFatBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Snf        : ${totalQtyBuffallo > 0 ? ((totalSnfBuffallo / totalMilkBuffallo) * 100).truncateToDouble() / 100 : 0.0}
+Avg Rate      : ${totalQtyBuffallo > 0 ? ((((totalPriceBuffallo * 100).truncateToDouble() / 100) / totalMilkBuffallo.toDouble()) * 1000).truncateToDouble() / 1000 : 0.0}
+Total Amt     : ${totalQtyBuffallo > 0 ? (totalPriceBuffallo * 100).truncateToDouble() / 100 : 0.0}
 - - - - - - - - - - - - - - - - - - - -
-Total Ltrs      : ${(totalMilkCow + totalMilkBuffallo).toPrecision(2)}
-Total Amt      : ${(totalAmtCow + totalAmtBuffallo).toPrecision(2)}
+Total Ltrs      : ${((totalMilkCow + totalMilkBuffallo) * 100).truncateToDouble() / 100}
+Total Amt      : ${((totalAmtCow + totalAmtBuffallo) * 100).truncateToDouble() / 100}
 """;
       List<String> recipents = [];
       if (mob1.isNotEmpty) {
