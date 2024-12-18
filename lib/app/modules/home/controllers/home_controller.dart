@@ -696,6 +696,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   }
 
   printData({
+    required String date,
     required String farmerName,
     required String shift,
     required String getFarmerId,
@@ -707,7 +708,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     required String totalAmount,
   }) async {
     printSummaryData =
-        "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(DateTime.now())}\nTime  :  $shift\nFarmerName    :     $farmerName\nFarmer Id     :     $getFarmerId\nFat           :     $fat1\nSnf           :     $snf1\nMilk Type     :     $milkType\nWeight        :     $quantity1\nPrice         :     $price\nAmount        :     $totalAmount\n          \n                      \n          \n       \n               \n           \n";
+        "***Maklife Producer Company Ltd***\n\nDate  :  ${DateFormat("dd-MMM-yyyy").format(date.isNotEmpty ? DateTime.parse(date) : DateTime.now())}\nTime  :  $shift\nFarmerName    :     $farmerName\nFarmer Id     :     $getFarmerId\nFat           :     $fat1\nSnf           :     $snf1\nMilk Type     :     $milkType\nWeight        :     $quantity1\nPrice         :     $price\nAmount        :     $totalAmount\n          \n                      \n          \n       \n               \n           \n";
     printStatus = true;
   }
 

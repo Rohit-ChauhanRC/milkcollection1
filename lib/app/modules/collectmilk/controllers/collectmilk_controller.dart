@@ -1005,6 +1005,7 @@ class CollectmilkController extends GetxController {
 
   Future printData() async {
     homeController.printData(
+      date: fromDate,
       shift: shift.capitalizeFirst.toString(),
       farmerName: farmerData.farmerName!,
       fat1: !check ? fat.text : homeController.fat,

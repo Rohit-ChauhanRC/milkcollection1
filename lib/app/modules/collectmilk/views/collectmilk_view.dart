@@ -59,19 +59,19 @@ class CollectmilkView extends GetView<CollectmilkController> {
               } else if (i == "Manual Collection") {
                 controller.pin = "";
 
-                if (controller.box.read(manualpinConst) ==
-                    DateFormat("yyyy-mm-dd")
-                        .format(DateTime.now())
-                        .toString()) {
-                  controller.check = false;
-                } else {
-                  controller.showDialogManualPin(
-                    initialValue: controller.pin,
-                    onTap: () async {
-                      await controller.getVerifyPin();
-                    },
-                  );
-                }
+                // if (controller.box.read(manualpinConst) ==
+                //     DateFormat("yyyy-mm-dd")
+                //         .format(DateTime.now())
+                //         .toString()) {
+                //   controller.check = false;
+                // } else {
+                controller.showDialogManualPin(
+                  initialValue: controller.pin,
+                  onTap: () async {
+                    await controller.getVerifyPin();
+                  },
+                );
+                // }
               } else {
                 await controller.exportExcel();
               }
@@ -650,51 +650,55 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                 top: 15.h, left: 35.w, right: 35.w),
                             child: controller.check
                                 ? Obx(() => ElevatedButton(
-                                      onPressed: () async {
-                                        bool result = await InternetConnection()
-                                            .hasInternetAccess;
+                                      onPressed: (controller.farmerId.isNotEmpty &&
+                                              controller.homeController.fat
+                                                  .isNotEmpty &&
+                                              controller.farmerData.farmerName !=
+                                                  "Unknown" &&
+                                              controller.farmerData.farmerName !=
+                                                  "null" &&
+                                              controller.farmerData.farmerName !=
+                                                  null &&
+                                              controller.homeController.water
+                                                  .isNotEmpty &&
+                                              controller.homeController.quantity
+                                                  .isNotEmpty &&
+                                              (controller.radio == 1 ||
+                                                  controller.radio == 0) &&
+                                              (double.parse(controller
+                                                      .getPriceData()) >
+                                                  0.0) &&
+                                              (double.parse(controller
+                                                      .homeController
+                                                      .quantity) >
+                                                  0.0))
+                                          ? () async {
+                                              controller.progress = true;
 
-                                        if (controller.farmerId.isNotEmpty &&
-                                            controller.homeController.fat
-                                                .isNotEmpty &&
-                                            controller.farmerData.farmerName !=
-                                                "Unknown" &&
-                                            controller.farmerData.farmerName !=
-                                                "null" &&
-                                            controller.farmerData.farmerName !=
-                                                null &&
-                                            controller.homeController.water
-                                                .isNotEmpty &&
-                                            controller.homeController.quantity
-                                                .isNotEmpty &&
-                                            (controller.radio == 1 ||
-                                                controller.radio == 0) &&
-                                            (double.parse(
-                                                    controller.getPriceData()) >
-                                                0.0)) {
-                                          if (double.parse(controller
-                                                  .homeController.quantity) >
-                                              0.0) {
-                                            controller.progress = true;
-                                            SystemChannels.textInput
-                                                .invokeMethod('TextInput.hide');
+                                              bool result =
+                                                  await InternetConnection()
+                                                      .hasInternetAccess;
 
-                                            await controller.accept(result);
-                                            await controller.printData();
-                                            // controller.progress = false;
+                                              await controller.accept(result);
+                                              await controller.printData();
 
-                                            await controller.homeController
-                                                .fetchMilkCollectionDateWise();
-                                            if (result) {
-                                              await controller.checkSmsFlag();
+                                              if (result) {
+                                                await controller.checkSmsFlag();
 
-                                              await controller.sendCollection();
+                                                await controller
+                                                    .sendCollection();
+                                              }
+                                              // controller.progress = false;
+
+                                              await controller.homeController
+                                                  .fetchMilkCollectionDateWise();
+
+                                              controller.emptyData();
+                                              SystemChannels.textInput
+                                                  .invokeMethod(
+                                                      'TextInput.hide');
                                             }
-
-                                            controller.emptyData();
-                                          }
-                                        }
-                                      },
+                                          : null,
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: (controller
                                                         .farmerId.isNotEmpty &&
@@ -734,50 +738,52 @@ class CollectmilkView extends GetView<CollectmilkController> {
                                       ),
                                     ))
                                 : ElevatedButton(
-                                    onPressed: () async {
-                                      bool result = await InternetConnection()
-                                          .hasInternetAccess;
+                                    onPressed: (controller
+                                                .farmerId.isNotEmpty &&
+                                            controller.fatDC.isNotEmpty &&
+                                            controller.farmerData.farmerName !=
+                                                "Unknown" &&
+                                            controller.farmerData.farmerName !=
+                                                "null" &&
+                                            controller.farmerData.farmerName !=
+                                                null &&
+                                            controller.waterDC.isNotEmpty &&
+                                            controller.quantityDC.isNotEmpty &&
+                                            controller.snfDC.isNotEmpty &&
+                                            (controller.radio == 1 ||
+                                                controller.radio == 0) &&
+                                            (double.parse(
+                                                    controller.getPriceData()) >
+                                                0.0) &&
+                                            (double.parse(
+                                                    controller.quantityDC) >
+                                                0.0))
+                                        ? () async {
+                                            controller.progress = true;
 
-                                      if (controller.farmerId.isNotEmpty &&
-                                          controller.fatDC.isNotEmpty &&
-                                          controller.farmerData.farmerName !=
-                                              "Unknown" &&
-                                          controller.farmerData.farmerName !=
-                                              "null" &&
-                                          controller.farmerData.farmerName !=
-                                              null &&
-                                          controller.waterDC.isNotEmpty &&
-                                          controller.quantityDC.isNotEmpty &&
-                                          controller.snfDC.isNotEmpty &&
-                                          (controller.radio == 1 ||
-                                              controller.radio == 0) &&
-                                          (double.parse(
-                                                  controller.getPriceData()) >
-                                              0.0)) {
-                                        if (double.parse(
-                                                controller.quantityDC) >
-                                            0.0) {
-                                          controller.progress = true;
-                                          SystemChannels.textInput
-                                              .invokeMethod('TextInput.hide');
+                                            bool result =
+                                                await InternetConnection()
+                                                    .hasInternetAccess;
 
-                                          await controller.accept(result);
-                                          await controller.printData();
-                                          // controller.progress = false;
+                                            SystemChannels.textInput
+                                                .invokeMethod('TextInput.hide');
 
-                                          await controller.homeController
-                                              .fetchMilkCollectionDateWise();
+                                            await controller.accept(result);
+                                            await controller.printData();
+                                            // controller.progress = false;
 
-                                          if (result) {
-                                            await controller.checkSmsFlag();
+                                            await controller.homeController
+                                                .fetchMilkCollectionDateWise();
 
-                                            await controller.sendCollection();
+                                            if (result) {
+                                              await controller.checkSmsFlag();
+
+                                              await controller.sendCollection();
+                                            }
+
+                                            controller.emptyData();
                                           }
-
-                                          controller.emptyData();
-                                        }
-                                      }
-                                    },
+                                        : null,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: (controller
                                                       .farmerId.isNotEmpty &&
