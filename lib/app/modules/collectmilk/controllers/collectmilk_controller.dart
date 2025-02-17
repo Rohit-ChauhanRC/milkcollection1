@@ -68,6 +68,12 @@ class CollectmilkController extends GetxController {
   List<MilkCollectionModel> get restoreData => _restoreData;
   set restoreData(List<MilkCollectionModel> lst) => _restoreData.assignAll(lst);
 
+  final RxList<MilkCollectionModel> _restoreData1 =
+      RxList<MilkCollectionModel>();
+  List<MilkCollectionModel> get restoreData1 => _restoreData1;
+  set restoreData1(List<MilkCollectionModel> lst) =>
+      _restoreData.assignAll(lst);
+
   final RxList<PinnmanualModel> _pinManual = RxList<PinnmanualModel>();
   List<PinnmanualModel> get pinManual => _pinManual;
   set pinManual(List<PinnmanualModel> lst) => _pinManual.assignAll(lst);
@@ -162,6 +168,8 @@ class CollectmilkController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    // restoreData.assignAll(await milkCollectionDB.fetchAll());
 
     farmerDataList.assignAll(await farmerDB.fetchAll());
     milkCollectionData.assignAll(await milkCollectionDB.fetchAll());
@@ -403,6 +411,7 @@ class CollectmilkController extends GetxController {
     for (var i = 0; i < milkCollectionData.length; i++) {
       if (milkCollectionData[i].FUploaded == 0) {
         b = true;
+        await postMilkCollectionDataDB();
       }
     }
     if (box.read(backupCollectionConst) !=
@@ -416,6 +425,57 @@ class CollectmilkController extends GetxController {
       });
     }
     circularProgress = false;
+  }
+
+  Future<void> postMilkCollectionDataDB() async {
+    // print(farmerData.first.farmerId);
+    if (milkCollectionData.isNotEmpty) {
+      for (var e in milkCollectionData) {
+        if (e.FUploaded == 0) {
+          try {
+            var res = await http.post(
+              Uri.parse("$baseUrlConst/$dailyCollection"),
+              body: {
+                "Collection_Date": e.collectionDate.toString(),
+                "Inserted_Time": e.insertedTime.toString(),
+                "Calculations_ID": e.farmerId.toString(),
+                "FarmerId": e.farmerId.toString(),
+                "Farmer_Name": e.farmerName.toString(),
+                "Collection_Mode": e.collectionMode.toString(),
+                "Scale_Mode": e.scaleMode.toString(),
+                "Analyze_Mode": e.analyzeMode.toString(),
+                "Milk_Status": e.milkStatus.toString(),
+                "Milk_Type": e.milkType.toString(),
+                "Rate_Chart_Name": e.rateChartName.toString(),
+                "Qty": e.qty.toString(),
+                "FAT": e.fat.toString(),
+                "SNF": e.snf.toString(),
+                "Added_Water": e.addedWater.toString(),
+                "Rate_Per_Liter": e.ratePerLiter.toString(),
+                "Total_Amt": e.totalAmt.toString(),
+                "CollectionCenterId": e.collectionCenterId.toString(),
+                "CollectionCenterName": e.collectionCenterName.toString(),
+                "Shift": e.shift.toString(),
+              },
+              headers: {
+                "Access-Control-Allow-Origin":
+                    "*", // Required for CORS support to work
+                "Access-Control-Allow-Credentials":
+                    "true", // Required for cookies, authorization headers with HTTPS
+                "Access-Control-Allow-Headers":
+                    "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale",
+                "Access-Control-Allow-Methods": "POST, OPTIONS, GET"
+              },
+            );
+
+            if (res.statusCode == 200) {
+              await milkCollectionDB.update(
+                  farmerId: e.calculationsId!, FUploaded: 1);
+            }
+          } catch (e) {}
+        }
+      }
+    }
   }
 
   Future<void> getCollectionThirtyDaysData() async {
